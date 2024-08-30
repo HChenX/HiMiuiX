@@ -24,9 +24,37 @@
 #### 展示:
 
 - MiuiPreference
-- ![MiuiPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiPreference.jpg)
+![MiuiPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiPreference.jpg)
 
 - MiuiSwitchPreference
-- ![MiuiSwitchPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiSwitchPreference.jpg)
+![MiuiSwitchPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiSwitchPreference.jpg)
+
+- MiuiDropDownPreference
+![MiuiDropDownPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiDropDownPreference.jpg)
+
+- MiuiEditTextPreference
+![MiuiEditTextPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiEditTextPreference.jpg)
+![MiuiEditTextPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiEditTextPreference1.jpg)
+
+- MiuiAlertDialog
+![MiuiAlertDialog](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiAlertDialog.jpg)
+
+- MiuiSeekBarPreference
+![MiuiSeekBarPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiSeekBarPreference.jpg)
 
 
+### 使用
+
+- 请做为模块在项目中导入使用！
+```shell
+  # 在你仓库中执行，将本仓库作为模块使用
+  git submodule add https://github.com/HChenX/HiMiuiX.git
+  # 后续拉取本模块仓库
+  git submodule update --init
+```
+
+#### 开源许可
+
+- 本 UI 是对 MiuiX 的仿制而来，在此感谢 MiuiX！
+- 本项目遵循 GPL-3.0 开源协议。
+- 使用本项目请在项目中注明！
