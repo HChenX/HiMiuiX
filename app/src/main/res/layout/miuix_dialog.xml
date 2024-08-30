@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/customPanel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:clipChildren="false"
+    android:clipToOutline="false"
+    android:clipToPadding="false"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/alertTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25sp"
+        android:layout_marginEnd="25sp"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingTop="25sp"
+        android:paddingBottom="16sp"
+        android:scrollbars="none"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="20sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.hchen.himiuix.MiuiTextView
+        android:id="@android:id/message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26sp"
+        android:layout_marginEnd="25sp"
+        android:paddingBottom="22sp"
+        android:scrollbars="none"
+        android:textDirection="locale"
+        android:textSize="16sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/alertTitle"
+        app:singeLineCenter="true" />
+
+    <include
+        layout="@layout/miuix_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_marginStart="25sp"
+        android:layout_marginEnd="25sp"
+        android:layout_marginBottom="22sp"
+        app:layout_constraintBottom_toTopOf="@id/button_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@android:id/message" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToOutline="false"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/button_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@android:id/message" />
+
+    <LinearLayout
+        android:id="@+id/button_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="visible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list_view">
+
+        <Button
+            android:id="@android:id/button1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25sp"
+            android:layout_marginEnd="5sp"
+            android:layout_weight="1"
+            android:background="@drawable/dialog_nagative_background"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minHeight="0sp"
+            android:scrollbars="none"
+            android:text="取消"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            app:backgroundTint="@null"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@android:id/button2"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <Button
+            android:id="@android:id/button3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5sp"
+            android:layout_marginEnd="5sp"
+            android:layout_weight="1"
+            android:background="@drawable/dialog_nagative_background"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minHeight="0sp"
+            android:scrollbars="none"
+            android:text="取消"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:backgroundTint="@null"
+            app:layout_constraintLeft_toRightOf="@android:id/button1"
+            app:layout_constraintRight_toLeftOf="@android:id/button2"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <Button
+            android:id="@android:id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5sp"
+            android:layout_marginEnd="25sp"
+            android:layout_weight="1"
+            android:background="@drawable/dialog_positive_background"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minHeight="0sp"
+            android:scrollbars="none"
+            android:text="确定"
+            android:textSize="16sp"
+            app:backgroundTint="@null"
+            app:layout_constraintLeft_toRightOf="@android:id/button3"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/end_view"
+        android:layout_width="0dp"
+        android:layout_height="25sp"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_view" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

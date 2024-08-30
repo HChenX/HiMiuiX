@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="25sp"
+    android:layout_marginTop="15sp"
+    android:layout_marginEnd="25sp"
+    android:layout_marginBottom="15sp"
+    android:background="@drawable/ic_edit_bg"
+    android:gravity="center"
+    android:longClickable="false"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/edit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="50sp"
+        android:layout_marginStart="15sp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/edit_text_id"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edit_text_id"
+        android:layout_width="0dp"
+        android:layout_height="50sp"
+        android:layout_marginStart="15sp"
+        android:layout_marginEnd="15sp"
+        android:layout_weight="2"
+        android:background="@null"
+        android:clickable="true"
+        android:ellipsize="none"
+        android:hint="请输入"
+        android:inputType="textNoSuggestions"
+        android:longClickable="false"
+        android:maxLines="1"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollbars="none"
+        android:scrollHorizontally="true"
+        android:textAlignment="viewStart"
+        android:textColorHint="#909090"
+        android:textCursorDrawable="@drawable/edit_cursor"
+        app:layout_constraintLeft_toRightOf="@id/edit_text"
+        app:layout_constraintRight_toLeftOf="@id/edit_image"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/edit_image"
+        android:layout_width="50dp"
+        android:layout_height="50sp"
+        android:adjustViewBounds="true"
+        android:paddingTop="8sp"
+        android:paddingBottom="8sp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintLeft_toRightOf="@id/edit_text_id"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

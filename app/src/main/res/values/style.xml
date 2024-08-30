@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MiuiAlertDialog">
+        <item name="android:fullDark">@android:color/transparent</item>
+        <item name="android:topDark">@android:color/transparent</item>
+        <item name="android:centerDark">@android:color/transparent</item>
+        <item name="android:bottomDark">@android:color/transparent</item>
+        <item name="android:fullBright">@android:color/transparent</item>
+        <item name="android:topBright">@android:color/transparent</item>
+        <item name="android:centerBright">@android:color/transparent</item>
+        <item name="android:bottomBright">@android:color/transparent</item>
+        <item name="android:bottomMedium">@android:color/transparent</item>
+        <item name="android:centerMedium">@android:color/transparent</item>
+
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowBackground">@drawable/dialog_round_bg_light</item>
+    </style>
+
+    <style name="Animation" parent=""></style>
+
+    <style name="Animation.Dialog" parent="@style/Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_anim_slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/dialog_anim_slide_out_bottom</item>
+    </style>
+
+    <style name="Animation.Dialog.Center" parent="@style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_anim_pop_in_center</item>
+        <item name="android:windowExitAnimation">@anim/dialog_anim_pop_out_center</item>
+    </style>
+
+    <style name="Animation.Dialog.NoAnimation" parent="@style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_anim_noanim</item>
+        <item name="android:windowExitAnimation">@anim/dialog_anim_noanim</item>
+    </style>
+
+</resources>

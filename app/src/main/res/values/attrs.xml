@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MiuiPreference">
+        <attr name="tip" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiSwitchPreference">
+        <attr name="summaryOn" format="string" />
+        <attr name="summaryOff" format="string" />
+        <attr name="android:summaryOn" />
+        <attr name="android:summaryOff" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiTextView">
+        <attr name="focusable" format="boolean" />
+        <attr name="singeLineCenter" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiDropDownPreference">
+        <attr name="entries" format="reference" />
+        <attr name="android:entries" />
+
+        <attr name="entryValues" format="reference" />
+        <attr name="android:entryValues" />
+
+        <attr name="defaultValue" format="string|boolean|integer|reference|float" />
+        <attr name="android:defaultValue" />
+
+        <attr name="key" format="string" />
+        <attr name="android:key" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiSeekBarPreference">
+        <attr name="maxValue" format="integer" />
+        <attr name="minValue" format="integer" />
+        <attr name="format" format="string" /> <!--可以理解为单位-->
+        <attr name="stepValue" format="integer" /> <!--跳跃值-->
+        <attr name="android:defaultValue" />
+        <attr name="dialogEnabled" format="boolean" />
+        <attr name="showSeekBarValue" format="boolean" />
+        <attr name="displayDividerValue" format="integer" /> <!--可用于显示小数-->
+    </declare-styleable>
+
+</resources>

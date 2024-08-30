@@ -1,0 +1,36 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace 'com.hchen.himiuix'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 30
+        targetSdk 34
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+}
+
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.preference
+    implementation libs.core
+    implementation libs.fragment
+    implementation libs.constraintlayout
+    implementation libs.recyclerview
+}
