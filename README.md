@@ -11,6 +11,7 @@
 </div>
 
 ### HiMiuiX
+
 #### 包含:
 
 - MiuiPreference
@@ -24,28 +25,28 @@
 #### 展示:
 
 - MiuiPreference
-![MiuiPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiPreference.jpg)
+  ![MiuiPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiPreference.jpg)
 
 - MiuiSwitchPreference
-![MiuiSwitchPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiSwitchPreference.jpg)
+  ![MiuiSwitchPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSwitchPreference.jpg)
 
 - MiuiDropDownPreference
-![MiuiDropDownPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiDropDownPreference.jpg)
+  ![MiuiDropDownPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiDropDownPreference.jpg)
 
 - MiuiEditTextPreference
-![MiuiEditTextPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiEditTextPreference.jpg)
-![MiuiEditTextPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiEditTextPreference1.jpg)
+  ![MiuiEditTextPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiEditTextPreference.jpg)
+  ![MiuiEditTextPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiEditTextPreference1.jpg)
 
 - MiuiAlertDialog
-![MiuiAlertDialog](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiAlertDialog.jpg)
+  ![MiuiAlertDialog](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog.jpg)
 
 - MiuiSeekBarPreference
-![MiuiSeekBarPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/MiuiSeekBarPreference.jpg)
-
+  ![MiuiSeekBarPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSeekBarPreference.jpg)
 
 ### 使用
 
 - 请做为模块在项目中导入使用！
+
 ```shell
   # 在你仓库中执行，将本仓库作为模块使用
   git submodule add https://github.com/HChenX/HiMiuiX.git
