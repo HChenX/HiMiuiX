@@ -54,6 +54,19 @@
   git submodule update --init
 ```
 
+- 然后设置项目 settings.gradle 添加:
+
+```groovy
+include ':HiMiuiX'
+```
+
+- 最后设置项目 app 下 build.gradle 文件，添加:
+```groovy
+implementation(project(':HiMiuiX'))
+```
+
+- tip: 请确保导入并使用了 `com.android.library`
+
 #### 开源许可
 
 - 本 UI 是对 MiuiX 的仿制而来，在此感谢 MiuiX！
