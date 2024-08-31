@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:background="#FFFFFFFF"
     android:clickable="true"
     android:minHeight="67sp"
     android:paddingTop="10sp"
@@ -28,11 +27,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <include layout="@layout/miuix_tittle_summary"
-        android:layout_height="wrap_content"
+    <include
+        layout="@layout/miuix_tittle_summary"
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/prefs_icon"
-        app:layout_constraintRight_toLeftOf="@id/pref_tip"/>
+        app:layout_constraintRight_toLeftOf="@id/pref_tip" />
 
     <TextView
         android:id="@+id/pref_tip"
@@ -42,7 +42,7 @@
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:scrollbars="none"
-        android:textColor="#666666"
+        android:textColor="@color/tip"
         android:textSize="13sp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

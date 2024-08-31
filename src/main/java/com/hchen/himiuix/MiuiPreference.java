@@ -5,7 +5,6 @@ import static com.hchen.himiuix.MiuiXUtils.sp2px;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -36,6 +35,7 @@ public class MiuiPreference extends Preference {
     TextView tipView;
     ImageView arrowRight;
     String tip = null;
+    boolean loadArrowRight;
     private int mViewId = 0;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @SuppressLint("RestrictedApi")
@@ -59,12 +59,12 @@ public class MiuiPreference extends Preference {
 
     public MiuiPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        this.context = getContext();
         init(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_preference);
-        this.context = context;
         try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference)) {
             tip = typedArray.getString(R.styleable.MiuiPreference_tip);
         }
@@ -121,7 +121,7 @@ public class MiuiPreference extends Preference {
             setVisibility(false);
             onlyTittle.setText(getTitle());
         }
-        loadArrowRight();
+        if (loadArrowRight) loadArrowRight();
         loadTipView();
         setColor();
         if (isEnabled())
@@ -151,11 +151,11 @@ public class MiuiPreference extends Preference {
     private void setColor() {
         int tc, sc;
         if (isEnabled()) {
-            tc = Color.argb(255, 0, 0, 0);
-            sc = Color.argb(255, 66, 66, 66);
+            tc = context.getColor(R.color.tittle);
+            sc = context.getColor(R.color.summary);
         } else {
-            tc = Color.argb(255, 0xB1, 0xB1, 0xB1);
-            sc = Color.argb(255, 0xB2, 0xB2, 0xB2);
+            tc = context.getColor(R.color.tittle_d);
+            sc = context.getColor(R.color.summary_d);
         }
         tittle.setTextColor(tc);
         onlyTittle.setTextColor(tc);
@@ -220,9 +220,9 @@ public class MiuiPreference extends Preference {
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundColor(Color.argb(255, 0xEB, 0xEB, 0xEB));
+            v.setBackgroundResource(R.color.touch_down);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundColor(Color.argb(255, 0xFF, 0xFF, 0xFF));
+            v.setBackgroundResource(R.color.touch_up);
         }
         return false;
     }

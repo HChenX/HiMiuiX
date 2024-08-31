@@ -5,7 +5,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -22,9 +21,11 @@ import android.view.WindowManager;
 import androidx.annotation.ArrayRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,11 +54,16 @@ public class MiuiDropDownPreference extends MiuiPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    @SuppressLint({"RestrictedApi", "PrivateResource"})
     public MiuiDropDownPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setLayoutResource(R.layout.miuix_preference);
-        this.context = context;
+        mEntriesList.addAll(Arrays.asList(mEntries));
+        safeCheck();
+    }
+
+    @Override
+    @SuppressLint({"RestrictedApi", "PrivateResource"})
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
             mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
                     R.styleable.MiuiDropDownPreference_android_entries);
@@ -68,13 +74,8 @@ public class MiuiDropDownPreference extends MiuiPreference {
             mKey = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_key,
                     R.styleable.MiuiDropDownPreference_android_key);
         }
-        mEntriesList.addAll(Arrays.asList(mEntries));
-        safeCheck();
+        loadArrowRight = false;
         setPersistent(true);
-    }
-
-    @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
     }
 
     public CharSequence getDefValue() {
@@ -169,6 +170,15 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        if (isEnabled())
+            arrowRight.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_preference_arrow_up_down));
+        else
+            arrowRight.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_preference_disable_arrow_up_down));
+    }
+
+    @Override
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         setValue(getPersistedString((String) defaultValue));
     }
@@ -229,14 +239,14 @@ public class MiuiDropDownPreference extends MiuiPreference {
         if (!isEnabled()) return false;
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundColor(Color.argb(255, 0xEB, 0xEB, 0xEB));
+            v.setBackgroundResource(R.color.touch_down);
         } else if (action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundColor(Color.argb(255, 0xFF, 0xFF, 0xFF));
+            v.setBackgroundResource(R.color.touch_up);
         }
         if (event.getAction() == MotionEvent.ACTION_UP) {
             safeCheck();
             if (dialog != null && dialog.isShowing()) return false;
-            v.setBackgroundColor(Color.argb(255, 0xEB, 0xEB, 0xEB));
+            v.setBackgroundResource(R.color.touch_down);
             v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
             view = v;
             float x = event.getRawX();
@@ -281,7 +291,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                view.setBackgroundColor(Color.argb(255, 0xFF, 0xFF, 0xFF));
+                view.setBackgroundResource(R.color.touch_up);
             }
         });
         dialog.show();

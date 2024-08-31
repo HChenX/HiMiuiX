@@ -2,7 +2,6 @@ package com.hchen.himiuix;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -148,11 +147,11 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         }
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundColor(Color.argb(255, 0xEB, 0xEB, 0xEB));
+            v.setBackgroundResource(R.color.touch_down);
         } else if (action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundColor(Color.argb(255, 0xFF, 0xFF, 0xFF));
+            v.setBackgroundResource(R.color.touch_up);
         } else if (action == MotionEvent.ACTION_UP) {
-            v.setBackgroundColor(Color.argb(255, 0xEB, 0xEB, 0xEB));
+            v.setBackgroundResource(R.color.touch_down);
             view = v;
             new MiuiAlertDialog(getContext())
                     .setTitle(getTitle())
@@ -169,7 +168,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                     })
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->
-                            view.setBackgroundColor(Color.argb(255, 0xFF, 0xFF, 0xFF)))
+                            view.setBackgroundResource(R.color.touch_up))
                     .show();
         }
         return false;

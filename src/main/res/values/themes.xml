@@ -1,6 +1,7 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.HiMiuiX" parent="Theme.Material3.DayNight.NoActionBar">
-        
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="colorOnBackground">#FFFFFF</item>
     </style>
 </resources>

@@ -2,7 +2,6 @@ package com.hchen.himiuix;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -184,7 +183,7 @@ public class MiuiAlertDialog implements DialogInterface {
 
     public MiuiAlertDialog setCornersRadius(int radius) {
         customRadius = new GradientDrawable();
-        customRadius.setColor(Color.argb(255, 255, 255, 255));
+        customRadius.setColor(context.getColor(R.color.white_or_black));
         customRadius.setShape(GradientDrawable.RECTANGLE);
         customRadius.setCornerRadius(radius);
         this.radius = radius;
@@ -552,18 +551,21 @@ public class MiuiAlertDialog implements DialogInterface {
 
         private void checkState(@NonNull ListViewHolder holder, int position) {
             if (booleanArray.get(position)) {
-                setDrawableColor(Color.argb(255, 0xEA, 0xF2, 0xFF));
+                setDrawableColor(dialog.context.getColor(R.color.list_state_background));
+                if (position == 0) holder.mainLayout.setBackground(drawableTop);
+                else if (position == dialog.items.size() - 1) {
+                    holder.mainLayout.setBackground(drawableBottom);
+                } else
+                    holder.mainLayout.setBackgroundResource(R.drawable.list_choose_item_background);
+                holder.switchView.setTextColor(dialog.context.getColor(R.color.list_choose_text));
+                holder.imageView.setVisibility(View.VISIBLE);
+            } else {
+                setDrawableColor(dialog.context.getColor(R.color.list_background));
                 if (position == 0) holder.mainLayout.setBackground(drawableTop);
                 else if (position == dialog.items.size() - 1) {
                     holder.mainLayout.setBackground(drawableBottom);
                 } else holder.mainLayout.setBackgroundResource(R.drawable.list_item_background);
-                holder.imageView.setVisibility(View.VISIBLE);
-            } else {
-                setDrawableColor(Color.argb(255, 255, 255, 255));
-                if (position == 0) holder.mainLayout.setBackground(drawableTop);
-                else if (position == dialog.items.size() - 1) {
-                    holder.mainLayout.setBackground(drawableBottom);
-                } else holder.mainLayout.setBackgroundColor(Color.argb(255, 255, 255, 255));
+                holder.switchView.setTextColor(dialog.context.getColor(R.color.list_text));
                 holder.imageView.setVisibility(View.GONE);
             }
         }
