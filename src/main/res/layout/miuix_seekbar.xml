@@ -30,7 +30,6 @@
         android:layout_marginTop="20sp"
         android:layout_marginEnd="27sp"
         android:gravity="bottom"
-        android:text="20%"
         android:textColor="@color/tittle"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@id/seekbar"

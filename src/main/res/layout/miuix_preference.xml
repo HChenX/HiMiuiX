@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
-    android:clickable="true"
     android:minHeight="67sp"
     android:paddingTop="10sp"
     android:paddingBottom="10sp">

@@ -24,21 +24,20 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.TypedArrayUtils;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class MiuiDropDownPreference extends MiuiPreference {
     private MiuiAlertDialog dialog;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
     private CharSequence mDefValue;
-    private String mKey;
+    private boolean showOnSummary;
     private String mValue;
     private View view;
+    private boolean isInitialTime = true;
     private final ArrayList<CharSequence> mEntriesList = new ArrayList<>();
     private final SparseBooleanArray booleanArray = new SparseBooleanArray();
 
@@ -56,13 +55,14 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     public MiuiDropDownPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mEntriesList.addAll(Arrays.asList(mEntries));
         safeCheck();
+        mEntriesList.addAll(Arrays.asList(mEntries));
+        setDefaultValue(mDefValue);
     }
 
     @Override
     @SuppressLint({"RestrictedApi", "PrivateResource"})
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
             mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
@@ -71,19 +71,10 @@ public class MiuiDropDownPreference extends MiuiPreference {
                     R.styleable.MiuiDropDownPreference_android_entryValues);
             mDefValue = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_defaultValue,
                     R.styleable.MiuiDropDownPreference_android_defaultValue);
-            mKey = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_key,
-                    R.styleable.MiuiDropDownPreference_android_key);
+            showOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
         }
         loadArrowRight = false;
         setPersistent(true);
-    }
-
-    public CharSequence getDefValue() {
-        return mDefValue;
-    }
-
-    public void setDefValue(CharSequence def) {
-        mDefValue = def;
     }
 
     public void setEntries(CharSequence[] entries) {
@@ -120,7 +111,12 @@ public class MiuiDropDownPreference extends MiuiPreference {
             persistString(value);
             makeBooleanArray(value);
             mValue = value;
-            notifyChanged();
+            if (showOnSummary)
+                setSummary(mEntriesList.get(Integer.parseInt(mValue)));
+            if (!isInitialTime) {
+                callChangeListener(value);
+                notifyChanged();
+            }
         }
     }
 
@@ -179,17 +175,23 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
-        setValue(getPersistedString((String) defaultValue));
+    protected boolean needSummary() {
+        return getSummary() != null || showOnSummary;
     }
 
     @Override
-    protected void onAttachedToHierarchy(@NonNull PreferenceManager preferenceManager) {
-        super.onAttachedToHierarchy(preferenceManager);
-        // 不存在条目时调用用于初始化
-        if (!Objects.requireNonNull(getSharedPreferences()).contains(mKey)) {
-            if (mDefValue != null) {
-                setValue((String) mDefValue);
+    protected void onSetInitialValue(@Nullable Object defaultValue) {
+        setValue(getPersistedString((String) defaultValue));
+        isInitialTime = false;
+    }
+
+    private void makeBooleanArray(@NonNull String mValue) {
+        booleanArray.clear();
+        safeCheck();
+        for (int i = 0; i < mEntryValues.length; i++) {
+            if (mEntryValues[i].equals(mValue)) {
+                booleanArray.put(i, true);
+                break;
             }
         }
     }
@@ -216,17 +218,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(((SavedState) state).getSuperState());
         setValue(savedState.mValue);
-    }
-
-    private void makeBooleanArray(@NonNull String mValue) {
-        booleanArray.clear();
-        safeCheck();
-        for (int i = 0; i < mEntryValues.length; i++) {
-            if (mEntryValues[i].equals(mValue)) {
-                booleanArray.put(i, true);
-                break;
-            }
-        }
     }
 
     @Override

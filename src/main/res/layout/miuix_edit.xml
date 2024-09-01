@@ -10,7 +10,6 @@
     android:layout_marginBottom="15sp"
     android:background="@drawable/ic_edit_bg"
     android:gravity="center"
-    android:longClickable="false"
     android:orientation="horizontal">
 
     <TextView

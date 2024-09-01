@@ -16,7 +16,6 @@ import androidx.preference.PreferenceViewHolder;
 import java.util.ArrayList;
 
 public class MiuiSeekBarPreference extends MiuiPreference {
-    private ConstraintLayout mainLayout;
     private SeekBar seekBar;
     private TextView numberView;
     private boolean mTrackingTouch;
@@ -31,6 +30,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private boolean dialogEnabled;
     private int mSeekBarIncrement;
     private boolean mShowSeekBarValue;
+    private boolean isInitialTime = true;
 
     private final SeekBar.OnSeekBarChangeListener changeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -71,7 +71,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_seekbar);
         try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MiuiSeekBarPreference,
                 defStyleAttr, defStyleRes)) {
@@ -100,7 +100,11 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             mSeekBarValue = value;
             updateLabelValue(value);
             persistInt(value);
-            notifyChanged();
+            if (!isInitialTime) {
+                callChangeListener(value);
+                notifyChanged();
+            }
+            notifyDependencyChange(shouldDisableDependents());
         }
     }
 
@@ -108,6 +112,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         if (defaultValue == null) defaultValue = 0;
         setValue(getPersistedInt((Integer) defaultValue));
+        isInitialTime = false;
     }
 
     @Nullable

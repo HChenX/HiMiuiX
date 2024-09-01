@@ -30,15 +30,20 @@ public class MiuiSwitchPreference extends MiuiPreference {
     private CharSequence mSummaryOn;
     private CharSequence mSummaryOff;
     private boolean mChecked;
+    private boolean mDisableDependentsState;
+    private boolean isInitialTime = true;
     private final View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (animating) return;
-            setChecked(!isChecked());
-            updateSwitchState();
-            animateThumbIfNeed(true, isChecked());
-            if (mSummaryOn != null && isChecked()) summary.setText(mSummaryOn);
-            if (mSummaryOff != null && !isChecked()) summary.setText(mSummaryOff);
+            final boolean newValue = !isChecked();
+            if (callChangeListener(newValue)) {
+                setChecked(newValue);
+                updateSwitchState();
+                animateThumbIfNeed(true, isChecked());
+                if (mSummaryOn != null && isChecked()) summary.setText(mSummaryOn);
+                if (mSummaryOff != null && !isChecked()) summary.setText(mSummaryOff);
+            }
             v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
     };
@@ -61,12 +66,14 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     @SuppressLint("RestrictedApi")
     @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_switch);
         this.context = context;
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiSwitchPreference, defStyleAttr, defStyleRes)) {
             mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOn, R.styleable.MiuiSwitchPreference_android_summaryOn);
             mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOff, R.styleable.MiuiSwitchPreference_android_summaryOff);
+            mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiPreference_disableDependentsState,
+                    R.styleable.MiuiPreference_android_disableDependentsState, false);
         }
     }
 
@@ -109,13 +116,24 @@ public class MiuiSwitchPreference extends MiuiPreference {
             mChecked = checked;
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
-            notifyChanged();
+            if (!isInitialTime) {
+                notifyChanged();
+            }
         }
+    }
+
+    public void setDisableDependentsState(boolean disableDependentsState) {
+        mDisableDependentsState = disableDependentsState;
+    }
+
+    public boolean getDisableDependentsState() {
+        return mDisableDependentsState;
     }
 
     @Override
     public boolean shouldDisableDependents() {
-        return super.shouldDisableDependents();
+        boolean shouldDisable = mDisableDependentsState == mChecked;
+        return shouldDisable || super.shouldDisableDependents();
     }
 
     @Override
@@ -123,8 +141,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
         super.onSetInitialValue(defaultValue);
         if (defaultValue == null) defaultValue = false;
         setChecked(getPersistedBoolean((Boolean) defaultValue));
+        isInitialTime = false;
     }
-
 
     @Nullable
     @Override
@@ -137,7 +155,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
         savedState.mChecked = isChecked();
         return savedState;
     }
-
 
     @Override
     protected void onRestoreInstanceState(@Nullable Parcelable state) {
@@ -154,7 +171,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-
         switchBackground = (ConstraintLayout) holder.findViewById(R.id.switch_container);
         thumb = holder.findViewById(R.id.switch_thumb);
 
@@ -162,7 +178,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         updateSwitchState();
         animateThumbIfNeed(false, isChecked());
 
-        if (needSetSummary()) {
+        if (needSummary()) {
             if (mSummaryOff == null && mSummaryOn == null)
                 summary.setText(getSummary()); // on 与 off 应当成对出现
             else {
@@ -175,7 +191,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean needSetSummary() {
+    protected boolean needSummary() {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
     }
 
@@ -226,13 +242,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 animator.removeListener(this);
             }
         });
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        updateSwitchState();
-        animateThumbIfNeed(false, isChecked());
     }
 
     private static class SavedState extends BaseSavedState {

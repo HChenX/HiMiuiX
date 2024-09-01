@@ -21,6 +21,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import java.util.ArrayList;
+
 /** @noinspection FieldCanBeLocal */
 public class MiuiPreference extends Preference {
     String TAG = "MiuiPreference";
@@ -37,6 +39,8 @@ public class MiuiPreference extends Preference {
     String tip = null;
     boolean loadArrowRight;
     private int mViewId = 0;
+    private String mDependencyKey;
+    private ArrayList<MiuiPreference> mDependents = new ArrayList<>();
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @SuppressLint("RestrictedApi")
         @Override
@@ -63,7 +67,7 @@ public class MiuiPreference extends Preference {
         init(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_preference);
         try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference)) {
             tip = typedArray.getString(R.styleable.MiuiPreference_tip);
@@ -74,6 +78,65 @@ public class MiuiPreference extends Preference {
         mViewId = viewId;
     }
 
+    @Override
+    public void onAttached() {
+        registerDependency();
+    }
+
+    @Override
+    protected void notifyChanged() {
+        super.notifyChanged();
+        onDependencyChange();
+    }
+
+    @Override
+    public void onDetached() {
+        unregisterDependency();
+        InvokeUtils.setField(this, "mWasDetached", true);
+    }
+
+    @Override
+    protected void onPrepareForRemoval() {
+        unregisterDependency();
+    }
+
+    @Override
+    public void setDependency(@Nullable String dependencyKey) {
+        unregisterDependency();
+        InvokeUtils.setField(this, "mDependencyKey", dependencyKey);
+        registerDependency();
+    }
+
+    private void registerDependency() {
+        mDependencyKey = getDependency();
+        if (mDependencyKey == null) return;
+        MiuiPreference preference = findPreferenceInHierarchy(mDependencyKey);
+        if (preference != null) {
+            if (preference.mDependents == null) preference.mDependents = new ArrayList<>();
+            setVisible(preference.shouldDisableDependents());
+            onDependencyChanged(this, preference.shouldDisableDependents());
+            preference.mDependents.add(this);
+        } else {
+            throw new IllegalStateException("Dependency \"" + mDependencyKey
+                    + "\" not found for preference \"" + getKey() + "\" (title: \"" + getTitle() + "\"");
+        }
+    }
+
+    private void onDependencyChange() {
+        if (mDependents.isEmpty()) return;
+        for (MiuiPreference preference : mDependents) {
+            preference.setVisible(shouldDisableDependents());
+        }
+    }
+
+    private void unregisterDependency() {
+        mDependencyKey = getDependency();
+        if (mDependencyKey == null) return;
+        MiuiPreference preference = findPreferenceInHierarchy(mDependencyKey);
+        if (preference != null)
+            preference.mDependents.remove(this);
+    }
+
     int textHeight = -1;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -82,6 +145,7 @@ public class MiuiPreference extends Preference {
         mainLayout = (ConstraintLayout) holder.itemView;
         mainLayout.setOnClickListener(null);
         mainLayout.setOnTouchListener(null);
+        mainLayout.setBackground(null);
         mainLayout.setOnClickListener(mClickListener);
         mainLayout.setId(mViewId);
 
@@ -94,9 +158,7 @@ public class MiuiPreference extends Preference {
         textConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_text_constraint);
         onlyTextConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_only_text_constraint);
 
-        Drawable drawable = getIcon();
-        loadIcon(drawable);
-        if (needSetSummary()) {
+        if (needSummary()) {
             setVisibility(true);
             tittle.setText(getTitle());
             summary.setText(getSummary());
@@ -122,15 +184,15 @@ public class MiuiPreference extends Preference {
             onlyTittle.setText(getTitle());
         }
         if (loadArrowRight) loadArrowRight();
+        loadIcon(getIcon());
         loadTipView();
         setColor();
         if (isEnabled())
-            mainLayout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return MiuiPreference.this.onTouch(v, event);
-                }
-            });
+            mainLayout.setOnTouchListener(MiuiPreference.this::onTouch);
+        mainLayout.setClickable(isSelectable());
+        mainLayout.setFocusable(isSelectable());
+        holder.setDividerAllowedAbove(false);
+        holder.setDividerAllowedBelow(false);
     }
 
     @SuppressLint("RestrictedApi")
@@ -144,7 +206,7 @@ public class MiuiPreference extends Preference {
     protected void onClick(View view) {
     }
 
-    protected boolean needSetSummary() {
+    protected boolean needSummary() {
         return getSummary() != null;
     }
 

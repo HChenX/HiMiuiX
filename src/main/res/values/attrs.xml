@@ -2,6 +2,8 @@
 <resources>
     <declare-styleable name="MiuiPreference">
         <attr name="tip" format="string" />
+        <attr name="disableDependentsState" format="boolean" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
+        <attr name="android:disableDependentsState" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
     </declare-styleable>
 
     <declare-styleable name="MiuiSwitchPreference">
@@ -26,8 +28,7 @@
         <attr name="defaultValue" format="string|boolean|integer|reference|float" />
         <attr name="android:defaultValue" />
 
-        <attr name="key" format="string" />
-        <attr name="android:key" />
+        <attr name="showOnSummary" format="boolean" /> <!--选择结果显示在 summary 上-->
     </declare-styleable>
 
     <declare-styleable name="MiuiSeekBarPreference">
