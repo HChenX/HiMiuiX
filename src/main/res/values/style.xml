@@ -21,6 +21,11 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
         <item name="android:windowBackground">@drawable/dialog_round_bg_light</item>
+        <item name="android:windowSoftInputMode">stateVisible|adjustResize</item>
+        <!--如果 dialog 未被舒服发正常顶起，请检查是否设置属性:
+        <item name="android:fitsSystemWindows">true</item>
+        并删除。
+        -->
     </style>
 
     <style name="Animation" parent=""></style>

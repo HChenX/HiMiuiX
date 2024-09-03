@@ -21,3 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class androidx.preference.Preference
+-keep class android.widget.TextView

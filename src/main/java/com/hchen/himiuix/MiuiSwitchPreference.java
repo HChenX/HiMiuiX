@@ -4,6 +4,7 @@ import static com.hchen.himiuix.MiuiXUtils.sp2px;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,7 +25,6 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiSwitchPreference extends MiuiPreference {
-    String TAG = "MiuiSwitchPreference";
     private ConstraintLayout switchBackground;
     private View thumb;
     private CharSequence mSummaryOn;
@@ -44,7 +44,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 if (mSummaryOn != null && isChecked()) summary.setText(mSummaryOn);
                 if (mSummaryOff != null && !isChecked()) summary.setText(mSummaryOff);
             }
-            v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            if (v != null)
+                v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
     };
 
@@ -173,6 +174,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         super.onBindViewHolder(holder);
         switchBackground = (ConstraintLayout) holder.findViewById(R.id.switch_container);
         thumb = holder.findViewById(R.id.switch_thumb);
+        thumb.setOnTouchListener(null);
 
         switchBackground.setOnClickListener(null);
         updateSwitchState();
@@ -186,8 +188,90 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 if (mSummaryOff != null && !isChecked()) summary.setText(mSummaryOff);
             }
         }
-        if (isEnabled() && isSelectable())
+        if (isEnabled() && isSelectable()) {
             switchBackground.setOnClickListener(clickListener);
+            thumb.setOnTouchListener(new View.OnTouchListener() {
+                private float switchViewX;
+                private boolean shouldHaptic;
+                private float maxMoveX;
+                private float minMoveX;
+                private boolean isMoved;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            v.getParent().requestDisallowInterceptTouchEvent(true);
+                            int[] outLocation = new int[2];
+                            switchBackground.getLocationOnScreen(outLocation);
+                            switchViewX = outLocation[0];
+                            maxMoveX = switchBackground.getWidth() - thumb.getWidth() - MiuiXUtils.sp2px(context, 4.5F);
+                            minMoveX = MiuiXUtils.sp2px(context, 4.5F);
+                            animZoom(v);
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            isMoved = true;
+                            float moveX = event.getRawX() - switchViewX;
+                            if (moveX >= maxMoveX) {
+                                moveX = maxMoveX;
+                                hapticFeedbackIfNeed(v);
+                            } else if (moveX <= minMoveX) {
+                                moveX = minMoveX;
+                                hapticFeedbackIfNeed(v);
+                            } else if (moveX > minMoveX && moveX < maxMoveX) {
+                                shouldHaptic = true;
+                            }
+                            v.setX(moveX);
+                            break;
+                        case MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL:
+                            if (isMoved) {
+                                float finalX = v.getX();
+                                boolean newCheckedState;
+                                if (finalX < (minMoveX + maxMoveX) / 2) {
+                                    finalX = minMoveX;
+                                    newCheckedState = false;
+                                } else {
+                                    finalX = maxMoveX;
+                                    newCheckedState = true;
+                                }
+                                v.animate().x(finalX).setDuration(200).start();
+                                if (newCheckedState != isChecked()) {
+                                    clickListener.onClick(null);
+                                }
+                            } else
+                                clickListener.onClick(v);
+                            animRevert(v);
+                            v.getParent().requestDisallowInterceptTouchEvent(false);
+                            break;
+                        default:
+                            return false;
+                    }
+                    return true;
+                }
+
+                private void hapticFeedbackIfNeed(View v) {
+                    if (shouldHaptic)
+                        v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                    shouldHaptic = false;
+                }
+
+                private void animZoom(View view) {
+                    AnimatorSet set = new AnimatorSet();
+                    set.playTogether(
+                            ObjectAnimator.ofFloat(view, "scaleX", 1, 1.1f).setDuration(200),
+                            ObjectAnimator.ofFloat(view, "scaleY", 1, 1.1f).setDuration(200));
+                    set.start();
+                }
+                
+                private void animRevert(View view){
+                    AnimatorSet set = new AnimatorSet();
+                    set.playTogether(
+                            ObjectAnimator.ofFloat(view, "scaleX", 1, 1f).setDuration(200),
+                            ObjectAnimator.ofFloat(view, "scaleY", 1, 1f).setDuration(200));
+                    set.start();
+                }
+            });
+        }
     }
 
     @Override
@@ -221,9 +305,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
         if (animating) return;
-        int translationX = switchBackground.getWidth() - thumb.getWidth() - (2 * sp2px(context, 3.7F));
+        int translationX = switchBackground.getWidth() - thumb.getWidth() - (2 * sp2px(context, 4F));
         if (!useAnimate) {
-            if (toRight) thumb.setTranslationX(sp2px(context, 22.4F));
+            if (toRight) thumb.setTranslationX(sp2px(context, 23.3F));
             else thumb.setTranslationX(0);
             return;
         }

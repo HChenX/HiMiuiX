@@ -13,7 +13,7 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/edit_text"
+        android:id="@+id/edit_tip"
         android:layout_width="wrap_content"
         android:layout_height="50sp"
         android:layout_marginStart="15sp"
@@ -47,7 +47,7 @@
         android:textAlignment="viewStart"
         android:textColorHint="@color/edit_hint"
         android:textCursorDrawable="@drawable/edit_cursor"
-        app:layout_constraintLeft_toRightOf="@id/edit_text"
+        app:layout_constraintLeft_toRightOf="@id/edit_tip"
         app:layout_constraintRight_toLeftOf="@id/edit_image"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.text.Editable;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -18,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -76,6 +76,7 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean hapticFeedbackEnabled;
     private TextWatcher textWatcher;
     private boolean needInput;
+    private boolean isCreated;
     private OnItemsChangeListener itemsChangeListener;
 
     public MiuiAlertDialog(@NonNull Context context) {
@@ -91,14 +92,12 @@ public class MiuiAlertDialog implements DialogInterface {
         dialog = new Dialog(context, themeResId) {
             @Override
             public void dismiss() {
-                Log.i(TAG, "dismiss: ");
                 if (!isShowing()) return;
                 if (itemsChangeListener != null) {
                     itemsChangeListener.onResult(items, listAdapter.booleanArray);
                 }
                 if (editText.getVisibility() == View.VISIBLE) {
                     if (isInputVisible()) {
-                        Log.i(TAG, "dismiss: hh");
                         hideInputIfNeed(this::dismissDialog);
                     } else dismissDialog();
                 } else
@@ -137,7 +136,7 @@ public class MiuiAlertDialog implements DialogInterface {
         endView = mainDialog.findViewById(R.id.end_view);
         editText = mainDialog.findViewById(R.id.edit_text_id);
         editLayout = mainDialog.findViewById(R.id.edit_layout);
-        editTextTip = mainDialog.findViewById(R.id.edit_text);
+        editTextTip = mainDialog.findViewById(R.id.edit_tip);
         editImage = mainDialog.findViewById(R.id.edit_image);
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -420,17 +419,17 @@ public class MiuiAlertDialog implements DialogInterface {
         if (!isSetPositiveButton) positiveButton.setVisibility(View.GONE);
         if (customRadius != null) mainDialog.setBackground(customRadius);
         dialog.create();
+        isCreated = true;
         return this;
     }
 
     public void show() {
-        create();
+        if (!isCreated) create();
         dialog.setOnShowListener(new android.content.DialogInterface.OnShowListener() {
             @Override
-            public void onShow(android.content.DialogInterface dialog) {
-                if (needInput) {
+            public void onShow(android.content.DialogInterface d) {
+                if (needInput)
                     showInputIfNeed();
-                }
             }
         });
         dialog.show();
@@ -466,9 +465,14 @@ public class MiuiAlertDialog implements DialogInterface {
         editText.setFocusable(true);
         editText.setFocusableInTouchMode(true);
         editText.requestFocus();
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (!isInputVisible()) {
-            imm.showSoftInput(editText, 0);
+            WindowInsetsController windowInsetsController = window.getDecorView().getWindowInsetsController();
+            if (windowInsetsController != null)
+                windowInsetsController.show(WindowInsets.Type.ime());
+            else {
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editText, 0);
+            }
         }
     }
 

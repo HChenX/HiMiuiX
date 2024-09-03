@@ -69,7 +69,8 @@ public class MiuiPreference extends Preference {
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_preference);
-        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference)) {
+        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference,
+                defStyleAttr, defStyleRes)) {
             tip = typedArray.getString(R.styleable.MiuiPreference_tip);
         }
     }
