@@ -41,10 +41,16 @@
         <attr name="showSeekBarValue" format="boolean" />
         <attr name="displayDividerValue" format="integer" /> <!--可用于显示小数-->
     </declare-styleable>
-    
+
     <declare-styleable name="MiuiEditTextPreference">
         <attr name="hint" format="string" />
         <attr name="android:hint" />
+    </declare-styleable>
+
+    <declare-styleable name="SpringBackLayout">
+        <attr name="scrollableView" format="reference" />
+        <attr name="scrollOrientation" format="integer" />
+        <attr name="springBackMode" format="integer" />
     </declare-styleable>
 
 </resources>
