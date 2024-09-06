@@ -46,7 +46,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     public MiuiDropDownPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, androidx.preference.R.attr.preferenceStyle);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiDropDownPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {

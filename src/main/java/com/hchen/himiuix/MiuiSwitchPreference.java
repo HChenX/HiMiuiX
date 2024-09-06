@@ -54,7 +54,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, androidx.preference.R.attr.preferenceStyle);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {

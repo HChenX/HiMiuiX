@@ -45,4 +45,13 @@
         <item name="android:windowExitAnimation">@anim/dialog_anim_noanim</item>
     </style>
 
+    <style name="MiuiPreference">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+
+    <style name="MiuiPreference.Category">
+        <item name="android:shouldDisableView">false</item>
+        <item name="android:selectable">false</item>
+    </style>
 </resources>

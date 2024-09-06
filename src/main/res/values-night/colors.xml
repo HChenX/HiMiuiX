@@ -37,4 +37,6 @@
     <color name="arrow_right_d">#4D4D4D</color>
     <color name="arrow_up_down">#666666</color>
     <color name="arrow_up_down_d">#6B6B6B</color>
+    <color name="category_background">#333333</color>
+    <color name="category_tip">#808080</color>
 </resources>

@@ -40,4 +40,6 @@
     <color name="arrow_right_d">#B2B2B2</color>
     <color name="arrow_up_down">#949494</color> <!--DropDownPreference 右侧上下箭头颜色-->
     <color name="arrow_up_down_d">#999999</color>
+    <color name="category_background">#E5E5E5</color> <!--MiuiPreferenceCategory 分割线背景-->
+    <color name="category_tip">#8D94B1</color> <!--MiuiPreferenceCategory tittle 字体颜色-->
 </resources>
