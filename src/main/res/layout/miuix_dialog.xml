@@ -71,6 +71,16 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@android:id/message" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dialog_custom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/button_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@android:id/message" />
+
     <LinearLayout
         android:id="@+id/button_view"
         android:layout_width="match_parent"

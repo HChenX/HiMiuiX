@@ -2,6 +2,7 @@ package com.hchen.himiuix;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -158,19 +159,29 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         } else if (action == MotionEvent.ACTION_UP) {
             v.setBackgroundResource(R.color.touch_down);
             view = v;
+            CharSequence def;
+            if (mDisplayDividerValue != -1)
+                def = String.valueOf((float) mSeekBarValue / (float) mDisplayDividerValue);
+            else
+                def = String.valueOf(mSeekBarValue);
+
             new MiuiAlertDialog(getContext())
                     .setTitle(getTitle())
                     .setMessage(getSummary())
                     .setPositiveButton("确定", null)
                     .setHapticFeedbackEnabled(true)
-                    .setEditText(String.valueOf(mSeekBarValue), true, new DialogInterface.TextWatcher() {
+                    .setEditText(def, true, new DialogInterface.TextWatcher() {
                         @Override
                         public void onResult(CharSequence s) {
-                            int result = Integer.parseInt((String) s);
+                            float f = Float.MIN_VALUE;
+                            if (mDisplayDividerValue != -1)
+                                f = Float.parseFloat((String) s) * mDisplayDividerValue;
+                            int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
                             setValue(result);
                             setProgressIfNeed(result);
                         }
                     })
+                    .setInputType(InputType.TYPE_CLASS_NUMBER)
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->
                             view.setBackgroundResource(R.color.touch_up))
