@@ -7,7 +7,6 @@ public class SpringScroller {
     private static final float VALUE_THRESHOLD = 1.0F;
     private double mCurrX;
     private double mCurrY;
-    private long mCurrentTime;
     private double mEndX;
     private double mEndY;
     private boolean mFinished = true;
@@ -27,74 +26,71 @@ public class SpringScroller {
     }
 
     public void scrollByFling(float f, float f2, float f3, float f4, float f5, int i, boolean z) {
-        this.mFinished = false;
-        this.mLastStep = false;
-        double d = (double)f;
-        this.mStartX = d;
-        this.mOriginStartX = d;
-        this.mEndX = (double)f2;
-        double d2 = (double)f3;
-        this.mStartY = d2;
-        this.mOriginStartY = d2;
-        this.mCurrY = (double)((int)this.mStartY);
-        this.mEndY = (double)f4;
-        double d3 = (double)f5;
-        this.mOriginVelocity = d3;
-        this.mVelocity = d3;
-        if (!(Math.abs(this.mVelocity) <= 5000.0) && !z) {
-            this.mSpringOperator = new SpringOperator(1.0F, 0.55F);
+        mFinished = false;
+        mLastStep = false;
+        mStartX = f;
+        mOriginStartX = f;
+        mEndX = f2;
+        mStartY = f3;
+        mOriginStartY = f3;
+        mCurrY = ((int) mStartY);
+        mEndY = f4;
+        mOriginVelocity = f5;
+        mVelocity = f5;
+        if (!(Math.abs(mVelocity) <= 5000.0) && !z) {
+            mSpringOperator = new SpringOperator(1.0F, 0.55F);
         } else {
-            this.mSpringOperator = new SpringOperator(1.0F, 0.4F);
+            mSpringOperator = new SpringOperator(1.0F, 0.4F);
         }
 
-        this.mOrientation = i;
-        this.mStartTime = AnimationUtils.currentAnimationTimeMillis();
+        mOrientation = i;
+        mStartTime = AnimationUtils.currentAnimationTimeMillis();
     }
 
     public boolean computeScrollOffset() {
-        if (this.mSpringOperator != null && !this.mFinished) {
-            if (this.mFirstStep != 0) {
-                if (this.mOrientation == 1) {
-                    this.mCurrX = (double)this.mFirstStep;
-                    this.mStartX = (double)this.mFirstStep;
+        if (mSpringOperator != null && !mFinished) {
+            if (mFirstStep != 0) {
+                if (mOrientation == 1) {
+                    mCurrX =  mFirstStep;
+                    mStartX =  mFirstStep;
                 } else {
-                    this.mCurrY = (double)this.mFirstStep;
-                    this.mStartY = (double)this.mFirstStep;
+                    mCurrY =  mFirstStep;
+                    mStartY =  mFirstStep;
                 }
 
-                this.mFirstStep = 0;
+                mFirstStep = 0;
                 return true;
-            } else if (this.mLastStep) {
-                this.mFinished = true;
+            } else if (mLastStep) {
+                mFinished = true;
                 return true;
             } else {
-                this.mCurrentTime = AnimationUtils.currentAnimationTimeMillis();
-                float min = Math.min((float)(this.mCurrentTime - this.mStartTime) / 1000.0F, 0.016F);
+                long mCurrentTime = AnimationUtils.currentAnimationTimeMillis();
+                float min = Math.min((float) (mCurrentTime - mStartTime) / 1000.0F, 0.016F);
                 if (min == 0.0F) {
                     min = 0.016F;
                 }
 
-                this.mStartTime = this.mCurrentTime;
+                mStartTime = mCurrentTime;
                 double updateVelocity;
-                if (this.mOrientation == 2) {
-                    updateVelocity = this.mSpringOperator.updateVelocity(this.mVelocity, min, this.mEndY, this.mStartY);
-                    this.mCurrY = this.mStartY + (double)min * updateVelocity;
-                    this.mVelocity = updateVelocity;
-                    if (this.isAtEquilibrium(this.mCurrY, this.mOriginStartY, this.mEndY)) {
-                        this.mLastStep = true;
-                        this.mCurrY = this.mEndY;
+                if (mOrientation == 2) {
+                    updateVelocity = mSpringOperator.updateVelocity(mVelocity, min, mEndY, mStartY);
+                    mCurrY = mStartY + (double) min * updateVelocity;
+                    mVelocity = updateVelocity;
+                    if (isAtEquilibrium(mCurrY, mOriginStartY, mEndY)) {
+                        mLastStep = true;
+                        mCurrY = mEndY;
                     } else {
-                        this.mStartY = this.mCurrY;
+                        mStartY = mCurrY;
                     }
                 } else {
-                    updateVelocity = this.mSpringOperator.updateVelocity(this.mVelocity, min, this.mEndX, this.mStartX);
-                    this.mCurrX = this.mStartX + (double)min * updateVelocity;
-                    this.mVelocity = updateVelocity;
-                    if (this.isAtEquilibrium(this.mCurrX, this.mOriginStartX, this.mEndX)) {
-                        this.mLastStep = true;
-                        this.mCurrX = this.mEndX;
+                    updateVelocity = mSpringOperator.updateVelocity(mVelocity, min, mEndX, mStartX);
+                    mCurrX = mStartX + (double) min * updateVelocity;
+                    mVelocity = updateVelocity;
+                    if (isAtEquilibrium(mCurrX, mOriginStartX, mEndX)) {
+                        mLastStep = true;
+                        mCurrX = mEndX;
                     } else {
-                        this.mStartX = this.mCurrX;
+                        mStartX = mCurrX;
                     }
                 }
 
@@ -109,34 +105,33 @@ public class SpringScroller {
         if (!(d2 >= d3) && !(d <= d3)) {
             return true;
         } else {
-            int i = d2 > d3 ? 1 : (d2 == d3 ? 0 : -1);
+            int i = Double.compare(d2, d3);
             if (i > 0 && !(d >= d3)) {
                 return true;
             } else {
-                return i == 0 && Math.signum(this.mOriginVelocity) != Math.signum(d) || Math.abs(d - d3) < 1.0;
+                return i == 0 && Math.signum(mOriginVelocity) != Math.signum(d) || Math.abs(d - d3) < 1.0;
             }
         }
     }
 
     public final int getCurrX() {
-        return (int)this.mCurrX;
+        return (int) mCurrX;
     }
 
     public final int getCurrY() {
-        return (int)this.mCurrY;
+        return (int) mCurrY;
     }
 
     public final boolean isFinished() {
-        return this.mFinished;
+        return mFinished;
     }
 
     public final void forceStop() {
-        this.mFinished = true;
-        this.mFirstStep = 0;
+        mFinished = true;
+        mFirstStep = 0;
     }
 
     public void setFirstStep(int step) {
-        this.mFirstStep = step;
+        mFirstStep = step;
     }
-
 }

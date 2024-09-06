@@ -11,20 +11,20 @@ public class SpringBackLayoutHelper {
     float mInitialDownX;
     float mInitialDownY;
     int mScrollOrientation;
-    private ViewGroup mTarget;
+    private final ViewGroup mTarget;
     int mTargetScrollOrientation;
-    private int mTouchSlop;
+    private final int mTouchSlop;
 
     public SpringBackLayoutHelper(ViewGroup target, int orientation) {
-        this.mTarget = target;
-        this.mTargetScrollOrientation = orientation;
-        this.mTouchSlop = ViewConfiguration.get(target.getContext()).getScaledTouchSlop();
+        mTarget = target;
+        mTargetScrollOrientation = orientation;
+        mTouchSlop = ViewConfiguration.get(target.getContext()).getScaledTouchSlop();
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        this.checkOrientation(ev);
-        boolean disallowIntercept = this.mScrollOrientation != 0 && this.mScrollOrientation != this.mTargetScrollOrientation;
-        this.mTarget.requestDisallowInterceptTouchEvent(disallowIntercept);
+        checkOrientation(ev);
+        boolean disallowIntercept = mScrollOrientation != 0 && mScrollOrientation != mTargetScrollOrientation;
+        mTarget.requestDisallowInterceptTouchEvent(disallowIntercept);
         return !disallowIntercept;
     }
 
@@ -34,10 +34,10 @@ public class SpringBackLayoutHelper {
             float y = ev.getY(findPointerIndex);
             float x = ev.getX(findPointerIndex);
             int[] iArr = new int[]{0, 0};
-            this.mTarget.getLocationInWindow(iArr);
+            mTarget.getLocationInWindow(iArr);
             int i = iArr[0];
             int i2 = iArr[1];
-            return (new Rect(i, i2, this.mTarget.getWidth() + i, this.mTarget.getHeight() + i2)).contains((int)x, (int)y);
+            return (new Rect(i, i2, mTarget.getWidth() + i, mTarget.getHeight() + i2)).contains((int)x, (int)y);
         } else {
             return false;
         }
@@ -47,31 +47,30 @@ public class SpringBackLayoutHelper {
         int actionMasked = ev.getActionMasked();
         int findPointerIndex;
         switch (actionMasked) {
-            case 0:
-                this.mActivePointerId = ev.getPointerId(0);
-                findPointerIndex = ev.findPointerIndex(this.mActivePointerId);
+            case MotionEvent.ACTION_DOWN:
+                mActivePointerId = ev.getPointerId(0);
+                findPointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (findPointerIndex >= 0) {
-                    this.mInitialDownY = ev.getY(findPointerIndex);
-                    this.mInitialDownX = ev.getX(findPointerIndex);
-                    this.mScrollOrientation = 0;
+                    mInitialDownY = ev.getY(findPointerIndex);
+                    mInitialDownX = ev.getX(findPointerIndex);
+                    mScrollOrientation = 0;
                 }
                 break;
-            case 1:
-                this.mScrollOrientation = 0;
-                this.mTarget.requestDisallowInterceptTouchEvent(false);
+            case MotionEvent.ACTION_UP:
+                mScrollOrientation = 0;
+                mTarget.requestDisallowInterceptTouchEvent(false);
                 break;
-            case 2:
-                if (this.mActivePointerId != -1) {
-                    findPointerIndex = ev.findPointerIndex(this.mActivePointerId);
+            case MotionEvent.ACTION_MOVE:
+                if (mActivePointerId != -1) {
+                    findPointerIndex = ev.findPointerIndex(mActivePointerId);
                     if (findPointerIndex >= 0) {
-                        float x = ev.getX(findPointerIndex) - this.mInitialDownX;
-                        float y = ev.getY(findPointerIndex) - this.mInitialDownY;
-                        if (Math.abs(x) > (float)this.mTouchSlop || Math.abs(y) > (float)this.mTouchSlop) {
-                            this.mScrollOrientation = Math.abs(x) <= Math.abs(y) ? 2 : 1;
+                        float x = ev.getX(findPointerIndex) - mInitialDownX;
+                        float y = ev.getY(findPointerIndex) - mInitialDownY;
+                        if (Math.abs(x) > (float)mTouchSlop || Math.abs(y) > (float)mTouchSlop) {
+                            mScrollOrientation = Math.abs(x) <= Math.abs(y) ? 2 : 1;
                         }
                     }
                 }
         }
-
     }
 }
