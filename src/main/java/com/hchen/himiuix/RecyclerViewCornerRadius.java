@@ -47,10 +47,15 @@ public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
     }
 
     public void setCornerRadius(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
-        this.topLeftRadius = topLeftRadius;
-        this.topRightRadius = topRightRadius;
-        this.bottomLeftRadius = bottomLeftRadius;
-        this.bottomRightRadius = bottomRightRadius;
+        this.topLeftRadius = defOrChange(this.topLeftRadius, topLeftRadius);
+        this.topRightRadius = defOrChange(this.topRightRadius, topRightRadius);
+        this.bottomLeftRadius = defOrChange(this.bottomLeftRadius, bottomLeftRadius);
+        this.bottomRightRadius = defOrChange(this.bottomRightRadius, bottomRightRadius);
+    }
+
+    private float defOrChange(float def, float change) {
+        if (change == -1) return def;
+        return change;
     }
 
     @Override

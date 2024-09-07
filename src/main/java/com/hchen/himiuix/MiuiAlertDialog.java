@@ -346,22 +346,23 @@ public class MiuiAlertDialog implements DialogInterface {
             editText.setSelection(editText.getText().length());
         }
         this.needInput = needInput;
-        editText.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                watcher.beforeTextChanged(s, start, count, after);
-            }
+        if (watcher != null)
+            editText.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    watcher.beforeTextChanged(s, start, count, after);
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                watcher.onTextChanged(s, start, before, count);
-            }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    watcher.onTextChanged(s, start, before, count);
+                }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                watcher.afterTextChanged(s);
-            }
-        });
+                @Override
+                public void afterTextChanged(Editable s) {
+                    watcher.afterTextChanged(s);
+                }
+            });
         textWatcher = watcher;
         shouldShowEdit = true;
         return this;
@@ -452,35 +453,41 @@ public class MiuiAlertDialog implements DialogInterface {
         if (customView != null || customViewId != 0) {
             setupCustomContent();
         } else {
-            RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(recyclerView);
-            float radius = (this.radius == -1) ? MiuiXUtils.sp2px(context, 32) : this.radius;
-            cornerRadius.setCornerRadius(radius);
-            if ((isSetNegativeButton || isSetPositiveButton || isSetNeutralButton
-                    || alertTitle.getVisibility() == View.VISIBLE || message.getVisibility() == View.VISIBLE)
-                    && items != null && !isDropDown) {
-                ConstraintLayout.LayoutParams layout = (ConstraintLayout.LayoutParams) recyclerView.getLayoutParams();
-                int height = (MiuiXUtils.sp2px(context, 56) * (items.size())) + MiuiXUtils.sp2px(context, 35);
-                int maxHeight = (int) (MiuiXUtils.getScreenSize(context).y / 2.5);
-                layout.height = Math.min(height, maxHeight);
-                recyclerView.setLayoutParams(layout);
-                // recyclerView.setPadding(0, 0, 0, MiuiXUtils.dp2px(context, 15));
-                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) buttonView.getLayoutParams();
-                layoutParams.topMargin = MiuiXUtils.sp2px(context, 15);
-                buttonView.setLayoutParams(layoutParams);
-                cornerRadius.setCornerRadius(0);
-                if (alertTitle.getVisibility() == View.GONE && message.getVisibility() == View.GONE) {
-                    cornerRadius.setCornerRadius(radius, radius, 0, 0);
-                }
-            }
-            recyclerView.addItemDecoration(cornerRadius);
             if (shouldShowEdit) {
                 editLayout.setVisibility(View.VISIBLE);
                 editText.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE); // 不支持同时显示文本输入框和多选菜单 (至少是我不想写
+                recyclerView.setAdapter(null);
+            } else {
+                RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(recyclerView);
+                float radius = (this.radius == -1) ? MiuiXUtils.sp2px(context, 32) : this.radius;
+                cornerRadius.setCornerRadius(radius);
+                if (items != null && !isDropDown) {
+                    cornerRadius.setCornerRadius(0);
+                    ConstraintLayout.LayoutParams layout = (ConstraintLayout.LayoutParams) recyclerView.getLayoutParams();
+                    int height = (MiuiXUtils.sp2px(context, 56) * (items.size())) + MiuiXUtils.sp2px(context, 20);
+                    int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.1);
+                    layout.height = Math.min(height, maxHeight);
+                    recyclerView.setLayoutParams(layout);
+
+                    if (isSetPositiveButton || isSetNegativeButton || isSetNeutralButton) {
+                        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) buttonView.getLayoutParams();
+                        layoutParams.topMargin = MiuiXUtils.sp2px(context, 10);
+                        buttonView.setLayoutParams(layoutParams);
+                    } else {
+                        endView.setVisibility(View.GONE);
+                        buttonView.setVisibility(View.GONE);
+                        cornerRadius.setCornerRadius(-1, -1, radius, radius);
+                    }
+
+                    if (alertTitle.getVisibility() == View.GONE && message.getVisibility() == View.GONE) {
+                        cornerRadius.setCornerRadius(radius, radius, -1, -1);
+                    }
+                }
+                recyclerView.addItemDecoration(cornerRadius);
             }
-            if (editText.getVisibility() == View.VISIBLE && message.getVisibility() == View.GONE)
-                message.setVisibility(View.INVISIBLE);
         }
+        if (!isSetNeutralButton) neutralButton.setVisibility(View.GONE);
         if (!isSetNegativeButton) negativeButton.setVisibility(View.GONE);
         if (!isSetPositiveButton) positiveButton.setVisibility(View.GONE);
         if (customRadius != null) mainDialog.setBackground(customRadius);
