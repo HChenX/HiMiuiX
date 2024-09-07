@@ -472,7 +472,7 @@ public class MiuiAlertDialog implements DialogInterface {
 
                     if (isSetPositiveButton || isSetNegativeButton || isSetNeutralButton) {
                         ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) buttonView.getLayoutParams();
-                        layoutParams.topMargin = MiuiXUtils.sp2px(context, 10);
+                        layoutParams.topMargin = MiuiXUtils.sp2px(context, 20);
                         buttonView.setLayoutParams(layoutParams);
                     } else {
                         endView.setVisibility(View.GONE);
@@ -491,6 +491,11 @@ public class MiuiAlertDialog implements DialogInterface {
         if (!isSetNegativeButton) negativeButton.setVisibility(View.GONE);
         if (!isSetPositiveButton) positiveButton.setVisibility(View.GONE);
         if (customRadius != null) mainDialog.setBackground(customRadius);
+        if (message.getVisibility() == View.VISIBLE && alertTitle.getVisibility() == View.GONE) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) message.getLayoutParams();
+            params.topMargin = MiuiXUtils.sp2px(context, 25);
+            message.setLayoutParams(params);
+        }
         dialog.create();
         isCreated = true;
         return this;
