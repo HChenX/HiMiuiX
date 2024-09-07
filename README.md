@@ -20,6 +20,8 @@
 - MiuiEditTextPreference
 - MiuiSeekBarPreference
 - MiuiSwitchPreference
+- MiuiPreferenceCategory
+- MiuiCardPreference
 - 等.... 更多 Ui 正在构建ing
 
 #### 展示:
