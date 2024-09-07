@@ -27,11 +27,9 @@ public class MiuiRecommendPreference extends MiuiPreference {
     @Override
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setSelectable(false);
-        setSelectable(false);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-
     }
 }

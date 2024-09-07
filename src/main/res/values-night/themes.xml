@@ -1,6 +1,5 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.HiMiuiX" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowSoftInputMode">stateVisible|adjustPan</item>
     </style>
 </resources>
