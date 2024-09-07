@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="15sp"
+    android:layout_marginTop="5sp"
+    android:layout_marginEnd="15sp"
+    android:layout_marginBottom="20sp"
+    android:background="@drawable/card_background">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="20sp"
+        android:paddingTop="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/card_tittle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20sp"
+            android:layout_marginEnd="20sp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:maxLines="1"
+            android:paddingBottom="20sp"
+            android:scrollbars="none"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:visibility="gone"
+            android:text="焕晨"
+            android:textColor="@color/tittle"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@id/card_summary"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/card_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22sp"
+            android:layout_marginEnd="22sp"
+            android:layout_marginBottom="20sp"
+            android:text="小焕晨"
+            android:textColor="@color/summary"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_tittle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <ImageView
+        android:id="@+id/card_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20sp"
+        android:adjustViewBounds="true"
+        android:maxWidth="25sp"
+        android:maxHeight="25sp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_preference_arrow_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

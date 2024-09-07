@@ -42,6 +42,18 @@
         <attr name="displayDividerValue" format="integer" /> <!--可用于显示小数-->
     </declare-styleable>
 
+    <declare-styleable name="MiuiCardPreference">
+        <attr name="tittleSize" format="dimension" />
+        <attr name="summarySize" format="dimension" />
+        <attr name="tittleColor" format="color" />
+        <attr name="summaryColor" format="color" />
+        <attr name="backgroundColor" format="color" /> <!--更改卡片背景色-->
+        <attr name="iconArrowRight" format="boolean" /> <!--使用向右图标-->
+        <attr name="iconCancel" format="boolean" /> <!--使用默认关闭图标-->
+        <attr name="iconArrowRightColor" format="color" /> <!--向右图标背景-->
+        <attr name="iconCancelColor" format="color" /> <!--关闭图标背景-->
+    </declare-styleable>
+
     <declare-styleable name="MiuiEditTextPreference">
         <attr name="hint" format="string" />
         <attr name="android:hint" />

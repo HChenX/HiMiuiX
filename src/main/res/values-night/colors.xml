@@ -39,4 +39,6 @@
     <color name="arrow_up_down_d">#6B6B6B</color>
     <color name="category_background">#333333</color>
     <color name="category_tip">#808080</color>
+    <color name="card_background">#222224</color>
+    <color name="cancel_background">#666666</color>
 </resources>
