@@ -40,5 +40,8 @@
     <color name="category_background">#333333</color>
     <color name="category_tip">#808080</color>
     <color name="card_background">#222224</color>
+    <color name="card_background_waring">#4D3214</color>
     <color name="cancel_background">#666666</color>
+    <color name="cancel_background_waring">#FFB459</color>
+    <color name="card_text_waring">#FFA83F</color>
 </resources>

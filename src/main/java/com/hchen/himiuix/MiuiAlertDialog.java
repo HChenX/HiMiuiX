@@ -1,5 +1,7 @@
 package com.hchen.himiuix;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Point;
@@ -44,7 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MiuiAlertDialog implements DialogInterface {
-    private static final String TAG = "MiuiAlertDialog";
+    private static final String TAG = "MiuiPreference";
     private ConstraintLayout mainDialog;
     TextView alertTitle;
     TextView message;
@@ -57,7 +59,7 @@ public class MiuiAlertDialog implements DialogInterface {
     EditText editText;
     TextView editTextTip;
     ImageView editImage;
-    ConstraintLayout editLayout;
+    private ConstraintLayout editLayout;
     boolean isDropDown = false;
     private GradientDrawable customRadius;
     private float radius = -1;
@@ -74,7 +76,8 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean isSetNegativeButton;
     private boolean isSetNeutralButton;
     private boolean isMultiSelect = false;
-    ArrayList<CharSequence> items = new ArrayList<>();
+    private boolean dismissNow;
+    private ArrayList<CharSequence> items = new ArrayList<>();
     final ListAdapter listAdapter;
     private final Context context;
     private final Dialog dialog;
@@ -105,6 +108,12 @@ public class MiuiAlertDialog implements DialogInterface {
                 }
                 EditText edit = getVisibleEditText();
                 if (edit != null) {
+                    if (dismissNow) {
+                        hideInputNow(edit);
+                        dismissDialog();
+                        dismissNow = false;
+                        return;
+                    }
                     hideInputIfNeed(edit, this::dismissDialog);
                 } else dismissDialog();
             }
@@ -127,6 +136,9 @@ public class MiuiAlertDialog implements DialogInterface {
         window.setWindowAnimations(R.style.Animation_Dialog);
 
         listAdapter = new ListAdapter(this);
+        if (context instanceof Activity activity) {
+            activity.registerActivityLifecycleCallbacks(new ActivityLifecycle(this));
+        }
     }
 
     private void initView() {
@@ -498,6 +510,11 @@ public class MiuiAlertDialog implements DialogInterface {
         dialog.dismiss();
     }
 
+    protected void dismissNow() {
+        dismissNow = true;
+        dialog.dismiss();
+    }
+
     private void setupCustomContent() {
         View view = customView != null ? customView :
                 (customViewId != 0 ? LayoutInflater.from(context).inflate(customViewId, customLayout, false) : null);
@@ -552,6 +569,13 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
+    private void hideInputNow(EditText editText) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (isInputVisible(editText)) {
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        }
+    }
+
     private @Nullable EditText getVisibleEditText() {
         EditText edit = null;
         if (editLayout.getVisibility() == View.VISIBLE) {
@@ -569,6 +593,8 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     private boolean isInputVisible(EditText editText) {
+        if (editText == null) return false;
+        if (editText.getRootWindowInsets() == null) return false;
         return editText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 
@@ -719,6 +745,45 @@ public class MiuiAlertDialog implements DialogInterface {
                 switchView = itemView.findViewById(R.id.list_item);
                 imageView = itemView.findViewById(R.id.list_image);
                 imageView.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private record ActivityLifecycle(
+            MiuiAlertDialog dialog) implements Application.ActivityLifecycleCallbacks {
+
+        @Override
+        public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+        }
+
+        @Override
+        public void onActivityStarted(@NonNull Activity activity) {
+        }
+
+        @Override
+        public void onActivityResumed(@NonNull Activity activity) {
+        }
+
+        @Override
+        public void onActivityPaused(@NonNull Activity activity) {
+        }
+
+        @Override
+        public void onActivityStopped(@NonNull Activity activity) {
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+        }
+
+        @Override
+        public void onActivityDestroyed(@NonNull Activity activity) {
+        }
+
+        @Override
+        public void onActivityPreDestroyed(@NonNull Activity activity) {
+            if (dialog.isShowing()) {
+                dialog.dismissNow();
             }
         }
     }

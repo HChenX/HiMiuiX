@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,14 +21,15 @@ public class MiuiCardPreference extends MiuiPreference {
     TextView tittleView;
     TextView summaryView;
     ImageView imageView;
-    private float tittleSize;
-    private float summarySize;
-    private int tittleColor;
-    private int summaryColor;
-    private boolean iconArrowRight;
-    private boolean iconCancel;
-    private int iconArrowRightColor;
-    private int iconCancelColor;
+    public float tittleSize;
+    public float summarySize;
+    public int backgroundColor;
+    public int tittleColor;
+    public int summaryColor;
+    public boolean iconArrowRight;
+    public boolean iconCancel;
+    public int iconArrowRightColor;
+    public int iconCancelColor;
 
     public MiuiCardPreference(@NonNull Context context) {
         super(context);
@@ -48,24 +50,19 @@ public class MiuiCardPreference extends MiuiPreference {
     @Override
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_card);
-        float defTittleSize = 20;
-        float defSummarySize = 16;
-        int defTittleColor = context.getColor(R.color.tittle);
-        int defSummaryColor = context.getColor(R.color.summary);
-        int defIconArrowRightColor = context.getColor(R.color.arrow_right);
-        int defIconCancelColor = context.getColor(R.color.cancel_background);
+        setSelectable(false);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiCardPreference,
                 defStyleAttr, defStyleRes)) {
-            tittleSize = array.getDimension(R.styleable.MiuiCardPreference_tittleSize, defTittleSize);
-            summarySize = array.getDimension(R.styleable.MiuiCardPreference_summarySize, defSummarySize);
-            tittleColor = array.getColor(R.styleable.MiuiCardPreference_tittleColor, defTittleColor);
-            summaryColor = array.getColor(R.styleable.MiuiCardPreference_summaryColor, defSummaryColor);
+            backgroundColor = array.getColor(R.styleable.MiuiCardPreference_backgroundColor, context.getColor(R.color.card_background));
+            tittleSize = array.getDimension(R.styleable.MiuiCardPreference_tittleSize, 20);
+            summarySize = array.getDimension(R.styleable.MiuiCardPreference_summarySize, 16);
+            tittleColor = array.getColor(R.styleable.MiuiCardPreference_tittleColor, context.getColor(R.color.tittle));
+            summaryColor = array.getColor(R.styleable.MiuiCardPreference_summaryColor, context.getColor(R.color.summary));
             iconArrowRight = array.getBoolean(R.styleable.MiuiCardPreference_iconArrowRight, false);
             iconCancel = array.getBoolean(R.styleable.MiuiCardPreference_iconCancel, false);
-            iconArrowRightColor = array.getColor(R.styleable.MiuiCardPreference_iconArrowRightColor, defIconArrowRightColor);
-            iconCancelColor = array.getColor(R.styleable.MiuiCardPreference_iconCancelColor, defIconCancelColor);
+            iconArrowRightColor = array.getColor(R.styleable.MiuiCardPreference_iconArrowRightColor, context.getColor(R.color.arrow_right));
+            iconCancelColor = array.getColor(R.styleable.MiuiCardPreference_iconCancelColor, context.getColor(R.color.cancel_background));
         }
-        setSelectable(false);
     }
 
     @Override
@@ -92,6 +89,13 @@ public class MiuiCardPreference extends MiuiPreference {
             summaryView.setText(getSummary());
             summaryView.setVisibility(View.VISIBLE);
         }
+        Drawable drawable = layout.getBackground();
+        drawable.setTint(backgroundColor);
+        layout.setBackground(drawable);
+        setIcon();
+    }
+
+    private void setIcon() {
         if (iconArrowRight) {
             Drawable drawable = AppCompatResources.getDrawable(context, R.drawable.ic_preference_arrow_right);
             assert drawable != null;
@@ -102,11 +106,24 @@ public class MiuiCardPreference extends MiuiPreference {
             Drawable drawable = AppCompatResources.getDrawable(context, R.drawable.miuix_button_cancel);
             assert drawable != null;
             drawable.setTint(iconCancelColor);
-            imageView.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.miuix_button_cancel));
+            imageView.setImageDrawable(drawable);
             imageView.setVisibility(View.VISIBLE);
         } else if (getIcon() != null) {
             imageView.setImageDrawable(getIcon());
             imageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void setIconClickListener(View.OnClickListener clickListener) {
+        if (imageView.getVisibility() == View.VISIBLE) {
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (clickListener != null)
+                        clickListener.onClick(v);
+                    v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                }
+            });
         }
     }
 }

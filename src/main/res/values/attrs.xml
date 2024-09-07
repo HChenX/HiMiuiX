@@ -54,6 +54,10 @@
         <attr name="iconCancelColor" format="color" /> <!--关闭图标背景-->
     </declare-styleable>
 
+    <declare-styleable name="MiuiPreferenceCategory">
+        <attr name="noDivider" format="boolean" />
+    </declare-styleable>
+
     <declare-styleable name="MiuiEditTextPreference">
         <attr name="hint" format="string" />
         <attr name="android:hint" />
