@@ -26,22 +26,40 @@
 
 - MiuiPreference
   ![MiuiPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiPreference.jpg)
+  ![MiuiPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiPreference_dark.jpg)
 
 - MiuiSwitchPreference
   ![MiuiSwitchPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSwitchPreference.jpg)
+  ![MiuiSwitchPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSwitchPreference1.jpg)
+  ![MiuiSwitchPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSwitchPreference_dark.jpg)
 
 - MiuiDropDownPreference
   ![MiuiDropDownPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiDropDownPreference.jpg)
+  ![MiuiDropDownPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiDropDownPreference1.jpg)
+  ![MiuiDropDownPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiDropDownPreference_dark.jpg)
 
 - MiuiEditTextPreference
   ![MiuiEditTextPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiEditTextPreference.jpg)
-  ![MiuiEditTextPreference1](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiEditTextPreference1.jpg)
+  ![MiuiEditTextPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiEditTextPreference_dark.jpg)
 
 - MiuiAlertDialog
-  ![MiuiAlertDialog](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog.jpg)
+  ![MiuiAlertDialog_edit](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog_edit.jpg)
+  ![MiuiAlertDialog_edit_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog_edit_dark.jpg)
+  ![MiuiAlertDialog_items](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog_items.jpg)
+  ![MiuiAlertDialog_items_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiAlertDialog_items_dark.jpg)
 
 - MiuiSeekBarPreference
   ![MiuiSeekBarPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSeekBarPreference.jpg)
+  ![MiuiSeekBarPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSeekBarPreference_dark.jpg)
+  ![MiuiSeekBarPreference_dialog](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiSeekBarPreference_dialog.jpg)
+
+- MiuiPreferenceCategory
+  ![MiuiPreferenceCategory](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiPreferenceCategory.jpg)
+  ![MiuiPreferenceCategory_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiPreferenceCategory_dark.jpg)
+
+- MiuiCardPreference
+  ![MiuiCardPreference](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiCardPreference.jpg)
+  ![MiuiCardPreference_dark](https://raw.githubusercontent.com/HChenX/HiMiuiX/master/image/MiuiCardPreference_dark.jpg)
 
 ### 使用
 
@@ -61,6 +79,7 @@ include ':HiMiuiX'
 ```
 
 - 最后设置项目 app 下 build.gradle 文件，添加:
+
 ```groovy
 implementation(project(':HiMiuiX'))
 ```
