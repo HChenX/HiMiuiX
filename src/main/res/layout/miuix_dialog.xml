@@ -123,7 +123,7 @@
             android:maxLines="1"
             android:minHeight="0sp"
             android:scrollbars="none"
-            android:text="取消"
+            android:text="自定义"
             android:textColor="@color/dialog_button1"
             android:textSize="16sp"
             android:visibility="gone"

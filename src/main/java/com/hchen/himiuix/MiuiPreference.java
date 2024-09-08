@@ -1,7 +1,5 @@
 package com.hchen.himiuix;
 
-import static com.hchen.himiuix.MiuiXUtils.sp2px;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -31,6 +29,7 @@ public class MiuiPreference extends Preference {
     ConstraintLayout onlyTextConstraint;
     Context context;
     ImageView icon;
+    View startView;
     TextView tittle;
     TextView onlyTittle;
     TextView summary;
@@ -150,6 +149,7 @@ public class MiuiPreference extends Preference {
         mainLayout.setOnClickListener(mClickListener);
         mainLayout.setId(mViewId);
 
+        startView = holder.findViewById(R.id.pref_start);
         icon = (ImageView) holder.findViewById(R.id.prefs_icon);
         tittle = (TextView) holder.findViewById(R.id.prefs_text);
         onlyTittle = (TextView) holder.findViewById(R.id.prefs_only_text);
@@ -255,12 +255,13 @@ public class MiuiPreference extends Preference {
     private void loadIcon(Drawable drawable) {
         if (icon != null)
             if (drawable != null) {
+                startView.setVisibility(View.GONE);
                 icon.setVisibility(View.VISIBLE);
                 icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 icon.setImageDrawable(drawable);
             } else {
-                icon.setVisibility(View.INVISIBLE);
-                icon.setPadding(sp2px(context, 25), 0, sp2px(context, 5), 0);
+                icon.setVisibility(View.GONE);
+                startView.setVisibility(View.VISIBLE);
             }
     }
 

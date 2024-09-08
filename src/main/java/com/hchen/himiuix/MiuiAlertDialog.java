@@ -466,7 +466,7 @@ public class MiuiAlertDialog implements DialogInterface {
                     cornerRadius.setCornerRadius(0);
                     ConstraintLayout.LayoutParams layout = (ConstraintLayout.LayoutParams) recyclerView.getLayoutParams();
                     int height = (MiuiXUtils.sp2px(context, 56) * (items.size())) + MiuiXUtils.sp2px(context, 20);
-                    int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.1);
+                    int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.5);
                     layout.height = Math.min(height, maxHeight);
                     recyclerView.setLayoutParams(layout);
 
@@ -761,8 +761,13 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
-    private record ActivityLifecycle(
-            MiuiAlertDialog dialog) implements Application.ActivityLifecycleCallbacks {
+    /** @noinspection ClassCanBeRecord*/
+    private static class ActivityLifecycle implements Application.ActivityLifecycleCallbacks {
+        private final MiuiAlertDialog dialog;
+
+        public ActivityLifecycle(MiuiAlertDialog dialog) {
+            this.dialog = dialog;
+        }
 
         @Override
         public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
