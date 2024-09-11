@@ -24,6 +24,11 @@
 - MiuiCardPreference
 - 等.... 更多 Ui 正在构建ing
 
+#### Demo 项目:
+
+- [HiMiuiXDemo](https://github.com/HChenX/HiMiuiXDemo)
+- 欢迎下载体验！
+
 #### 展示:
 
 - MiuiPreference
