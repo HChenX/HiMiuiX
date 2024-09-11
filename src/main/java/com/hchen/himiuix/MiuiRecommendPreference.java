@@ -25,7 +25,7 @@ public class MiuiRecommendPreference extends MiuiPreference {
     }
 
     @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setSelectable(false);
     }
 

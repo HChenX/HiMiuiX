@@ -15,6 +15,7 @@ import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -50,15 +51,15 @@ public class MiuiAlertDialog implements DialogInterface {
     private ConstraintLayout mainDialog;
     TextView alertTitle;
     TextView message;
-    Button positiveButton;
-    Button negativeButton;
-    Button neutralButton;
+    private Button positiveButton;
+    private Button negativeButton;
+    private Button neutralButton;
     LinearLayout buttonView;
     View endView;
     RecyclerView recyclerView;
-    EditText editText;
-    TextView editTextTip;
-    ImageView editImage;
+    private EditText editText;
+    private TextView editTextTip;
+    private ImageView editImage;
     private ConstraintLayout editLayout;
     boolean isDropDown = false;
     private GradientDrawable customRadius;
@@ -104,7 +105,13 @@ public class MiuiAlertDialog implements DialogInterface {
             public void dismiss() {
                 if (!isShowing()) return;
                 if (itemsChangeListener != null) {
-                    itemsChangeListener.onResult(items, listAdapter.booleanArray);
+                    ArrayList<CharSequence> result = new ArrayList<>();
+                    for (int i = 0; i < items.size(); i++) {
+                        if (listAdapter.booleanArray.get(i)) {
+                            result.add(items.get(i));
+                        }
+                    }
+                    itemsChangeListener.onResult(result, items, listAdapter.booleanArray);
                 }
                 EditText edit = getVisibleEditText();
                 if (edit != null) {
@@ -130,7 +137,7 @@ public class MiuiAlertDialog implements DialogInterface {
         WindowManager.LayoutParams params = window.getAttributes();
         Point windowPoint = MiuiXUtils.getScreenSize(context);
         params.verticalMargin = (MiuiXUtils.sp2px(context, 16) * 1.0f) / windowPoint.y;
-        params.width = MiuiXUtils.sp2px(context, 360);
+        params.width = MiuiXUtils.isVerticalScreen(context) ? (int) (windowPoint.x / 1.08) : (int) (windowPoint.x / 2.0);
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setAttributes(params);
         window.setWindowAnimations(R.style.Animation_Dialog);
@@ -208,13 +215,15 @@ public class MiuiAlertDialog implements DialogInterface {
         return this;
     }
 
-    public MiuiAlertDialog setCustomView(View view) {
+    public MiuiAlertDialog setCustomView(View view, CustomViewCallBack viewCallBack) {
+        this.viewCallBack = viewCallBack;
         customView = view;
         customViewId = 0;
         return this;
     }
 
-    public MiuiAlertDialog setCustomView(int viewId) {
+    public MiuiAlertDialog setCustomView(int viewId, CustomViewCallBack viewCallBack) {
+        this.viewCallBack = viewCallBack;
         customViewId = viewId;
         customView = null;
         return this;
@@ -225,11 +234,6 @@ public class MiuiAlertDialog implements DialogInterface {
             return customView;
         else
             return LayoutInflater.from(context).inflate(customViewId, customLayout, false);
-    }
-
-    public MiuiAlertDialog setCustomViewCallBack(CustomViewCallBack viewCallBack) {
-        this.viewCallBack = viewCallBack;
-        return this;
     }
 
     public CustomViewCallBack getCustomViewCallBack() {
@@ -549,7 +553,8 @@ public class MiuiAlertDialog implements DialogInterface {
         params.topMargin = MiuiXUtils.sp2px(context, 25);
         customLayout.setLayoutParams(params);
 
-        viewCallBack.onCustomViewCreate(view);
+        if (viewCallBack != null)
+            viewCallBack.onCustomViewCreate(view);
 
         editLayout.setVisibility(View.GONE);
         recyclerView.setVisibility(View.GONE);
@@ -693,6 +698,7 @@ public class MiuiAlertDialog implements DialogInterface {
             checkState(holder, position);
 
             holder.switchView.setOnCheckedChangeListener(null);
+            holder.switchView.setOnHoverListener(null);
             holder.switchView.setChecked(isChecked);
 
             holder.switchView.setOnCheckedChangeListener((b, i) -> {
@@ -703,6 +709,20 @@ public class MiuiAlertDialog implements DialogInterface {
                 if (listener != null) listener.onClick(dialog, s, position);
                 if (!dialog.isMultiSelect)
                     dialog.dismiss();
+            });
+            holder.switchView.setOnHoverListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_HOVER_MOVE -> {
+                        holder.mainLayout.setBackgroundResource(R.color.touch_down);
+                    }
+                    case MotionEvent.ACTION_HOVER_EXIT -> {
+                        checkState(holder, position);
+                    }
+                    default -> {
+                        return false;
+                    }
+                }
+                return true;
             });
         }
 
@@ -761,7 +781,7 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
-    /** @noinspection ClassCanBeRecord*/
+    /** @noinspection ClassCanBeRecord */
     private static class ActivityLifecycle implements Application.ActivityLifecycleCallbacks {
         private final MiuiAlertDialog dialog;
 

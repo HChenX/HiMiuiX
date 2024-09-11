@@ -30,7 +30,6 @@ public class MiuiEditTextPreference extends MiuiPreference {
     private EditText editText;
     private TextView tipText;
     private ImageView imageView;
-    private CharSequence tip;
     private CharSequence hint;
     private Drawable drawable;
     private TextWatcher watcher;
@@ -38,48 +37,33 @@ public class MiuiEditTextPreference extends MiuiPreference {
     private View.OnClickListener imageClickListener;
 
     public MiuiEditTextPreference(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     @SuppressLint("RestrictedApi")
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        setLayoutResource(R.layout.miuix_edit);
+    public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiEditTextPreference, defStyleAttr, defStyleRes)) {
-            tip = array.getString(R.styleable.MiuiPreference_tip);
             hint = TypedArrayUtils.getString(array, R.styleable.MiuiEditTextPreference_hint, R.styleable.MiuiEditTextPreference_android_hint);
+            type = array.getInt(R.styleable.MiuiEditTextPreference_android_inputType, -1);
         }
-        if (tip == null) tip = getTitle();
     }
 
-    public void setTip(@StringRes int tipRes) {
-        setTip(context.getText(tipRes));
-    }
-
-    public void setTip(CharSequence tip) {
-        this.tip = tip;
-        setTitle(tip);
-        notifyChanged();
-    }
-
-    public CharSequence getTip() {
-        return tip;
+    @Override
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        setLayoutResource(R.layout.miuix_edit);
     }
 
     public void setHint(@StringRes int hintRes) {
-        setTip(context.getText(hintRes));
+        setHint(getContext().getText(hintRes));
     }
 
     public void setHint(CharSequence hint) {
@@ -97,7 +81,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
     }
 
     public void setImage(@DrawableRes int drawableRes) {
-        setImage(AppCompatResources.getDrawable(context, drawableRes));
+        setImage(AppCompatResources.getDrawable(getContext(), drawableRes));
     }
 
     public void setImage(Drawable drawable) {
@@ -130,9 +114,9 @@ public class MiuiEditTextPreference extends MiuiPreference {
         imageView = holder.itemView.findViewById(R.id.edit_image);
 
         tipText.setVisibility(View.GONE);
-        if (tip != null) {
+        if (getTitle() != null) {
             tipText.setVisibility(View.VISIBLE);
-            tipText.setText(tip);
+            tipText.setText(getTitle());
         }
         if (hint != null) editText.setHint(hint);
         else editText.setHint("请输入");
@@ -154,7 +138,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
             if (watcher != null) {
                 editText.addTextChangedListener(watcher);
             }
-            
+
             if (type != -1) editText.setInputType(type);
             else editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
@@ -177,7 +161,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
     }
 
     private void hideInputIfNeed() {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible()) imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 }

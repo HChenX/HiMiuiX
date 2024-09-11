@@ -21,30 +21,26 @@ import androidx.preference.PreferenceViewHolder;
 
 import java.util.ArrayList;
 
-/** @noinspection FieldCanBeLocal */
 public class MiuiPreference extends Preference {
-    String TAG = "MiuiPreference";
-    ConstraintLayout mainLayout;
-    ConstraintLayout textConstraint;
-    ConstraintLayout onlyTextConstraint;
-    Context context;
-    ImageView icon;
-    View startView;
-    TextView tittle;
-    TextView onlyTittle;
-    TextView summary;
-    TextView tipView;
-    ImageView arrowRight;
-    String tip = null;
-    boolean loadArrowRight;
+    protected String TAG = "MiuiPreference";
+    private ConstraintLayout mainLayout;
+    private ConstraintLayout textConstraint;
+    private ConstraintLayout onlyTextConstraint;
+    private ImageView iconView;
+    private View startView;
+    private TextView tittleView;
+    private TextView onlyTittleView;
+    private TextView summaryView;
+    private TextView tipView;
+    private ImageView arrowRightView;
+    private String tipText = null;
     private int mViewId = 0;
     private String mDependencyKey;
-    private ArrayList<MiuiPreference> mDependents = new ArrayList<>();
+    private ArrayList<MiuiPreference> mDependents = null;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
-        @SuppressLint("RestrictedApi")
         @Override
         public void onClick(View v) {
-            customClick(v);
+            miuiPrefClick(v);
         }
     };
 
@@ -62,20 +58,128 @@ public class MiuiPreference extends Preference {
 
     public MiuiPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        this.context = getContext();
         init(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    // 一些初始化操作
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_preference);
         try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference,
                 defStyleAttr, defStyleRes)) {
-            tip = typedArray.getString(R.styleable.MiuiPreference_tip);
+            tipText = typedArray.getString(R.styleable.MiuiPreference_tip);
         }
     }
 
     public void setViewId(int viewId) {
         mViewId = viewId;
+    }
+
+    private int textHeight = -1;
+
+    @Override
+    @SuppressLint("ClickableViewAccessibility")
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
+        mainLayout = (ConstraintLayout) holder.itemView;
+        mainLayout.setOnClickListener(null);
+        mainLayout.setOnTouchListener(null);
+        mainLayout.setBackground(null);
+        mainLayout.setOnClickListener(mClickListener);
+        mainLayout.setId(mViewId);
+
+        startView = holder.findViewById(R.id.pref_start);
+        iconView = (ImageView) holder.findViewById(R.id.prefs_icon);
+        tittleView = (TextView) holder.findViewById(R.id.prefs_text);
+        onlyTittleView = (TextView) holder.findViewById(R.id.prefs_only_text);
+        summaryView = (TextView) holder.findViewById(R.id.prefs_summary);
+        tipView = (TextView) holder.findViewById(R.id.pref_tip);
+        arrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
+        textConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_text_constraint);
+        onlyTextConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_only_text_constraint);
+
+        if (useSummary()) {
+            setVisibility(true);
+            tittleView.setText(getTitle());
+            summaryView.setText(getSummary());
+            summaryView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    summaryView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    if (textHeight == -1) textHeight = summaryView.getHeight();
+
+                    int lineHeight = summaryView.getLineHeight();
+                    int lineCount = summaryView.getLineCount();
+                    int totalHeight = lineHeight * lineCount;
+
+                    if (totalHeight > textHeight) {
+                        ViewGroup.LayoutParams params = textConstraint.getLayoutParams();
+                        params.height = MiuiXUtils.sp2px(getContext(), MiuiXUtils.px2sp(getContext(), (float) (totalHeight + textHeight / 1.85)));
+                        textConstraint.setLayoutParams(params);
+                    }
+                }
+            });
+        } else {
+            setVisibility(false);
+            onlyTittleView.setText(getTitle());
+        }
+        loadArrowRight();
+        loadIcon(getIcon());
+        loadTipView();
+        setColor();
+        if (isEnabled()) {
+            mainLayout.setOnTouchListener(MiuiPreference.this::onTouch);
+            mainLayout.setOnHoverListener(MiuiPreference.this::onHover);
+        }
+        mainLayout.setClickable(isSelectable());
+        mainLayout.setFocusable(isSelectable());
+        holder.setDividerAllowedAbove(false);
+        holder.setDividerAllowedBelow(false);
+
+        if (getShouldDisableView()) {
+            setEnabledStateOnViews(mainLayout, isEnabled());
+        } else {
+            setEnabledStateOnViews(mainLayout, true);
+        }
+    }
+
+    private void setEnabledStateOnViews(@NonNull View v, boolean enabled) {
+        v.setEnabled(enabled);
+
+        if (v instanceof ViewGroup vg) {
+            for (int i = vg.getChildCount() - 1; i >= 0; i--) {
+                setEnabledStateOnViews(vg.getChildAt(i), enabled);
+            }
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void miuiPrefClick(View v) {
+        performClick(v);
+        if (!isEnabled() || !isSelectable())
+            return;
+        onClick(v);
+    }
+
+    protected void onClick(View view) {
+    }
+
+    protected boolean useSummary() {
+        return getSummary() != null;
+    }
+
+    protected ConstraintLayout getMiuiPrefMainLayout() {
+        return mainLayout;
+    }
+
+    protected TextView getSummaryView() {
+        return summaryView;
+    }
+
+    protected ImageView getArrowRightView() {
+        return arrowRightView;
+    }
+
+    protected boolean disableArrowRight() {
+        return false;
     }
 
     @Override
@@ -84,15 +188,10 @@ public class MiuiPreference extends Preference {
     }
 
     @Override
-    protected void notifyChanged() {
-        super.notifyChanged();
-        onDependencyChange();
-    }
-
-    @Override
     public void onDetached() {
         unregisterDependency();
-        InvokeUtils.setField(this, "mWasDetached", true);
+        InvokeUtils.setField(this,
+                "mWasDetached", true);
     }
 
     @Override
@@ -103,7 +202,8 @@ public class MiuiPreference extends Preference {
     @Override
     public void setDependency(@Nullable String dependencyKey) {
         unregisterDependency();
-        InvokeUtils.setField(this, "mDependencyKey", dependencyKey);
+        InvokeUtils.setField(this,
+                "mDependencyKey", dependencyKey);
         registerDependency();
     }
 
@@ -113,7 +213,7 @@ public class MiuiPreference extends Preference {
         MiuiPreference preference = findPreferenceInHierarchy(mDependencyKey);
         if (preference != null) {
             if (preference.mDependents == null) preference.mDependents = new ArrayList<>();
-            setVisible(preference.shouldDisableDependents());
+            setVisible(!preference.shouldDisableDependents());
             onDependencyChanged(this, preference.shouldDisableDependents());
             preference.mDependents.add(this);
         } else {
@@ -122,10 +222,17 @@ public class MiuiPreference extends Preference {
         }
     }
 
-    private void onDependencyChange() {
-        if (mDependents.isEmpty()) return;
-        for (MiuiPreference preference : mDependents) {
-            preference.setVisible(shouldDisableDependents());
+    @Override
+    public void notifyDependencyChange(boolean disableDependents) {
+        final ArrayList<MiuiPreference> dependents = mDependents;
+
+        if (dependents == null) {
+            return;
+        }
+
+        for (MiuiPreference preference : dependents) {
+            preference.setVisible(!shouldDisableDependents());
+            preference.onDependencyChanged(this, disableDependents);
         }
     }
 
@@ -137,157 +244,101 @@ public class MiuiPreference extends Preference {
             preference.mDependents.remove(this);
     }
 
-    int textHeight = -1;
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        mainLayout = (ConstraintLayout) holder.itemView;
-        mainLayout.setOnClickListener(null);
-        mainLayout.setOnTouchListener(null);
-        mainLayout.setBackground(null);
-        mainLayout.setOnClickListener(mClickListener);
-        mainLayout.setId(mViewId);
-
-        startView = holder.findViewById(R.id.pref_start);
-        icon = (ImageView) holder.findViewById(R.id.prefs_icon);
-        tittle = (TextView) holder.findViewById(R.id.prefs_text);
-        onlyTittle = (TextView) holder.findViewById(R.id.prefs_only_text);
-        summary = (TextView) holder.findViewById(R.id.prefs_summary);
-        tipView = (TextView) holder.findViewById(R.id.pref_tip);
-        arrowRight = (ImageView) holder.findViewById(R.id.pref_arrow_right);
-        textConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_text_constraint);
-        onlyTextConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_only_text_constraint);
-
-        if (needSummary()) {
-            setVisibility(true);
-            tittle.setText(getTitle());
-            summary.setText(getSummary());
-            summary.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    summary.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    if (textHeight == -1) textHeight = summary.getHeight();
-
-                    int lineHeight = summary.getLineHeight();
-                    int lineCount = summary.getLineCount();
-                    int totalHeight = lineHeight * lineCount;
-
-                    if (totalHeight > textHeight) {
-                        ViewGroup.LayoutParams params = textConstraint.getLayoutParams();
-                        params.height = MiuiXUtils.sp2px(context, MiuiXUtils.px2sp(context, (float) (totalHeight + textHeight / 1.85)));
-                        textConstraint.setLayoutParams(params);
-                    }
-                }
-            });
-        } else {
-            setVisibility(false);
-            onlyTittle.setText(getTitle());
-        }
-        if (loadArrowRight) loadArrowRight();
-        loadIcon(getIcon());
-        loadTipView();
-        setColor();
-        if (isEnabled())
-            mainLayout.setOnTouchListener(MiuiPreference.this::onTouch);
-        mainLayout.setClickable(isSelectable());
-        mainLayout.setFocusable(isSelectable());
-        holder.setDividerAllowedAbove(false);
-        holder.setDividerAllowedBelow(false);
-    }
-
-    @SuppressLint("RestrictedApi")
-    private void customClick(View v) {
-        performClick(v);
-        if (!isEnabled() || !isSelectable())
-            return;
-        onClick(v);
-    }
-
-    protected void onClick(View view) {
-    }
-
-    protected boolean needSummary() {
-        return getSummary() != null;
-    }
-
     private void setColor() {
         int tc, sc;
         if (isEnabled()) {
-            tc = context.getColor(R.color.tittle);
-            sc = context.getColor(R.color.summary);
+            tc = getContext().getColor(R.color.tittle);
+            sc = getContext().getColor(R.color.summary);
         } else {
-            tc = context.getColor(R.color.tittle_d);
-            sc = context.getColor(R.color.summary_d);
+            tc = getContext().getColor(R.color.tittle_d);
+            sc = getContext().getColor(R.color.summary_d);
         }
-        tittle.setTextColor(tc);
-        onlyTittle.setTextColor(tc);
-        summary.setTextColor(sc);
+        tittleView.setTextColor(tc);
+        onlyTittleView.setTextColor(tc);
+        summaryView.setTextColor(sc);
         if (tipView != null)
             tipView.setTextColor(sc);
     }
 
     private void loadTipView() {
-        if (tipView != null)
-            if (tip == null) {
+        if (tipView != null) {
+            if (tipText == null) {
                 tipView.setVisibility(View.GONE);
             } else {
                 tipView.setVisibility(View.VISIBLE);
-                tipView.setText(tip);
+                tipView.setText(tipText);
             }
+        }
     }
 
     private void loadArrowRight() {
-        if (arrowRight == null)
-            return;
-        arrowRight.setVisibility(View.GONE);
+        if (arrowRightView == null) return;
+        arrowRightView.setVisibility(View.GONE);
+        if (disableArrowRight()) return;
         if (getFragment() != null || getOnPreferenceChangeListener() != null ||
                 getOnPreferenceClickListener() != null || getIntent() != null) {
-            arrowRight.setVisibility(View.VISIBLE);
-            if (!isEnabled())
-                arrowRight.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(),
-                        R.drawable.ic_preference_arrow_right_disable, context.getTheme()));
-            else arrowRight.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(),
-                    R.drawable.ic_preference_arrow_right, context.getTheme()));
+            arrowRightView.setVisibility(View.VISIBLE);
+            if (isEnabled())
+                arrowRightView.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(),
+                        R.drawable.ic_preference_arrow_right, getContext().getTheme()));
+            else
+                arrowRightView.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(),
+                        R.drawable.ic_preference_arrow_right_disable, getContext().getTheme()));
         }
     }
 
     private void loadIcon(Drawable drawable) {
-        if (icon != null)
+        if (iconView != null)
             if (drawable != null) {
                 startView.setVisibility(View.GONE);
-                icon.setVisibility(View.VISIBLE);
-                icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                icon.setImageDrawable(drawable);
+                iconView.setVisibility(View.VISIBLE);
+                iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                iconView.setImageDrawable(drawable);
             } else {
-                icon.setVisibility(View.GONE);
+                iconView.setVisibility(View.GONE);
                 startView.setVisibility(View.VISIBLE);
             }
     }
 
     private void setVisibility(boolean b) {
         if (b) {
-            tittle.setVisibility(View.VISIBLE);
-            summary.setVisibility(View.VISIBLE);
-            onlyTittle.setVisibility(View.GONE);
+            tittleView.setVisibility(View.VISIBLE);
+            summaryView.setVisibility(View.VISIBLE);
             textConstraint.setVisibility(View.VISIBLE);
+            onlyTittleView.setVisibility(View.GONE);
             onlyTextConstraint.setVisibility(View.GONE);
         } else {
-            tittle.setVisibility(View.GONE);
-            summary.setVisibility(View.GONE);
-            onlyTittle.setVisibility(View.VISIBLE);
+            tittleView.setVisibility(View.GONE);
+            summaryView.setVisibility(View.GONE);
             textConstraint.setVisibility(View.GONE);
+            onlyTittleView.setVisibility(View.VISIBLE);
             onlyTextConstraint.setVisibility(View.VISIBLE);
         }
     }
 
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
-        if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundResource(R.color.touch_down);
-        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundResource(R.color.touch_up);
-        }
+        // Log.i(TAG, "onTouch finger: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
+        //         + " action: " + action);
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
+            if (action == MotionEvent.ACTION_DOWN) {
+                v.setBackgroundResource(R.color.touch_down);
+            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                v.setBackgroundResource(R.color.touch_up);
+            }
+        return false;
+    }
+
+    public boolean onHover(View v, MotionEvent event) {
+        int action = event.getAction();
+        // Log.i(TAG, "onTouch mouse: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
+        //         + " action: " + action);
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
+            if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                v.setBackgroundResource(R.color.touch_down);
+            } else if (action == MotionEvent.ACTION_HOVER_EXIT) {
+                v.setBackgroundResource(R.color.touch_up);
+            }
         return false;
     }
 }

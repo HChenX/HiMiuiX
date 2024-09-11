@@ -24,7 +24,7 @@
     <color name="switch_on">#267AF7</color>
     <color name="switch_off">#333333</color>
     <color name="touch_down">#262626</color>
-    <color name="touch_up">@color/black</color>
+    <color name="touch_up">@android:color/transparent</color>
     <color name="white_or_black">@color/black</color>
     <color name="list_text">#EAEAEA</color>
     <color name="list_choose_text">#267AF7</color>

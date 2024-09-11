@@ -72,7 +72,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_seekbar);
         try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MiuiSeekBarPreference,
                 defStyleAttr, defStyleRes)) {
@@ -125,7 +125,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        mainLayout = (ConstraintLayout) holder.itemView;
+        ConstraintLayout mainLayout = (ConstraintLayout) holder.itemView;
         seekBar = mainLayout.findViewById(R.id.seekbar);
         numberView = mainLayout.findViewById(R.id.seekbar_number);
 
@@ -145,6 +145,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     private View view;
+    private MiuiAlertDialog miuiAlertDialog;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -157,6 +158,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         } else if (action == MotionEvent.ACTION_CANCEL) {
             v.setBackgroundResource(R.color.touch_up);
         } else if (action == MotionEvent.ACTION_UP) {
+            if (miuiAlertDialog != null && miuiAlertDialog.isShowing())
+                return false;
             v.setBackgroundResource(R.color.touch_down);
             view = v;
             CharSequence def;
@@ -165,10 +168,9 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             else
                 def = String.valueOf(mSeekBarValue);
 
-            new MiuiAlertDialog(getContext())
+            miuiAlertDialog = new MiuiAlertDialog(getContext())
                     .setTitle(getTitle())
                     .setMessage(getSummary())
-                    .setPositiveButton("确定", null)
                     .setHapticFeedbackEnabled(true)
                     .setEditText(def, true, new DialogInterface.TextWatcher() {
                         @Override
@@ -182,10 +184,11 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                         }
                     })
                     .setInputType(InputType.TYPE_CLASS_NUMBER)
+                    .setPositiveButton("确定", null)
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->
-                            view.setBackgroundResource(R.color.touch_up))
-                    .show();
+                            view.setBackgroundResource(R.color.touch_up));
+            miuiAlertDialog.show();
         }
         return false;
     }

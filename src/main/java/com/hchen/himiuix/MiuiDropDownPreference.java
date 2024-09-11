@@ -62,7 +62,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     @Override
     @SuppressLint({"RestrictedApi", "PrivateResource"})
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
             mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
@@ -73,7 +73,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
                     R.styleable.MiuiDropDownPreference_android_defaultValue);
             showOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
         }
-        loadArrowRight = false;
         setPersistent(true);
     }
 
@@ -85,7 +84,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     public void setEntries(@ArrayRes int entriesResId) {
-        setEntries(context.getResources().getTextArray(entriesResId));
+        setEntries(getContext().getResources().getTextArray(entriesResId));
     }
 
     public CharSequence[] getEntries() {
@@ -98,7 +97,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     public void setEntryValues(@ArrayRes int entryValuesResId) {
-        setEntryValues(context.getResources().getTextArray(entryValuesResId));
+        setEntryValues(getContext().getResources().getTextArray(entryValuesResId));
     }
 
     public CharSequence[] getEntryValues() {
@@ -168,14 +167,22 @@ public class MiuiDropDownPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        getArrowRightView().setVisibility(View.VISIBLE);
         if (isEnabled())
-            arrowRight.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_preference_arrow_up_down));
+            getArrowRightView().setImageDrawable(
+                    AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_arrow_up_down));
         else
-            arrowRight.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_preference_disable_arrow_up_down));
+            getArrowRightView().setImageDrawable(
+                    AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_disable_arrow_up_down));
     }
 
     @Override
-    protected boolean needSummary() {
+    protected boolean disableArrowRight() {
+        return true;
+    }
+
+    @Override
+    protected boolean useSummary() {
         return getSummary() != null || showOnSummary;
     }
 
@@ -259,23 +266,23 @@ public class MiuiDropDownPreference extends MiuiPreference {
     boolean showRight;
 
     private void showDialogAtPosition(float x, float y) {
-        screenHeight = MiuiXUtils.getScreenSize(context).y;
-        screenWidth = MiuiXUtils.getScreenSize(context).x;
+        screenHeight = MiuiXUtils.getScreenSize(getContext()).y;
+        screenWidth = MiuiXUtils.getScreenSize(getContext()).x;
 
         int[] location = new int[2];
-        mainLayout.getLocationOnScreen(location);
+        getMiuiPrefMainLayout().getLocationOnScreen(location);
         viewX = location[0];
         viewY = location[1];
-        viewWidth = mainLayout.getWidth();
-        viewHeight = mainLayout.getHeight();
+        viewWidth = getMiuiPrefMainLayout().getWidth();
+        viewHeight = getMiuiPrefMainLayout().getHeight();
 
         dialogHeight = calculateHeight();
         int spaceBelow = screenHeight - (viewY + viewHeight);
         boolean showBelow = (spaceBelow - dialogHeight) > screenHeight / 8;
         showRight = x > ((float) (viewX + viewWidth) / 2);
 
-        showX = MiuiXUtils.dp2px(context, 25);
-        showY = showBelow ? viewY + MiuiXUtils.sp2px(context, 5) : viewY - dialogHeight - MiuiXUtils.sp2px(context, 30);
+        showX = MiuiXUtils.dp2px(getContext(), 25);
+        showY = showBelow ? viewY + MiuiXUtils.sp2px(getContext(), 5) : viewY - dialogHeight - MiuiXUtils.sp2px(getContext(), 30);
 
         initDialog();
         calculateLayout();
@@ -310,21 +317,21 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     private int calculateWidth() {
-        Point point = MiuiXUtils.getScreenSize(context);
-        return MiuiXUtils.isVerticalScreen(context) ? (int) (point.x / 2.1) : (int) (point.x / 3.4);
+        Point point = MiuiXUtils.getScreenSize(getContext());
+        return MiuiXUtils.isVerticalScreen(getContext()) ? (int) (point.x / 2.1) : (int) (point.x / 3.4);
     }
 
     private int calculateHeight() {
         if (mEntryValues != null) {
             int count = mEntryValues.length;
-            int height = (MiuiXUtils.sp2px(context, 56) * (count)) + MiuiXUtils.sp2px(context, 20);
-            int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.1);
+            int height = (MiuiXUtils.sp2px(getContext(), 56) * (count)) + MiuiXUtils.sp2px(getContext(), 20);
+            int maxHeight = MiuiXUtils.isVerticalScreen(getContext()) ? MiuiXUtils.getScreenSize(getContext()).y / 3 : (int) (MiuiXUtils.getScreenSize(getContext()).y / 2.1);
             return Math.min(height, maxHeight);
         } else return WRAP_CONTENT;
     }
 
     private void initDialog() {
-        dialog = new MiuiAlertDialog(context);
+        dialog = new MiuiAlertDialog(getContext());
         dialog.alertTitle.setVisibility(View.GONE); // 隐藏标题
         dialog.message.setVisibility(View.GONE); // 隐藏信息
         dialog.buttonView.setVisibility(View.GONE); // 隐藏按钮布局
@@ -332,7 +339,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         dialog.isDropDown = true;
         dialog.setHapticFeedbackEnabled(true);
         dialog.setWindowAnimations(R.style.Animation_Dialog_Center);
-        dialog.setCornersRadius(MiuiXUtils.dp2px(context, 20));
+        dialog.setCornersRadius(MiuiXUtils.dp2px(getContext(), 20));
         dialog.listAdapter.booleanArray = booleanArray;
         dialog.setItems(mEntriesList, new DialogInterface.OnItemsChangeListener() {
             @Override

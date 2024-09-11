@@ -16,11 +16,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiCardPreference extends MiuiPreference {
-    ConstraintLayout layout;
-    ConstraintLayout textLayout;
-    TextView tittleView;
-    TextView summaryView;
-    ImageView imageView;
+    private ConstraintLayout layout;
+    private TextView tittleView;
+    private TextView summaryView;
+    private ImageView imageView;
     public float tittleSize;
     public float summarySize;
     public int backgroundColor;
@@ -48,7 +47,7 @@ public class MiuiCardPreference extends MiuiPreference {
     }
 
     @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_card);
         setSelectable(false);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiCardPreference,
@@ -68,7 +67,6 @@ public class MiuiCardPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         layout = (ConstraintLayout) holder.itemView;
-        textLayout = layout.findViewById(R.id.card_text_view);
         tittleView = layout.findViewById(R.id.card_tittle);
         summaryView = layout.findViewById(R.id.card_summary);
         imageView = layout.findViewById(R.id.card_image);
@@ -97,13 +95,13 @@ public class MiuiCardPreference extends MiuiPreference {
 
     private void setIcon() {
         if (iconArrowRight) {
-            Drawable drawable = AppCompatResources.getDrawable(context, R.drawable.ic_preference_arrow_right);
+            Drawable drawable = AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_arrow_right);
             assert drawable != null;
             drawable.setTint(iconArrowRightColor);
             imageView.setImageDrawable(drawable);
             imageView.setVisibility(View.VISIBLE);
         } else if (iconCancel) {
-            Drawable drawable = AppCompatResources.getDrawable(context, R.drawable.miuix_button_cancel);
+            Drawable drawable = AppCompatResources.getDrawable(getContext(), R.drawable.miuix_button_cancel);
             assert drawable != null;
             drawable.setTint(iconCancelColor);
             imageView.setImageDrawable(drawable);

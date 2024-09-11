@@ -11,6 +11,8 @@
         <attr name="summaryOff" format="string" />
         <attr name="android:summaryOn" />
         <attr name="android:summaryOff" />
+        <attr name="disableDependentsState" />
+        <attr name="android:disableDependentsState" />
     </declare-styleable>
 
     <declare-styleable name="MiuiTextView">
@@ -61,6 +63,7 @@
     <declare-styleable name="MiuiEditTextPreference">
         <attr name="hint" format="string" />
         <attr name="android:hint" />
+        <attr name="android:inputType" />
     </declare-styleable>
 
     <declare-styleable name="SpringBackLayout">

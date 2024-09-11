@@ -15,7 +15,7 @@ public interface DialogInterface {
     interface OnItemsChangeListener {
         void onClick(DialogInterface dialogInterface, CharSequence item, int which);
 
-        default void onResult(ArrayList<CharSequence> items, SparseBooleanArray booleanArray) {
+        default void onResult(ArrayList<CharSequence> selectedItems, ArrayList<CharSequence> items, SparseBooleanArray booleanArray) {
         }
     }
 

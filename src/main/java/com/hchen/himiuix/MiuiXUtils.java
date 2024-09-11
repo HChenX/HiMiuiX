@@ -8,6 +8,9 @@ import android.view.Display;
 import android.view.WindowManager;
 
 public class MiuiXUtils {
+    private static final Point windowSizePoint = new Point();
+    private static final Point screenSizePoint = new Point();
+
     // --------------- 获取窗口参数 --------------
     public static WindowManager getWindowManager(Context context) {
         return (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -33,9 +36,8 @@ public class MiuiXUtils {
     }
 
     public static Point getWindowSize(Context context) {
-        Point point = new Point();
-        getWindowSize(context, point);
-        return point;
+        getWindowSize(context, windowSizePoint);
+        return windowSizePoint;
     }
 
     @Deprecated
@@ -48,9 +50,8 @@ public class MiuiXUtils {
     }
 
     public static Point getScreenSize(Context context) {
-        Point point = new Point();
-        getScreenSize(getWindowManager(context), point);
-        return point;
+        getScreenSize(getWindowManager(context), screenSizePoint);
+        return screenSizePoint;
     }
 
     public static void getScreenSize(WindowManager windowManager, Point point) {

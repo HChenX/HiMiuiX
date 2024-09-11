@@ -27,7 +27,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="touch_down">#EBEBEB</color> <!--按下时的阴影颜色-->
-    <color name="touch_up">@color/white</color> <!--抬起后恢复的颜色-->
+    <color name="touch_up">@android:color/transparent</color> <!--抬起后恢复的颜色-->
     <color name="white_or_black">@color/white</color>
     <color name="list_text">#000000</color>
     <color name="list_choose_text">#000000</color> <!--列表项目被选择时字体颜色-->
