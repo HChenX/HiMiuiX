@@ -113,7 +113,8 @@ public class MiuiCardPreference extends MiuiPreference {
                     viewGroup.removeView(view);
                 customLayout.addView(view);
             }
-            customViewCallBack.onCustomViewCreate(view);
+            if (customViewCallBack != null)
+                customViewCallBack.onCustomViewCreate(view);
         }
     }
 
