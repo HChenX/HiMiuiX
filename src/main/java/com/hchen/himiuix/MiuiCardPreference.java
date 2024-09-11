@@ -5,7 +5,9 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,18 +19,21 @@ import androidx.preference.PreferenceViewHolder;
 
 public class MiuiCardPreference extends MiuiPreference {
     private ConstraintLayout layout;
+    private ConstraintLayout customLayout;
     private TextView tittleView;
     private TextView summaryView;
     private ImageView imageView;
-    public float tittleSize;
-    public float summarySize;
-    public int backgroundColor;
-    public int tittleColor;
-    public int summaryColor;
-    public boolean iconArrowRight;
-    public boolean iconCancel;
-    public int iconArrowRightColor;
-    public int iconCancelColor;
+    private float tittleSize;
+    private float summarySize;
+    private int backgroundColor;
+    private int tittleColor;
+    private int summaryColor;
+    private boolean iconArrowRight;
+    private boolean iconCancel;
+    private int iconArrowRightColor;
+    private int iconCancelColor;
+    private int customViewId;
+    private CustomViewCallBack customViewCallBack;
 
     public MiuiCardPreference(@NonNull Context context) {
         super(context);
@@ -61,12 +66,14 @@ public class MiuiCardPreference extends MiuiPreference {
             iconCancel = array.getBoolean(R.styleable.MiuiCardPreference_iconCancel, false);
             iconArrowRightColor = array.getColor(R.styleable.MiuiCardPreference_iconArrowRightColor, context.getColor(R.color.arrow_right));
             iconCancelColor = array.getColor(R.styleable.MiuiCardPreference_iconCancelColor, context.getColor(R.color.cancel_background));
+            customViewId = array.getResourceId(R.styleable.MiuiCardPreference_customView, 0);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         layout = (ConstraintLayout) holder.itemView;
+        customLayout = layout.findViewById(R.id.card_custom_view);
         tittleView = layout.findViewById(R.id.card_tittle);
         summaryView = layout.findViewById(R.id.card_summary);
         imageView = layout.findViewById(R.id.card_image);
@@ -87,10 +94,27 @@ public class MiuiCardPreference extends MiuiPreference {
             summaryView.setText(getSummary());
             summaryView.setVisibility(View.VISIBLE);
         }
+        loadCustomLayout();
         Drawable drawable = layout.getBackground();
         drawable.setTint(backgroundColor);
         layout.setBackground(drawable);
         setIcon();
+    }
+
+    private void loadCustomLayout() {
+        if (customViewId == 0) {
+            customLayout.setVisibility(View.GONE);
+        } else {
+            customLayout.setVisibility(View.VISIBLE);
+            View view = LayoutInflater.from(getContext()).inflate(customViewId, customLayout, false);
+            ViewGroup viewGroup = (ViewGroup) view.getParent();
+            if (viewGroup != customLayout) {
+                if (viewGroup != null)
+                    viewGroup.removeView(view);
+                customLayout.addView(view);
+            }
+            customViewCallBack.onCustomViewCreate(view);
+        }
     }
 
     private void setIcon() {
@@ -112,6 +136,10 @@ public class MiuiCardPreference extends MiuiPreference {
         }
     }
 
+    public void customViewCallBack(CustomViewCallBack customViewCallBack) {
+        this.customViewCallBack = customViewCallBack;
+    }
+
     public void setIconClickListener(View.OnClickListener clickListener) {
         if (imageView.getVisibility() == View.VISIBLE) {
             imageView.setOnClickListener(new View.OnClickListener() {
@@ -123,5 +151,9 @@ public class MiuiCardPreference extends MiuiPreference {
                 }
             });
         }
+    }
+
+    public interface CustomViewCallBack {
+        void onCustomViewCreate(View view);
     }
 }

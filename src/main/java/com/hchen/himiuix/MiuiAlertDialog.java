@@ -43,6 +43,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -126,6 +127,10 @@ public class MiuiAlertDialog implements DialogInterface {
             }
 
             public void dismissDialog() {
+                if (weakReference != null) {
+                    weakReference.clear();
+                    weakReference = null;
+                }
                 super.dismiss();
             }
         };
@@ -573,16 +578,24 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
+    private WeakReference<ResultReceiver> weakReference = null;
+
     private void hideInputIfNeed(EditText editText, Runnable runnable) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible(editText)) {
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0,
-                    new ResultReceiver(new Handler(context.getMainLooper())) {
-                        @Override
-                        protected void onReceiveResult(int resultCode, Bundle resultData) {
-                            new Handler(context.getMainLooper()).postDelayed(runnable, 300);
-                        }
-                    });
+            if (weakReference != null && weakReference.get() == null) {
+                weakReference.clear();
+                weakReference = null;
+            }
+            if (weakReference == null) {
+                weakReference = new WeakReference<>(new ResultReceiver(new Handler(context.getMainLooper())) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        new Handler(context.getMainLooper()).postDelayed(runnable, 300);
+                    }
+                });
+            }
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0, weakReference.get());
         }
     }
 

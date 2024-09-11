@@ -49,6 +49,7 @@
         <attr name="summarySize" format="dimension" />
         <attr name="tittleColor" format="color" />
         <attr name="summaryColor" format="color" />
+        <attr name="customView" format="reference" />
         <attr name="backgroundColor" format="color" /> <!--更改卡片背景色-->
         <attr name="iconArrowRight" format="boolean" /> <!--使用向右图标-->
         <attr name="iconCancel" format="boolean" /> <!--使用默认关闭图标-->
