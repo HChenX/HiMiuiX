@@ -332,8 +332,8 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     private void initDialog() {
         dialog = new MiuiAlertDialog(getContext());
-        dialog.alertTitle.setVisibility(View.GONE); // 隐藏标题
-        dialog.message.setVisibility(View.GONE); // 隐藏信息
+        dialog.alertTitleView.setVisibility(View.GONE); // 隐藏标题
+        dialog.messageView.setVisibility(View.GONE); // 隐藏信息
         dialog.buttonView.setVisibility(View.GONE); // 隐藏按钮布局
         dialog.endView.setVisibility(View.GONE); // 隐藏垫底 view
         dialog.isDropDown = true;
