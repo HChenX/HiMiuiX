@@ -73,7 +73,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
                     R.styleable.MiuiDropDownPreference_android_defaultValue);
             showOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
         }
-        setPersistent(true);
     }
 
     public void setEntries(CharSequence[] entries) {
@@ -164,6 +163,17 @@ public class MiuiDropDownPreference extends MiuiPreference {
         }
     }
 
+    private void makeBooleanArray(@NonNull String mValue) {
+        safeCheck();
+        booleanArray.clear();
+        for (int i = 0; i < mEntryValues.length; i++) {
+            if (mEntryValues[i].equals(mValue)) {
+                booleanArray.put(i, true);
+                break;
+            }
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
@@ -192,15 +202,10 @@ public class MiuiDropDownPreference extends MiuiPreference {
         isInitialTime = false;
     }
 
-    private void makeBooleanArray(@NonNull String mValue) {
-        booleanArray.clear();
-        safeCheck();
-        for (int i = 0; i < mEntryValues.length; i++) {
-            if (mEntryValues[i].equals(mValue)) {
-                booleanArray.put(i, true);
-                break;
-            }
-        }
+    @Nullable
+    @Override
+    protected Object onGetDefaultValue(@NonNull TypedArray a, int index) {
+        return a.getString(index);
     }
 
     @Nullable
@@ -228,11 +233,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected void onClick() {
-        super.onClick();
-    }
-
-    @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (!isEnabled()) return false;
         int action = event.getAction();
@@ -254,16 +254,16 @@ public class MiuiDropDownPreference extends MiuiPreference {
         return false;
     }
 
-    int screenHeight;
-    int screenWidth;
-    int viewX;
-    int viewY;
-    int viewWidth;
-    int viewHeight;
-    int dialogHeight;
-    int showX;
-    int showY;
-    boolean showRight;
+    private int screenHeight;
+    private int screenWidth;
+    private int viewX;
+    private int viewY;
+    private int viewWidth;
+    private int viewHeight;
+    private int dialogHeight;
+    private int showX;
+    private int showY;
+    private boolean showRight;
 
     private void showDialogAtPosition(float x, float y) {
         screenHeight = MiuiXUtils.getScreenSize(getContext()).y;
@@ -352,14 +352,15 @@ public class MiuiDropDownPreference extends MiuiPreference {
         });
     }
 
+    // 安全检查
     private void safeCheck() {
-        if (mEntries.length != mEntryValues.length) {
+        if (mEntries.length != mEntryValues.length) { // 元素数与索引数不相等
             throw new RuntimeException("MiuiDropDownPreference: The length of entries must be equal to the length of entryValues!");
         }
-        if (!mEntryValues[0].equals("0")) {
+        if (!mEntryValues[0].equals("0")) { // 不是从零开始的索引
             throw new RuntimeException("MiuiDropDownPreference: EntryValues must start from scratch!");
         }
-        for (int i = 0; i < mEntryValues.length; i++) {
+        for (int i = 0; i < mEntryValues.length; i++) { // 索引必须是连续的数字
             if (!mEntryValues[i].equals(Integer.toString(i))) {
                 throw new RuntimeException("MiuiDropDownPreference: The entryValues must be continuous!");
             }

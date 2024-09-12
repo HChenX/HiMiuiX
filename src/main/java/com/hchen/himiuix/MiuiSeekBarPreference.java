@@ -15,9 +15,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MiuiSeekBarPreference extends MiuiPreference {
-    private SeekBar seekBar;
+    private SeekBar seekBarView;
     private TextView numberView;
     private boolean mTrackingTouch;
     private int mDisplayDividerValue;
@@ -105,7 +106,6 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                 callChangeListener(value);
                 notifyChanged();
             }
-            notifyDependencyChange(shouldDisableDependents());
         }
     }
 
@@ -126,22 +126,22 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         ConstraintLayout mainLayout = (ConstraintLayout) holder.itemView;
-        seekBar = mainLayout.findViewById(R.id.seekbar);
+        seekBarView = mainLayout.findViewById(R.id.seekbar);
         numberView = mainLayout.findViewById(R.id.seekbar_number);
 
         numberView.setVisibility(mShowSeekBarValue ? View.VISIBLE : View.GONE);
-        seekBar.setOnSeekBarChangeListener(changeListener);
-        seekBar.setMax(shouldStep ? stepCount : maxValue);
-        seekBar.setMin(shouldStep ? 0 : minValue);
+        seekBarView.setOnSeekBarChangeListener(changeListener);
+        seekBarView.setMax(shouldStep ? stepCount : maxValue);
+        seekBarView.setMin(shouldStep ? 0 : minValue);
 
         if (mSeekBarIncrement != 0) {
-            seekBar.setKeyProgressIncrement(mSeekBarIncrement);
+            seekBarView.setKeyProgressIncrement(mSeekBarIncrement);
         } else
-            mSeekBarIncrement = seekBar.getKeyProgressIncrement();
+            mSeekBarIncrement = seekBarView.getKeyProgressIncrement();
 
-        seekBar.setProgress(getStepBeforeIfNeed(mSeekBarValue));
+        seekBarView.setProgress(getStepBeforeIfNeed(mSeekBarValue));
         updateLabelValue(mSeekBarValue);
-        seekBar.setEnabled(isEnabled());
+        seekBarView.setEnabled(isEnabled());
     }
 
     private View view;
@@ -180,10 +180,10 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                                 f = Float.parseFloat((String) s) * mDisplayDividerValue;
                             int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
                             setValue(result);
-                            setProgressIfNeed(result);
+                            setProgressIfNeed(getStepBeforeIfNeed(result));
                         }
                     })
-                    .setInputType(InputType.TYPE_CLASS_NUMBER)
+                    .setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
                     .setPositiveButton("确定", null)
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->
@@ -214,7 +214,11 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             if (steps.contains(value)) return;
             throw new RuntimeException("Default value incorrect!" +
                     " It is not one of the available step values!" +
-                    " Available step values: " + steps.toString());
+                    " Available step values: " + (mDisplayDividerValue == -1 ?
+                    steps.toString() :
+                    Arrays.toString(steps.stream().map(integer ->
+                            ((float) integer / (float) mDisplayDividerValue)).toArray())
+            ));
         }
     }
 
@@ -233,9 +237,14 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     private void setProgressIfNeed(int value) {
-        if (value < minValue) value = minValue;
-        if (value > maxValue) value = maxValue;
-        seekBar.setProgress(value);
+        if (shouldStep) {
+            if (value < 0) value = 0;
+            if (value > stepCount) value = stepCount;
+        } else {
+            if (value < minValue) value = minValue;
+            if (value > maxValue) value = maxValue;
+        }
+        seekBarView.setProgress(value);
     }
 
     private void updateLabelValue(int value) {
