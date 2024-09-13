@@ -20,5 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class androidx.preference.Preference
--keep class android.widget.TextView
+-keep class androidx.preference.Preference {
+       private boolean mWasDetached;
+       private java.lang.String mDependencyKey;
+}

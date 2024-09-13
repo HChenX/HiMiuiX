@@ -23,8 +23,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
-import java.util.ArrayList;
-
 public class MiuiEditTextPreference extends MiuiPreference {
     private ConstraintLayout layout;
     private EditText editText;
@@ -129,7 +127,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
         }
 
         editText.setOnFocusChangeListener(null);
-        InvokeUtils.setField(editText, "mListeners", new ArrayList<>()); // 清空防止资源复用
+        editText.removeTextChangedListener(watcher);
         editText.clearFocus();
         if (isEnabled()) {
             if (imageView.getVisibility() != View.GONE) {
