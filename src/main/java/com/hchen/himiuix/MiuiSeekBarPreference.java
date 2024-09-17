@@ -2,6 +2,7 @@ package com.hchen.himiuix;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
@@ -130,6 +131,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         ConstraintLayout mainLayout = (ConstraintLayout) holder.itemView;
         seekBarView = mainLayout.findViewById(R.id.seekbar);
         numberView = mainLayout.findViewById(R.id.seekbar_number);
+        Drawable seekBarDrawable = seekBarView.getProgressDrawable();
 
         numberView.setVisibility(mShowSeekBarValue ? View.VISIBLE : View.GONE);
         seekBarView.setOnSeekBarChangeListener(changeListener);
@@ -140,9 +142,12 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         updateLabelValue(mSeekBarValue);
         seekBarView.setEnabled(isEnabled());
         if (isEnabled()) {
+            seekBarDrawable.setAlpha(255);
             numberView.setTextColor(getContext().getColor(R.color.tittle));
-        } else
+        } else {
+            seekBarDrawable.setAlpha(125);
             numberView.setTextColor(getContext().getColor(R.color.tittle_d));
+        }
     }
 
     private View view;
