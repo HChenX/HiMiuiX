@@ -34,7 +34,8 @@ public class MiuiCardPreference extends MiuiPreference {
     private int iconArrowRightColor;
     private int iconCancelColor;
     private View customView;
-    private CustomViewCallBack customViewCallBack;
+    private OnBindView onBindView;
+    private View.OnClickListener iconClickListener;
 
     public MiuiCardPreference(@NonNull Context context) {
         super(context);
@@ -134,6 +135,7 @@ public class MiuiCardPreference extends MiuiPreference {
         tittleView.setVisibility(View.GONE);
         summaryView.setVisibility(View.GONE);
         imageView.setVisibility(View.GONE);
+        imageView.setOnClickListener(null);
 
         if (getTitle() != null) {
             tittleView.setTextSize(tittleSize);
@@ -151,7 +153,7 @@ public class MiuiCardPreference extends MiuiPreference {
         Drawable drawable = layout.getBackground();
         drawable.setTint(backgroundColor);
         layout.setBackground(drawable);
-        setIcon();
+        loadIcon();
     }
 
     private void loadCustomLayout() {
@@ -165,12 +167,12 @@ public class MiuiCardPreference extends MiuiPreference {
                     viewGroup.removeView(customView);
                 customLayout.addView(customView);
             }
-            if (customViewCallBack != null)
-                customViewCallBack.onCustomViewCreate(customView);
+            if (onBindView != null)
+                onBindView.onBindView(customView);
         }
     }
 
-    private void setIcon() {
+    private void loadIcon() {
         if (iconArrowRight) {
             Drawable drawable = AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_arrow_right);
             assert drawable != null;
@@ -187,26 +189,27 @@ public class MiuiCardPreference extends MiuiPreference {
             imageView.setImageDrawable(getIcon());
             imageView.setVisibility(View.VISIBLE);
         }
-    }
-
-    public void customViewCallBack(CustomViewCallBack customViewCallBack) {
-        this.customViewCallBack = customViewCallBack;
-    }
-
-    public void setIconClickListener(View.OnClickListener clickListener) {
         if (imageView.getVisibility() == View.VISIBLE) {
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (clickListener != null)
-                        clickListener.onClick(v);
-                    v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-                }
-            });
+            imageView.setOnClickListener(iconClickListener);
         }
     }
 
-    public interface CustomViewCallBack {
-        void onCustomViewCreate(View view);
+    public void setCustomViewCallBack(OnBindView onBindView) {
+        this.onBindView = onBindView;
+    }
+
+    public void setIconClickListener(View.OnClickListener clickListener) {
+        iconClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (clickListener != null)
+                    clickListener.onClick(v);
+                v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            }
+        };
+    }
+
+    public interface OnBindView {
+        void onBindView(View view);
     }
 }
