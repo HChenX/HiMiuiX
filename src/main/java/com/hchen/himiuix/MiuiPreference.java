@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 import java.util.ArrayList;
@@ -77,6 +78,12 @@ public class MiuiPreference extends Preference {
     private int textHeight = -1;
 
     @Override
+    protected void onAttachedToHierarchy(@NonNull PreferenceManager preferenceManager) {
+        super.onAttachedToHierarchy(preferenceManager);
+        getPreferenceManager().setSharedPreferencesName(getContext().getString(R.string.prefs_name));
+    }
+
+    @Override
     @SuppressLint("ClickableViewAccessibility")
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         mainLayout = (ConstraintLayout) holder.itemView;
@@ -96,7 +103,7 @@ public class MiuiPreference extends Preference {
         textConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_text_constraint);
         onlyTextConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_only_text_constraint);
 
-        if (useSummary()) {
+        if (shouldShowSummary()) {
             setVisibility(true);
             tittleView.setText(getTitle());
             summaryView.setText(getSummary());
@@ -162,7 +169,7 @@ public class MiuiPreference extends Preference {
     protected void onClick(View view) {
     }
 
-    protected boolean useSummary() {
+    protected boolean shouldShowSummary() {
         return getSummary() != null;
     }
 
@@ -178,7 +185,7 @@ public class MiuiPreference extends Preference {
         return arrowRightView;
     }
 
-    protected boolean disableArrowRight() {
+    protected boolean disableArrowRightView() {
         return false;
     }
 
@@ -274,7 +281,7 @@ public class MiuiPreference extends Preference {
     private void loadArrowRight() {
         if (arrowRightView == null) return;
         arrowRightView.setVisibility(View.GONE);
-        if (disableArrowRight()) return;
+        if (disableArrowRightView()) return;
         if (getFragment() != null || getOnPreferenceChangeListener() != null ||
                 getOnPreferenceClickListener() != null || getIntent() != null) {
             arrowRightView.setVisibility(View.VISIBLE);
@@ -288,8 +295,9 @@ public class MiuiPreference extends Preference {
     }
 
     private void loadIcon(Drawable drawable) {
-        if (iconView != null)
+        if (iconView != null) {
             if (drawable != null) {
+                drawable.setAlpha(isEnabled() ? 255 : 125);
                 startView.setVisibility(View.GONE);
                 iconView.setVisibility(View.VISIBLE);
                 iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -298,6 +306,7 @@ public class MiuiPreference extends Preference {
                 iconView.setVisibility(View.GONE);
                 startView.setVisibility(View.VISIBLE);
             }
+        }
     }
 
     private void setVisibility(boolean b) {

@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ResultReceiver;
 import android.text.Editable;
 import android.util.Pair;
@@ -95,8 +96,25 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean needInput;
     private boolean isCreated;
     private OnItemsChangeListener itemsChangeListener;
+    private WeakReference<Handler> handlerWeakReference = null;
     private final HashMap<TypefaceObject, Typeface> typefaceHashMap = new HashMap<>();
     private final HashMap<TypefaceObject, Pair<Typeface, Integer>> typefaceStyleHashMap = new HashMap<>();
+    private final android.text.TextWatcher defTextWatcher = new android.text.TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            if (textWatcher != null) textWatcher.beforeTextChanged(s, start, count, after);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (textWatcher != null) textWatcher.onTextChanged(s, start, before, count);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (textWatcher != null) textWatcher.afterTextChanged(s);
+        }
+    };
 
     public enum TypefaceObject {
         TYPEFACE_ALERT_TITLE,
@@ -141,6 +159,11 @@ public class MiuiAlertDialog implements DialogInterface {
                     weakReference.clear();
                     weakReference = null;
                 }
+                if (handlerWeakReference != null) {
+                    handlerWeakReference.clear();
+                    handlerWeakReference = null;
+                }
+                editTextView.removeTextChangedListener(defTextWatcher);
                 super.dismiss();
             }
         };
@@ -157,6 +180,7 @@ public class MiuiAlertDialog implements DialogInterface {
         window.setAttributes(params);
         window.setWindowAnimations(R.style.Animation_Dialog);
 
+        handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
         listAdapter = new ListAdapter(this);
         if (context instanceof Activity activity) {
             activity.registerActivityLifecycleCallbacks(new ActivityLifecycle(this));
@@ -382,32 +406,17 @@ public class MiuiAlertDialog implements DialogInterface {
         }
         this.needInput = needInput;
         if (watcher != null)
-            editTextView.addTextChangedListener(new android.text.TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    watcher.beforeTextChanged(s, start, count, after);
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    watcher.onTextChanged(s, start, before, count);
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    watcher.afterTextChanged(s);
-                }
-            });
+            editTextView.addTextChangedListener(defTextWatcher);
         textWatcher = watcher;
         shouldShowEdit = true;
         return this;
     }
-    
+
     public MiuiAlertDialog setEditTextSize(float size) {
         editTextView.setTextSize(size);
         return this;
     }
-    
+
     public MiuiAlertDialog setInputType(int type) {
         inputType = type;
         editTextView.setInputType(inputType);
@@ -665,10 +674,10 @@ public class MiuiAlertDialog implements DialogInterface {
                 weakReference = null;
             }
             if (weakReference == null) {
-                weakReference = new WeakReference<>(new ResultReceiver(new Handler(context.getMainLooper())) {
+                weakReference = new WeakReference<>(new ResultReceiver(handlerWeakReference.get()) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        new Handler(context.getMainLooper()).postDelayed(runnable, 300);
+                        handlerWeakReference.get().postDelayed(runnable, 300);
                     }
                 });
             }

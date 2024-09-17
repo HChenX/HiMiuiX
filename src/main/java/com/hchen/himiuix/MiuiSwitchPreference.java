@@ -278,7 +278,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         updateSwitchState(true);
         animateThumbIfNeed(false, isChecked());
 
-        if (useSummary()) {
+        if (shouldShowSummary()) {
             if (mSummaryOff == null && mSummaryOn == null)
                 getSummaryView().setText(getSummary()); // on 与 off 应当成对出现
             else {
@@ -294,7 +294,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean useSummary() {
+    protected boolean shouldShowSummary() {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
     }
 

@@ -2,6 +2,8 @@ package com.hchen.himiuix;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -30,7 +32,6 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private int stepCount;
     private boolean shouldStep;
     private boolean dialogEnabled;
-    private int mSeekBarIncrement;
     private boolean mShowSeekBarValue;
     private boolean isInitialTime = true;
 
@@ -99,12 +100,13 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         if (value > maxValue) value = maxValue;
         isStepNumber(value);
         if (value != mSeekBarValue) {
-            mSeekBarValue = value;
-            updateLabelValue(value);
-            persistInt(value);
-            if (!isInitialTime) {
-                callChangeListener(value);
-                notifyChanged();
+            if (callChangeListener(value) || isInitialTime) {
+                mSeekBarValue = value;
+                updateLabelValue(value);
+                persistInt(value);
+                if (!isInitialTime) {
+                    notifyChanged();
+                }
             }
         }
     }
@@ -134,14 +136,13 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         seekBarView.setMax(shouldStep ? stepCount : maxValue);
         seekBarView.setMin(shouldStep ? 0 : minValue);
 
-        if (mSeekBarIncrement != 0) {
-            seekBarView.setKeyProgressIncrement(mSeekBarIncrement);
-        } else
-            mSeekBarIncrement = seekBarView.getKeyProgressIncrement();
-
         seekBarView.setProgress(getStepBeforeIfNeed(mSeekBarValue));
         updateLabelValue(mSeekBarValue);
         seekBarView.setEnabled(isEnabled());
+        if (isEnabled()) {
+            numberView.setTextColor(getContext().getColor(R.color.tittle));
+        } else
+            numberView.setTextColor(getContext().getColor(R.color.tittle_d));
     }
 
     private View view;
@@ -222,6 +223,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         }
     }
 
+    // 获取叠加跳跃后的值；是应该储存的最终值
     private int getStepAfterValueIfNeed(int progress) {
         if (shouldStep) {
             return minValue + (progress * stepValue);
@@ -229,6 +231,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         return progress;
     }
 
+    // 从值解析出跳跃步数；作为 seekbar 使用的阶数
     private int getStepBeforeIfNeed(int value) {
         if (shouldStep) {
             return (value - minValue) / stepValue;
@@ -256,6 +259,92 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             }
             String t = s + (format != null ? format : "");
             numberView.setText(t);
+        }
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        final Parcelable parcelable = super.onSaveInstanceState();
+        if (isPersistent()) {
+            return parcelable;
+        }
+
+        final SavedState savedState = new SavedState(parcelable);
+        savedState.mSeekbarValue = mSeekBarValue;
+        savedState.mMin = minValue;
+        savedState.mMax = maxValue;
+        savedState.stepCount = stepCount;
+        savedState.stepValue = stepValue;
+        savedState.shouldStep = shouldStep;
+
+        return savedState;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@Nullable Parcelable state) {
+        if (state == null || !state.getClass().equals(SavedState.class)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState savedState = (SavedState) state;
+        super.onRestoreInstanceState(savedState.getSuperState());
+        mSeekBarValue = savedState.mSeekbarValue;
+        minValue = savedState.mMin;
+        maxValue = savedState.mMax;
+        stepValue = savedState.stepValue;
+        stepCount = savedState.stepCount;
+        shouldStep = savedState.shouldStep;
+        notifyChanged();
+    }
+
+    private static class SavedState extends BaseSavedState {
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+                    @Override
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    @Override
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
+
+        int mSeekbarValue;
+        int mMin;
+        int mMax;
+        int stepValue;
+        int stepCount;
+        boolean shouldStep;
+
+        public SavedState(Parcel source) {
+            super(source);
+
+            mSeekbarValue = source.readInt();
+            mMin = source.readInt();
+            mMax = source.readInt();
+            stepValue = source.readInt();
+            stepCount = source.readInt();
+            shouldStep = source.readBoolean();
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+
+            dest.writeInt(mSeekbarValue);
+            dest.writeInt(mMin);
+            dest.writeInt(mMax);
+            dest.writeInt(stepValue);
+            dest.writeInt(stepCount);
+            dest.writeBoolean(shouldStep);
         }
     }
 }

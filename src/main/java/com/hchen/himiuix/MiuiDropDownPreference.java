@@ -105,15 +105,18 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     public void setValue(String value) {
         if (value == null) return;
+        valueCheck(value);
+        safeCheck();
         if (!value.equals(mValue)) {
-            persistString(value);
-            makeBooleanArray(value);
-            mValue = value;
-            if (showOnSummary)
-                setSummary(mEntriesList.get(Integer.parseInt(mValue)));
-            if (!isInitialTime) {
-                callChangeListener(value);
-                notifyChanged();
+            if (callChangeListener(value) || isInitialTime) {
+                persistString(value);
+                makeBooleanArray(value);
+                mValue = value;
+                if (showOnSummary)
+                    setSummary(mEntriesList.get(Integer.parseInt(mValue)));
+                if (!isInitialTime) {
+                    notifyChanged();
+                }
             }
         }
     }
@@ -127,6 +130,16 @@ public class MiuiDropDownPreference extends MiuiPreference {
         int index = getValueIndex();
         return index >= 0 && mEntries != null ? mEntries[index] : null;
     }
+    
+    public void setValueIndex(int index) {
+        if (mEntryValues != null) {
+            setValue(mEntryValues[index].toString());
+        }
+    }
+
+    private int getValueIndex() {
+        return findIndexOfValue(mValue);
+    }
 
     public int findIndexOfValue(String value) {
         if (value != null && mEntryValues != null) {
@@ -138,20 +151,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         }
         return -1;
     }
-
-    public void setValueIndex(int index) {
-        if (mEntryValues != null) {
-            setValue(mEntryValues[index].toString());
-            if (dialog != null && dialog.listAdapter != null)
-                dialog.listAdapter.booleanArray = booleanArray;
-            notifyChanged();
-        }
-    }
-
-    private int getValueIndex() {
-        return findIndexOfValue(mValue);
-    }
-
+    
     @Override
     @SuppressLint("NotifyDataSetChanged")
     protected void notifyChanged() {
@@ -164,7 +164,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     private void makeBooleanArray(@NonNull String mValue) {
-        safeCheck();
         booleanArray.clear();
         for (int i = 0; i < mEntryValues.length; i++) {
             if (mEntryValues[i].equals(mValue)) {
@@ -172,6 +171,31 @@ public class MiuiDropDownPreference extends MiuiPreference {
                 break;
             }
         }
+    }
+
+    // 安全检查
+    private void safeCheck() {
+        if (mEntries.length != mEntryValues.length) { // 元素数与索引数不相等
+            throw new RuntimeException("MiuiDropDownPreference: The length of entries must be equal to the length of entryValues!");
+        }
+        if (!mEntryValues[0].equals("0")) { // 不是从零开始的索引
+            throw new RuntimeException("MiuiDropDownPreference: EntryValues must start from scratch!");
+        }
+        for (int i = 0; i < mEntryValues.length; i++) { // 索引必须是连续的数字
+            if (!mEntryValues[i].equals(Integer.toString(i))) {
+                throw new RuntimeException("MiuiDropDownPreference: The entryValues must be continuous!");
+            }
+        }
+    }
+
+    private void valueCheck(String value) {
+        for (CharSequence mEntryValue : mEntryValues) {
+            if (mEntryValue.equals(value)) {
+                return;
+            }
+        }
+        throw new RuntimeException("MiuiDropDownPreference: The input value is not an existing set of available values! " +
+                "Input: " + value + " Available values: " + Arrays.toString(mEntryValues));
     }
 
     @Override
@@ -187,12 +211,12 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean disableArrowRight() {
+    protected boolean disableArrowRightView() {
         return true;
     }
 
     @Override
-    protected boolean useSummary() {
+    protected boolean shouldShowSummary() {
         return getSummary() != null || showOnSummary;
     }
 
@@ -350,21 +374,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
                 setValue(String.valueOf(which));
             }
         });
-    }
-
-    // 安全检查
-    private void safeCheck() {
-        if (mEntries.length != mEntryValues.length) { // 元素数与索引数不相等
-            throw new RuntimeException("MiuiDropDownPreference: The length of entries must be equal to the length of entryValues!");
-        }
-        if (!mEntryValues[0].equals("0")) { // 不是从零开始的索引
-            throw new RuntimeException("MiuiDropDownPreference: EntryValues must start from scratch!");
-        }
-        for (int i = 0; i < mEntryValues.length; i++) { // 索引必须是连续的数字
-            if (!mEntryValues[i].equals(Integer.toString(i))) {
-                throw new RuntimeException("MiuiDropDownPreference: The entryValues must be continuous!");
-            }
-        }
     }
 
     private static class SavedState extends BaseSavedState {

@@ -58,7 +58,7 @@
     </declare-styleable>
 
     <declare-styleable name="MiuiPreferenceCategory">
-        <attr name="noDivider" format="boolean" />
+        <attr name="goneDivider" format="boolean" /> <!--不需要分割线-->
     </declare-styleable>
 
     <declare-styleable name="MiuiEditTextPreference">

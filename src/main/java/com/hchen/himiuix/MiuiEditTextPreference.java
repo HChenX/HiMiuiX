@@ -25,8 +25,8 @@ import androidx.preference.PreferenceViewHolder;
 
 public class MiuiEditTextPreference extends MiuiPreference {
     private ConstraintLayout layout;
-    private EditText editText;
-    private TextView tipText;
+    private EditText editTextView;
+    private TextView tipTextView;
     private ImageView imageView;
     private CharSequence hint;
     private Drawable drawable;
@@ -107,40 +107,43 @@ public class MiuiEditTextPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         layout = holder.itemView.findViewById(R.id.edit_layout);
-        editText = holder.itemView.findViewById(R.id.edit_text_id);
-        tipText = holder.itemView.findViewById(R.id.edit_tip);
+        editTextView = holder.itemView.findViewById(R.id.edit_text_id);
+        tipTextView = holder.itemView.findViewById(R.id.edit_tip);
         imageView = holder.itemView.findViewById(R.id.edit_image);
 
-        tipText.setVisibility(View.GONE);
+        tipTextView.setVisibility(View.GONE);
         if (getTitle() != null) {
-            tipText.setVisibility(View.VISIBLE);
-            tipText.setText(getTitle());
+            tipTextView.setVisibility(View.VISIBLE);
+            tipTextView.setText(getTitle());
         }
-        if (hint != null) editText.setHint(hint);
-        else editText.setHint("请输入");
+        if (hint != null) editTextView.setHint(hint);
+        else editTextView.setHint("请输入");
 
         imageView.setVisibility(View.GONE);
         imageView.setOnClickListener(null);
         if (getIcon() != null) {
+            getIcon().setAlpha(isEnabled() ? 255 : 125);
             imageView.setVisibility(View.VISIBLE);
             imageView.setImageDrawable(getIcon());
         }
 
-        editText.setOnFocusChangeListener(null);
-        editText.removeTextChangedListener(watcher);
-        editText.clearFocus();
+        editTextView.setEnabled(isEnabled());
+        editTextView.setOnFocusChangeListener(null);
+        if (watcher != null) 
+            editTextView.removeTextChangedListener(watcher);
+        editTextView.clearFocus();
         if (isEnabled()) {
-            if (imageView.getVisibility() != View.GONE) {
+            tipTextView.setTextColor(getContext().getColor(R.color.tittle));
+            editTextView.setHintTextColor(getContext().getColor(R.color.summary));
+            if (imageView.getVisibility() != View.GONE)
                 imageView.setOnClickListener(imageClickListener);
-            }
-            if (watcher != null) {
-                editText.addTextChangedListener(watcher);
-            }
+            if (watcher != null)
+                editTextView.addTextChangedListener(watcher);
 
-            if (type != -1) editText.setInputType(type);
-            else editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            if (type != -1) editTextView.setInputType(type);
+            else editTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
-            editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            editTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (hasFocus) {
@@ -151,15 +154,18 @@ public class MiuiEditTextPreference extends MiuiPreference {
                     }
                 }
             });
+        } else {
+            tipTextView.setTextColor(getContext().getColor(R.color.tittle_d));
+            editTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
         }
     }
 
     private boolean isInputVisible() {
-        return editText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+        return editTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 
     private void hideInputIfNeed() {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (isInputVisible()) imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        if (isInputVisible()) imm.hideSoftInputFromWindow(editTextView.getWindowToken(), 0);
     }
 }

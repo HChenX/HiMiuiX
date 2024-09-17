@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -32,7 +33,7 @@ public class MiuiCardPreference extends MiuiPreference {
     private boolean iconCancel;
     private int iconArrowRightColor;
     private int iconCancelColor;
-    private int customViewId;
+    private View customView;
     private CustomViewCallBack customViewCallBack;
 
     public MiuiCardPreference(@NonNull Context context) {
@@ -55,6 +56,7 @@ public class MiuiCardPreference extends MiuiPreference {
     public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_card);
         setSelectable(false);
+        customView = null;
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiCardPreference,
                 defStyleAttr, defStyleRes)) {
             backgroundColor = array.getColor(R.styleable.MiuiCardPreference_backgroundColor, context.getColor(R.color.card_background));
@@ -66,8 +68,59 @@ public class MiuiCardPreference extends MiuiPreference {
             iconCancel = array.getBoolean(R.styleable.MiuiCardPreference_iconCancel, false);
             iconArrowRightColor = array.getColor(R.styleable.MiuiCardPreference_iconArrowRightColor, context.getColor(R.color.arrow_right));
             iconCancelColor = array.getColor(R.styleable.MiuiCardPreference_iconCancelColor, context.getColor(R.color.cancel_background));
-            customViewId = array.getResourceId(R.styleable.MiuiCardPreference_customView, 0);
+            int customViewId = array.getResourceId(R.styleable.MiuiCardPreference_customView, 0);
+            if (customViewId != 0) {
+                customView = LayoutInflater.from(getContext()).inflate(customViewId, customLayout, false);
+            }
         }
+    }
+
+    public void setTittleSize(float size) {
+        tittleSize = size;
+    }
+
+    public void setSummarySize(float size) {
+        summarySize = size;
+    }
+
+    public void setTittleColor(int color) {
+        tittleColor = color;
+    }
+
+    public void setSummaryColor(int color) {
+        summaryColor = color;
+    }
+
+    public void setBackgroundColor(int color) {
+        backgroundColor = color;
+    }
+
+    public void setIconArrowRight(boolean arrowRight) {
+        iconArrowRight = arrowRight;
+    }
+
+    public void setIconCancel(boolean cancel) {
+        iconCancel = cancel;
+    }
+
+    public void setIconArrowRightColor(int color) {
+        iconArrowRightColor = color;
+    }
+
+    public void setIconCancelColor(int color) {
+        iconCancelColor = color;
+    }
+
+    public void setCustomViewId(@LayoutRes int viewId) {
+        customView = LayoutInflater.from(getContext()).inflate(viewId, customLayout, false);
+    }
+
+    public void setCustomView(View v) {
+        customView = v;
+    }
+
+    public void removeCustomView() {
+        customView = null;
     }
 
     @Override
@@ -102,19 +155,18 @@ public class MiuiCardPreference extends MiuiPreference {
     }
 
     private void loadCustomLayout() {
-        if (customViewId == 0) {
+        if (customView == null) {
             customLayout.setVisibility(View.GONE);
         } else {
             customLayout.setVisibility(View.VISIBLE);
-            View view = LayoutInflater.from(getContext()).inflate(customViewId, customLayout, false);
-            ViewGroup viewGroup = (ViewGroup) view.getParent();
+            ViewGroup viewGroup = (ViewGroup) customView.getParent();
             if (viewGroup != customLayout) {
                 if (viewGroup != null)
-                    viewGroup.removeView(view);
-                customLayout.addView(view);
+                    viewGroup.removeView(customView);
+                customLayout.addView(customView);
             }
             if (customViewCallBack != null)
-                customViewCallBack.onCustomViewCreate(view);
+                customViewCallBack.onCustomViewCreate(customView);
         }
     }
 

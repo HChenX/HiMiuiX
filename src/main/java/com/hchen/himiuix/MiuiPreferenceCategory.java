@@ -11,16 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceGroup;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiPreferenceCategory extends PreferenceGroup {
     String TAG = "MiuiPreference";
-    ConstraintLayout layout;
-    View dividerView;
-    TextView textView;
-    int noTipHeight;
-    int haveTipHeight;
-    boolean noDivider;
+    private ConstraintLayout layout;
+    private View dividerView;
+    private TextView textView;
+    private int noTipHeight;
+    private int haveTipHeight;
+    private boolean goneDivider;
 
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.style.MiuiPreference_Category);
@@ -33,18 +34,42 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
-        setOrderingAsAdded(true);
     }
 
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_category);
         setSelectable(false);
+        setPersistent(false);
         noTipHeight = MiuiXUtils.sp2px(context, 50);
         haveTipHeight = MiuiXUtils.sp2px(context, 63);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreferenceCategory,
                 defStyleAttr, defStyleRes)) {
-            noDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_noDivider, false);
+            goneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, false);
         }
+    }
+
+    public void setGoneDivider(boolean goneDivider) {
+        this.goneDivider = goneDivider;
+    }
+
+    public boolean isGoneDivider() {
+        return goneDivider;
+    }
+
+    @Override
+    protected void onAttachedToHierarchy(@NonNull PreferenceManager preferenceManager) {
+        super.onAttachedToHierarchy(preferenceManager);
+        getPreferenceManager().setSharedPreferencesName(getContext().getString(R.string.prefs_name));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldDisableDependents() {
+        return !super.isEnabled();
     }
 
     @Override
@@ -57,7 +82,7 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
         dividerView.setVisibility(View.VISIBLE);
         setLayoutHeight(false);
 
-        if (noDivider) {
+        if (goneDivider) {
             dividerView.setVisibility(View.GONE);
             haveTipHeight = MiuiXUtils.sp2px(getContext(), 33);
             noTipHeight = MiuiXUtils.sp2px(getContext(), 20);
