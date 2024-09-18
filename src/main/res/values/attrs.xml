@@ -39,6 +39,9 @@
         <attr name="format" format="string" /> <!--可以理解为单位-->
         <attr name="stepValue" format="integer" /> <!--跳跃值-->
         <attr name="android:defaultValue" />
+        <attr name="defaultValue" />
+        <attr name="showDefTip" format="boolean" /> <!--是否显示默认值位置提示标-->
+        <attr name="defValueString" format="string" /> <!--处于默认值时显示的字符-->
         <attr name="dialogEnabled" format="boolean" />
         <attr name="showSeekBarValue" format="boolean" />
         <attr name="displayDividerValue" format="integer" /> <!--可用于显示小数-->

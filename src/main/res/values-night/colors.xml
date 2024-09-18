@@ -44,4 +44,5 @@
     <color name="cancel_background">#666666</color>
     <color name="cancel_background_waring">#FFB459</color>
     <color name="card_text_waring">#FFA83F</color>
+    <color name="seekbar_def">#AA555962</color>
 </resources>

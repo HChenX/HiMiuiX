@@ -803,6 +803,7 @@ public class MiuiAlertDialog implements DialogInterface {
             CharSequence s = dialog.items.get(position);
             setFirstOrEndView(holder, position);
             holder.switchView.setText(s);
+            holder.switchView.setHapticFeedbackEnabled(false);
             boolean isChecked = booleanArray.get(position);
             checkState(holder, position);
 
@@ -814,7 +815,7 @@ public class MiuiAlertDialog implements DialogInterface {
                 if (dialog.isMultiSelect) booleanArray.put(position, i);
                 checkState(holder, position);
                 if (dialog.hapticFeedbackEnabled)
-                    b.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                    holder.mainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
                 if (listener != null) listener.onClick(dialog, s, position);
                 if (!dialog.isMultiSelect)
                     dialog.dismiss();
