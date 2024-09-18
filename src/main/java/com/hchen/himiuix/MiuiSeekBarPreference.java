@@ -208,6 +208,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                                 f = Float.parseFloat((String) s) * mDisplayDividerValue;
                             int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
                             setValue(result);
+                            seekBarView.setShowDefaultPoint((result != mDefValue) && showDefTip);
                             setProgressIfNeed(getStepBeforeIfNeed(result));
                         }
                     })
