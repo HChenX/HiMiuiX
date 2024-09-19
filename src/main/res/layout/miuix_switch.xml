@@ -20,8 +20,8 @@
     <!-- 开关按钮部分 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/switch_container"
-        android:layout_width="53sp"
-        android:layout_height="30sp"
+        android:layout_width="53.2sp"
+        android:layout_height="30.5sp"
         android:layout_marginTop="15sp"
         android:layout_marginEnd="30sp"
         android:layout_marginBottom="15sp"
@@ -36,7 +36,7 @@
             android:id="@+id/switch_thumb"
             android:layout_width="21.5sp"
             android:layout_height="21.5dp"
-            android:layout_margin="4sp"
+            android:layout_margin="4.2sp"
             android:background="@drawable/thumb_background"
             android:longClickable="true"
             app:layout_constraintBottom_toBottomOf="parent"

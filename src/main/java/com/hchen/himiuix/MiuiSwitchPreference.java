@@ -14,7 +14,8 @@ import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.AnticipateOvershootInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +32,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
     private boolean mChecked;
     private boolean mDisableDependentsState;
     private boolean isInitialTime = true;
+    private ViewPropertyAnimator thumbViewAnimator;
+    private final int animatorDuration = 320;
+    private final float animatorTension = 1.2f;
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -51,9 +55,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
         @Override
         public boolean onHover(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
-                onTouchListener.animZoom(v);
+                onTouchListener.animZoom();
             } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
-                onTouchListener.animRevert(v);
+                onTouchListener.animRevert();
             } else return false;
             return true;
         }
@@ -76,7 +80,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
                     switchViewX = outLocation[0];
                     maxMoveX = switchBackgroundLayout.getWidth() - thumbView.getWidth() - MiuiXUtils.sp2px(getContext(), 4.5F);
                     minMoveX = MiuiXUtils.sp2px(getContext(), 4.5F);
-                    animZoom(v);
+                    animZoom();
                     break;
                 case MotionEvent.ACTION_MOVE:
                     isMoved = true;
@@ -93,6 +97,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
                     v.setX(moveX);
                     break;
                 case MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL:
+                    animRevert();
                     if (isMoved) {
                         float finalX = v.getX();
                         boolean newCheckedState;
@@ -103,15 +108,14 @@ public class MiuiSwitchPreference extends MiuiPreference {
                             finalX = maxMoveX;
                             newCheckedState = true;
                         }
-                        v.animate().x(finalX)
-                                .setInterpolator(new OvershootInterpolator(1.0f))
-                                .setDuration(200).start();
+                        thumbViewAnimator.x(finalX)
+                                .setInterpolator(new AnticipateOvershootInterpolator(animatorTension))
+                                .setDuration(animatorDuration);
                         if (newCheckedState != isChecked()) {
                             onClickListener.onClick(null);
-                        }
+                        } else thumbViewAnimator.start();
                     } else
                         onClickListener.onClick(v);
-                    animRevert(v);
                     v.getParent().requestDisallowInterceptTouchEvent(false);
                     break;
                 default:
@@ -126,18 +130,14 @@ public class MiuiSwitchPreference extends MiuiPreference {
             shouldHaptic = false;
         }
 
-        public void animZoom(View view) {
-            view.animate().scaleX(1.1f)
-                    .scaleY(1.1f)
-                    .setDuration(200)
-                    .start();
+        public void animZoom() {
+            thumbViewAnimator.scaleX(1.1f)
+                    .scaleY(1.1f);
         }
 
-        public void animRevert(View view) {
-            view.animate().scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(200)
-                    .start();
+        public void animRevert() {
+            thumbViewAnimator.scaleX(1f)
+                    .scaleY(1f);
         }
     };
 
@@ -271,6 +271,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         super.onBindViewHolder(holder);
         switchBackgroundLayout = (ConstraintLayout) holder.findViewById(R.id.switch_container);
         thumbView = holder.findViewById(R.id.switch_thumb);
+        thumbViewAnimator = thumbView.animate();
         thumbView.setOnTouchListener(null);
         thumbView.setOnHoverListener(null);
 
@@ -318,7 +319,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 switchBackgroundLayout.setBackgroundResource(R.drawable.switch_transition_background);
                 TransitionDrawable transitionDrawable = (TransitionDrawable) switchBackgroundLayout.getBackground();
                 if (isChecked()) {
-                    transitionDrawable.startTransition(200);  // 渐变到 on 状态
+                    transitionDrawable.startTransition(animatorDuration);  // 渐变到 on 状态
                 } else {
                     transitionDrawable.resetTransition();  // 渐变到 off 状态
                 }
@@ -339,25 +340,26 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
         if (animating) return;
-        int translationX = switchBackgroundLayout.getWidth() - thumbView.getWidth() - (2 * sp2px(getContext(), 4F));
+        int translationX = sp2px(getContext(), 22.8F);
         if (!useAnimate) {
-            if (toRight) thumbView.setTranslationX(sp2px(getContext(), 23.3F));
+            if (toRight) thumbView.setTranslationX(sp2px(getContext(), 22.8F));
             else thumbView.setTranslationX(0);
             return;
         }
         animating = true;
         int thumbPosition = toRight ? translationX : 0;
 
-        thumbView.animate()
+        thumbViewAnimator
                 .translationX(thumbPosition)
-                .setDuration(200)
-                .setInterpolator(new OvershootInterpolator(1.0f))
+                .setDuration(animatorDuration)
+                .setInterpolator(new AnticipateOvershootInterpolator(animatorTension))
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         animating = false;
                     }
-                });
+                })
+                .start();
     }
 
     private static class SavedState extends BaseSavedState {
@@ -396,8 +398,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
         @Override
         boolean onTouch(View v, MotionEvent event);
 
-        void animZoom(View view);
+        void animZoom();
 
-        void animRevert(View view);
+        void animRevert();
     }
 }
