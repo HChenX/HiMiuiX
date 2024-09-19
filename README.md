@@ -7,7 +7,7 @@
 ![language](https://img.shields.io/badge/language-java-purple)
 
 [//]: # (<p><b><a href="README-en.md">English</a> | <a href="README.md">简体中文</a></b></p>)
-<p>仿 MiuiX 的 Preference Ui，xml式布局非代码布局！</p>
+<p>仿 MiuiX 的 Preference Ui，xml式布局！</p>
 </div>
 
 ### HiMiuiX
