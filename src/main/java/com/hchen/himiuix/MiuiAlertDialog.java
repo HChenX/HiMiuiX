@@ -55,7 +55,7 @@ import java.util.HashMap;
 
 public class MiuiAlertDialog implements DialogInterface {
     private static final String TAG = "MiuiPreference";
-    private ConstraintLayout mainDialog;
+    protected ConstraintLayout mainDialog;
     TextView alertTitleView;
     TextView messageView;
     private Button positiveButton;
@@ -96,6 +96,7 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean needInput;
     private boolean isCreated;
     private boolean autoDismiss = true;
+    private View.OnApplyWindowInsetsListener onApplyWindowInsetsListener;
     private OnItemsChangeListener itemsChangeListener;
     private WeakReference<Handler> handlerWeakReference = null;
     private final HashMap<TypefaceObject, Typeface> typefaceHashMap = new HashMap<>();
@@ -181,6 +182,17 @@ public class MiuiAlertDialog implements DialogInterface {
         window.setAttributes(params);
         window.setWindowAnimations(R.style.Animation_Dialog);
 
+        window.getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                if (onApplyWindowInsetsListener != null)
+                    return onApplyWindowInsetsListener.onApplyWindowInsets(v, insets);
+                else
+                    return insets;
+            }
+        });
+
         handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
         listAdapter = new ListAdapter(this);
         if (context instanceof Activity activity) {
@@ -203,16 +215,8 @@ public class MiuiAlertDialog implements DialogInterface {
         editLayout = mainDialog.findViewById(R.id.edit_layout);
         editTextTipView = mainDialog.findViewById(R.id.edit_tip);
         editImageView = mainDialog.findViewById(R.id.edit_image);
-        customLayout.setVisibility(View.GONE);
-        editImageView.setVisibility(View.GONE);
-        editTextTipView.setVisibility(View.GONE);
         editLayout.setVisibility(View.GONE);
-        editTextView.setVisibility(View.GONE);
-        alertTitleView.setVisibility(View.GONE);
-        messageView.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.GONE);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        neutralButton.setVisibility(View.GONE);
         editTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -249,6 +253,11 @@ public class MiuiAlertDialog implements DialogInterface {
 
     public Window getWindow() {
         return window;
+    }
+
+    public MiuiAlertDialog setOnApplyWindowInsetsListener(View.OnApplyWindowInsetsListener onApplyWindowInsetsListener) {
+        this.onApplyWindowInsetsListener = onApplyWindowInsetsListener;
+        return this;
     }
 
     public MiuiAlertDialog setWindowAnimations(@StyleRes int resId) {
@@ -516,7 +525,6 @@ public class MiuiAlertDialog implements DialogInterface {
         } else {
             if (shouldShowEdit) {
                 editLayout.setVisibility(View.VISIBLE);
-                editTextView.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE); // 不支持同时显示文本输入框和多选菜单 (至少是我不想写
                 recyclerView.setAdapter(null);
             } else {
@@ -525,7 +533,7 @@ public class MiuiAlertDialog implements DialogInterface {
                 cornerRadius.setCornerRadius(radius);
                 if (items != null && !isDropDown) {
                     cornerRadius.setCornerRadius(0);
-                    ConstraintLayout.LayoutParams layout = (ConstraintLayout.LayoutParams) recyclerView.getLayoutParams();
+                    ViewGroup.LayoutParams layout = recyclerView.getLayoutParams();
                     int height = (MiuiXUtils.sp2px(context, 56) * (items.size())) + MiuiXUtils.sp2px(context, 20);
                     int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.5);
                     layout.height = Math.min(height, maxHeight);

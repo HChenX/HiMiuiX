@@ -23,6 +23,7 @@
         android:singleLine="true"
         android:textColor="@color/dialog_text"
         android:textSize="20sp"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -38,6 +39,7 @@
         android:textColor="@color/dialog_text"
         android:textDirection="locale"
         android:textSize="16sp"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/alertTitle"

@@ -12,12 +12,15 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.preference.PreferenceViewHolder;
 
 import com.hchen.himiuix.colorpicker.ColorBaseSeekBar;
@@ -85,6 +88,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         getColorSelectView().setColor(mColor);
     }
 
+    private NestedScrollView nestedScrollView;
     private ColorPickerHueView hueView;
     private ColorPickerSaturationView saturationView;
     private ColorPickerLightnessView lightnessView;
@@ -103,11 +107,13 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         alertDialog.setMessage(getSummary());
         alertDialog.autoDismiss(false);
         alertDialog.setHapticFeedbackEnabled(true);
+        alertDialog.getWindow().setDecorFitsSystemWindows(false);
         alertDialog.setCustomView(R.layout.miuix_color_picker, new MiuiAlertDialog.OnBindView() {
             private boolean isEditFocus = false;
 
             @Override
             public void onBindView(View view) {
+                nestedScrollView = view.findViewById(R.id.color_scroll_view);
                 hueView = view.findViewById(R.id.color_hue_view);
                 saturationView = view.findViewById(R.id.color_saturation_view);
                 lightnessView = view.findViewById(R.id.color_lightness_view);
@@ -162,6 +168,33 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                         }
                     }
                 });
+            }
+        });
+        alertDialog.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            private int oldHeight = -1;
+
+            @NonNull
+            @Override
+            public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                int bottom = insets.getInsets(WindowInsets.Type.ime()).bottom;
+                int dialogHeight = alertDialog.getWindow().getDecorView().getHeight();
+                if (insets.isVisible(WindowInsets.Type.ime())) {
+                    int screenY = MiuiXUtils.getScreenSize(getContext()).y;
+                    if (bottom + dialogHeight + MiuiXUtils.sp2px(getContext(), 100) > screenY) {
+                        if (oldHeight == -1) {
+                            oldHeight = nestedScrollView.getHeight();
+                        }
+                        
+                        ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
+                        layoutParams.height = oldHeight - MiuiXUtils.sp2px(getContext(), 100);
+                        nestedScrollView.setLayoutParams(layoutParams);
+                    }
+                } else if (oldHeight != -1) {
+                    ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
+                    layoutParams.height = oldHeight;
+                    nestedScrollView.setLayoutParams(layoutParams);
+                }
+                return insets;
             }
         });
         alertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
