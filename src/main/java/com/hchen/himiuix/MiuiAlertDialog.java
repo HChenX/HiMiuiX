@@ -96,7 +96,6 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean needInput;
     private boolean isCreated;
     private boolean autoDismiss = true;
-    private View.OnApplyWindowInsetsListener onApplyWindowInsetsListener;
     private OnItemsChangeListener itemsChangeListener;
     private WeakReference<Handler> handlerWeakReference = null;
     private final HashMap<TypefaceObject, Typeface> typefaceHashMap = new HashMap<>();
@@ -182,17 +181,6 @@ public class MiuiAlertDialog implements DialogInterface {
         window.setAttributes(params);
         window.setWindowAnimations(R.style.Animation_Dialog);
 
-        window.getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-            @NonNull
-            @Override
-            public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
-                if (onApplyWindowInsetsListener != null)
-                    return onApplyWindowInsetsListener.onApplyWindowInsets(v, insets);
-                else
-                    return insets;
-            }
-        });
-
         handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
         listAdapter = new ListAdapter(this);
         if (context instanceof Activity activity) {
@@ -253,11 +241,6 @@ public class MiuiAlertDialog implements DialogInterface {
 
     public Window getWindow() {
         return window;
-    }
-
-    public MiuiAlertDialog setOnApplyWindowInsetsListener(View.OnApplyWindowInsetsListener onApplyWindowInsetsListener) {
-        this.onApplyWindowInsetsListener = onApplyWindowInsetsListener;
-        return this;
     }
 
     public MiuiAlertDialog setWindowAnimations(@StyleRes int resId) {

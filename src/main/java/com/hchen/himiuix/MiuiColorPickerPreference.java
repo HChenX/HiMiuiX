@@ -14,6 +14,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,7 +108,6 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         alertDialog.setMessage(getSummary());
         alertDialog.autoDismiss(false);
         alertDialog.setHapticFeedbackEnabled(true);
-        alertDialog.getWindow().setDecorFitsSystemWindows(false);
         alertDialog.setCustomView(R.layout.miuix_color_picker, new MiuiAlertDialog.OnBindView() {
             private boolean isEditFocus = false;
 
@@ -170,7 +170,9 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 });
             }
         });
-        alertDialog.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        alertDialog.getWindow().setDecorFitsSystemWindows(false);
+        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        alertDialog.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             private int oldHeight = -1;
 
             @NonNull
@@ -179,12 +181,13 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 int bottom = insets.getInsets(WindowInsets.Type.ime()).bottom;
                 int dialogHeight = alertDialog.getWindow().getDecorView().getHeight();
                 if (insets.isVisible(WindowInsets.Type.ime())) {
+                    if (bottom == 0 || oldHeight != -1) return insets;
                     int screenY = MiuiXUtils.getScreenSize(getContext()).y;
                     if (bottom + dialogHeight + MiuiXUtils.sp2px(getContext(), 100) > screenY) {
                         if (oldHeight == -1) {
                             oldHeight = nestedScrollView.getHeight();
                         }
-                        
+
                         ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
                         layoutParams.height = oldHeight - MiuiXUtils.sp2px(getContext(), 100);
                         nestedScrollView.setLayoutParams(layoutParams);
@@ -193,6 +196,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                     ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
                     layoutParams.height = oldHeight;
                     nestedScrollView.setLayoutParams(layoutParams);
+                    oldHeight = -1;
                 }
                 return insets;
             }
