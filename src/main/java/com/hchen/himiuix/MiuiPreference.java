@@ -20,13 +20,16 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
+import com.hchen.himiuix.colorpicker.ColorSelectView;
+
 import java.util.ArrayList;
 
 public class MiuiPreference extends Preference {
-    protected String TAG = "MiuiPreference";
+    protected static String TAG = "MiuiPreference";
     private ConstraintLayout mainLayout;
     private ConstraintLayout textConstraint;
     private ConstraintLayout onlyTextConstraint;
+    private ColorSelectView colorSelectView;
     private ImageView iconView;
     private View startView;
     private TextView tittleView;
@@ -102,6 +105,8 @@ public class MiuiPreference extends Preference {
         arrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
         textConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_text_constraint);
         onlyTextConstraint = (ConstraintLayout) holder.findViewById(R.id.pref_only_text_constraint);
+        colorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
+        if (colorSelectView != null) colorSelectView.setVisibility(View.GONE);
 
         if (shouldShowSummary()) {
             setVisibility(true);
@@ -183,6 +188,10 @@ public class MiuiPreference extends Preference {
 
     protected ImageView getArrowRightView() {
         return arrowRightView;
+    }
+
+    protected ColorSelectView getColorSelectView() {
+        return colorSelectView;
     }
 
     protected boolean disableArrowRightView() {

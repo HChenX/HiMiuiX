@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="gradual_color">
+        <item>#FF6565</item>
+        <item>#FFBB55</item>
+        <item>#FFF175</item>
+        <item>#B3FFA7</item>
+        <item>#98FFF9</item>
+        <item>#7B98FF</item>
+        <item>#FF75E1</item>
+    </array>
+</resources>

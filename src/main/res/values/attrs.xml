@@ -70,6 +70,10 @@
         <attr name="android:inputType" />
     </declare-styleable>
 
+    <declare-styleable name="MiuiColorPickerPreference">
+        <attr name="defaultColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="SpringBackLayout">
         <attr name="scrollableView" format="reference" />
         <attr name="scrollOrientation" format="integer" />

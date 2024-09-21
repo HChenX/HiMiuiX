@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="15sp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="15sp">
 
     <include
         android:id="@+id/seekbar_titlle"
@@ -34,6 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@null"
+        android:hardwareAccelerated="true"
         android:paddingStart="25sp"
         android:paddingEnd="25sp"
         android:paddingBottom="20sp"

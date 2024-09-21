@@ -54,4 +54,11 @@
         <item name="android:shouldDisableView">false</item>
         <item name="android:selectable">false</item>
     </style>
+    
+    <style name="MiuiSeekBar">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:focusable">true</item>
+        <item name="android:paddingStart">25sp</item>
+        <item name="android:paddingEnd">25sp</item>
+    </style>
 </resources>

@@ -95,6 +95,7 @@ public class MiuiAlertDialog implements DialogInterface {
     private TextWatcher textWatcher;
     private boolean needInput;
     private boolean isCreated;
+    private boolean autoDismiss = true;
     private OnItemsChangeListener itemsChangeListener;
     private WeakReference<Handler> handlerWeakReference = null;
     private final HashMap<TypefaceObject, Typeface> typefaceHashMap = new HashMap<>();
@@ -241,7 +242,7 @@ public class MiuiAlertDialog implements DialogInterface {
                 }
             }
             if (listener != null) listener.onClick(this, id);
-            if (dialog.isShowing())
+            if (dialog.isShowing() && autoDismiss)
                 dismiss();
         };
     }
@@ -477,6 +478,16 @@ public class MiuiAlertDialog implements DialogInterface {
         return this;
     }
 
+    public MiuiAlertDialog setOnDismissListener(OnDismissListener dismissListener) {
+        dialog.setOnDismissListener(dialog -> dismissListener.onDismiss(MiuiAlertDialog.this));
+        return this;
+    }
+
+    public MiuiAlertDialog autoDismiss(boolean autoDismiss) {
+        this.autoDismiss = autoDismiss;
+        return this;
+    }
+
     public Context getContext() {
         return context;
     }
@@ -562,11 +573,6 @@ public class MiuiAlertDialog implements DialogInterface {
             }
         });
         dialog.show();
-    }
-
-    public MiuiAlertDialog setOnDismissListener(OnDismissListener dismissListener) {
-        dialog.setOnDismissListener(dialog -> dismissListener.onDismiss(MiuiAlertDialog.this));
-        return this;
     }
 
     public void cancel() {
@@ -677,6 +683,9 @@ public class MiuiAlertDialog implements DialogInterface {
                 weakReference = new WeakReference<>(new ResultReceiver(handlerWeakReference.get()) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (handlerWeakReference == null || handlerWeakReference.get() == null) {
+                            handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
+                        }
                         handlerWeakReference.get().postDelayed(runnable, 300);
                     }
                 });

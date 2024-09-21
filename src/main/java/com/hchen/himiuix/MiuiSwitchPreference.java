@@ -78,8 +78,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
                     int[] outLocation = new int[2];
                     switchBackgroundLayout.getLocationOnScreen(outLocation);
                     switchViewX = outLocation[0];
-                    maxMoveX = switchBackgroundLayout.getWidth() - thumbView.getWidth() - MiuiXUtils.sp2px(getContext(), 4.5F);
-                    minMoveX = MiuiXUtils.sp2px(getContext(), 4.5F);
+                    maxMoveX = switchBackgroundLayout.getWidth() - thumbView.getWidth() - MiuiXUtils.sp2px(getContext(), 4.2F);
+                    minMoveX = MiuiXUtils.sp2px(getContext(), 4.2F);
                     animZoom();
                     break;
                 case MotionEvent.ACTION_MOVE:

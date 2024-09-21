@@ -17,18 +17,15 @@ public class MiuiSeekBar extends SeekBar {
     private boolean showDefaultPoint;
 
     public MiuiSeekBar(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public MiuiSeekBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        this(context, attrs, R.style.MiuiSeekBar);
     }
 
     public MiuiSeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MiuiSeekBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -54,7 +51,7 @@ public class MiuiSeekBar extends SeekBar {
             float xPosition = scaleWidth * (shouldStep ? (defStep) : (defValue - getMin()))
                     + MiuiXUtils.sp2px(getContext(), 25);
             float yPosition = (float) height / 2;
-            
+
             canvas.drawCircle(xPosition, yPosition, (float) height / 5, paint);
         }
     }
