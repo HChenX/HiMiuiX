@@ -32,13 +32,13 @@ public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorP
                 Color.HSVToColor(new float[]{0, 1, 0}),
                 Color.HSVToColor(new float[]{0, 1, 1})
         };
-        setMax(100);
-        setProgress(100);
+        setMax(10000);
+        setProgress(0);
         super.init();
     }
 
     public void updateColorPickerLightnessState(int lightness) {
-        setProgress(lightness, true);
+        setProgress(lightness);
         if (colorPickerData != null)
             colorPickerData.lightness = lightness;
     }
@@ -50,7 +50,7 @@ public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorP
     }
 
     @Override
-    public void onColorHueChanged(int changed) {
+    public void onColorHueChanged(float changed) {
         colors = new int[]{
                 Color.HSVToColor(new float[]{changed, 1, 0}),
                 Color.HSVToColor(new float[]{changed, 1, 1}),

@@ -42,8 +42,9 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
                 Color.HSVToColor(new float[]{300, 1, 1}),
                 Color.HSVToColor(new float[]{360, 1, 1})
         };
-        setMax(360);
-        setProgress(0);
+        setMax(36000);
+        setMin(0);
+        setProgress(100);
         super.init();
     }
 
@@ -52,7 +53,7 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
     }
 
     public void updateColorPickerHueState(int hue) {
-        setProgress(hue, true);
+        setProgress(hue);
         callChanged(hue);
         if (colorPickerData != null)
             colorPickerData.hue = hue;
@@ -69,7 +70,7 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
         Arrays.stream(onColorHueChangeds).forEach(new Consumer<OnColorHueChanged>() {
             @Override
             public void accept(OnColorHueChanged onColorHueChanged) {
-                onColorHueChanged.onColorHueChanged(hue);
+                onColorHueChanged.onColorHueChanged((float) hue / 100);
             }
         });
     }
@@ -81,6 +82,6 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
     }
 
     public interface OnColorHueChanged {
-        void onColorHueChanged(int changed);
+        void onColorHueChanged(float changed);
     }
 }

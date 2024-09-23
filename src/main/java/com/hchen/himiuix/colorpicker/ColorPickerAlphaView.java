@@ -43,7 +43,7 @@ public class ColorPickerAlphaView extends ColorBaseSeekBar implements ColorPicke
     }
 
     public void updateColorPickerAlphaState(int alpha) {
-        setProgress(alpha, true);
+        setProgress(alpha);
         if (colorPickerData != null)
             colorPickerData.alpha = alpha;
     }
@@ -55,7 +55,7 @@ public class ColorPickerAlphaView extends ColorBaseSeekBar implements ColorPicke
     }
 
     @Override
-    public void onColorHueChanged(int changed) {
+    public void onColorHueChanged(float changed) {
         colors = new int[]{
                 Color.HSVToColor(0, new float[]{changed, 1, 1}),
                 Color.HSVToColor(255, new float[]{changed, 1, 1}),

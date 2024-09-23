@@ -265,9 +265,9 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
         float[] hsv = new float[3];
         Color.colorToHSV(rgb, hsv);
-        hueView.updateColorPickerHueState((int) hsv[0]);
-        saturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 100));
-        lightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 100));
+        hueView.updateColorPickerHueState(Math.round(hsv[0] * 100));
+        saturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 10000));
+        lightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 10000));
         alphaView.updateColorPickerAlphaState(alpha);
     }
 

@@ -9,6 +9,6 @@ public class ColorPickerData {
     public int alpha = 255;
 
     public int HSVToColor() {
-        return Color.HSVToColor(alpha, new float[]{hue, (float) saturation / 100, (float) lightness / 100});
+        return Color.HSVToColor(alpha, new float[]{(float) hue / 100, (float) saturation / 10000, (float) lightness / 10000});
     }
 }

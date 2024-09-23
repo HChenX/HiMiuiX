@@ -32,13 +32,13 @@ public class ColorPickerSaturationView extends ColorBaseSeekBar implements Color
                 Color.HSVToColor(new float[]{0, 0, 1}),
                 Color.HSVToColor(new float[]{0, 1, 1})
         };
-        setMax(100);
+        setMax(10000);
         setProgress(0);
         super.init();
     }
 
     public void updateColorPickerSaturationState(int saturation) {
-        setProgress(saturation, true);
+        setProgress(saturation);
         if (colorPickerData != null)
             colorPickerData.saturation = saturation;
     }
@@ -50,7 +50,7 @@ public class ColorPickerSaturationView extends ColorBaseSeekBar implements Color
     }
 
     @Override
-    public void onColorHueChanged(int changed) {
+    public void onColorHueChanged(float changed) {
         colors = new int[]{
                 Color.HSVToColor(new float[]{changed, 0, 1}),
                 Color.HSVToColor(new float[]{changed, 1, 1}),
