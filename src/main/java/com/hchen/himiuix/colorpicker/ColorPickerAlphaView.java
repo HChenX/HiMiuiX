@@ -31,9 +31,9 @@ public class ColorPickerAlphaView extends ColorBaseSeekBar implements ColorPicke
 
     @Override
     protected void init() {
-        backgroundImg = AppCompatResources.getDrawable(getContext(), R.drawable.color_picker_seekbar_alpha_bg);
-        tag = ColorPickerTag.TAG_ALPHA;
-        colors = new int[]{
+        mBackgroundImg = AppCompatResources.getDrawable(getContext(), R.drawable.color_picker_seekbar_alpha_bg);
+        mColorPickerTag = ColorPickerTag.TAG_ALPHA;
+        mColors = new int[]{
                 Color.HSVToColor(0, new float[]{0, 1, 1}),
                 Color.HSVToColor(255, new float[]{0, 1, 1}),
         };
@@ -44,19 +44,19 @@ public class ColorPickerAlphaView extends ColorBaseSeekBar implements ColorPicke
 
     public void updateColorPickerAlphaState(int alpha) {
         setProgress(alpha);
-        if (colorPickerData != null)
-            colorPickerData.alpha = alpha;
+        if (mColorPickerData != null)
+            mColorPickerData.alpha = alpha;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (colorPickerData != null)
-            colorPickerData.alpha = seekBar.getProgress();
+        if (mColorPickerData != null)
+            mColorPickerData.alpha = seekBar.getProgress();
     }
 
     @Override
     public void onColorHueChanged(float changed) {
-        colors = new int[]{
+        mColors = new int[]{
                 Color.HSVToColor(0, new float[]{changed, 1, 1}),
                 Color.HSVToColor(255, new float[]{changed, 1, 1}),
         };

@@ -27,8 +27,8 @@ public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorP
 
     @Override
     protected void init() {
-        tag = ColorPickerTag.TAG_LIGHTNESS;
-        colors = new int[]{
+        mColorPickerTag = ColorPickerTag.TAG_LIGHTNESS;
+        mColors = new int[]{
                 Color.HSVToColor(new float[]{0, 1, 0}),
                 Color.HSVToColor(new float[]{0, 1, 1})
         };
@@ -39,19 +39,19 @@ public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorP
 
     public void updateColorPickerLightnessState(int lightness) {
         setProgress(lightness);
-        if (colorPickerData != null)
-            colorPickerData.lightness = lightness;
+        if (mColorPickerData != null)
+            mColorPickerData.lightness = lightness;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (colorPickerData != null)
-            colorPickerData.lightness = seekBar.getProgress();
+        if (mColorPickerData != null)
+            mColorPickerData.lightness = seekBar.getProgress();
     }
 
     @Override
     public void onColorHueChanged(float changed) {
-        colors = new int[]{
+        mColors = new int[]{
                 Color.HSVToColor(new float[]{changed, 1, 0}),
                 Color.HSVToColor(new float[]{changed, 1, 1}),
         };

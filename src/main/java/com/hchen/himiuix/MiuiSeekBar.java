@@ -10,10 +10,10 @@ import android.widget.SeekBar;
 @SuppressLint("AppCompatCustomView")
 public class MiuiSeekBar extends SeekBar {
     private String TAG = "MiuiPreference";
-    private Paint paint;
+    private Paint mPaint;
     private boolean shouldStep = false;
-    private int defValue = -1;
-    private int defStep = -1;
+    private int mDefValue = -1;
+    private int mDefStep = -1;
     private boolean showDefaultPoint;
 
     public MiuiSeekBar(Context context) {
@@ -34,9 +34,9 @@ public class MiuiSeekBar extends SeekBar {
     }
 
     private void init() {
-        paint = new Paint();
-        paint.setColor(getContext().getColor(R.color.seekbar_def));
-        paint.setStyle(Paint.Style.FILL);
+        mPaint = new Paint();
+        mPaint.setColor(getContext().getColor(R.color.seekbar_def));
+        mPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -48,16 +48,16 @@ public class MiuiSeekBar extends SeekBar {
             int height = getHeight() - MiuiXUtils.sp2px(getContext(), 20);
 
             float scaleWidth = (float) width / (getMax() - getMin());
-            float xPosition = scaleWidth * (shouldStep ? (defStep) : (defValue - getMin()))
+            float xPosition = scaleWidth * (shouldStep ? (mDefStep) : (mDefValue - getMin()))
                     + MiuiXUtils.sp2px(getContext(), 25);
             float yPosition = (float) height / 2;
 
-            canvas.drawCircle(xPosition, yPosition, (float) height / 5, paint);
+            canvas.drawCircle(xPosition, yPosition, (float) height / 5, mPaint);
         }
     }
 
     public void setDefValue(int defValue) {
-        this.defValue = defValue;
+        this.mDefValue = defValue;
     }
 
     public void setShouldStep(boolean shouldStep) {
@@ -65,7 +65,7 @@ public class MiuiSeekBar extends SeekBar {
     }
 
     public void setDefStep(int defStep) {
-        this.defStep = defStep;
+        this.mDefStep = defStep;
     }
 
     public void setShowDefaultPoint(boolean show) {

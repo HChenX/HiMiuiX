@@ -16,12 +16,12 @@ import androidx.preference.PreferenceViewHolder;
 
 public class MiuiPreferenceCategory extends PreferenceGroup {
     String TAG = "MiuiPreference";
-    private ConstraintLayout layout;
-    private View dividerView;
-    private TextView textView;
-    private int noTipHeight;
-    private int haveTipHeight;
-    private boolean goneDivider;
+    private ConstraintLayout mLayout;
+    private View mDividerView;
+    private TextView mTextView;
+    private int mNoTipHeight;
+    private int mHaveTipHeight;
+    private boolean shouldGoneDivider;
 
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.style.MiuiPreference_Category);
@@ -40,20 +40,20 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
         setLayoutResource(R.layout.miuix_category);
         setSelectable(false);
         setPersistent(false);
-        noTipHeight = MiuiXUtils.sp2px(context, 50);
-        haveTipHeight = MiuiXUtils.sp2px(context, 63);
+        mNoTipHeight = MiuiXUtils.sp2px(context, 50);
+        mHaveTipHeight = MiuiXUtils.sp2px(context, 63);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreferenceCategory,
                 defStyleAttr, defStyleRes)) {
-            goneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, false);
+            shouldGoneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, false);
         }
     }
 
     public void setGoneDivider(boolean goneDivider) {
-        this.goneDivider = goneDivider;
+        this.shouldGoneDivider = goneDivider;
     }
 
     public boolean isGoneDivider() {
-        return goneDivider;
+        return shouldGoneDivider;
     }
 
     @Override
@@ -74,30 +74,30 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        layout = (ConstraintLayout) holder.itemView;
-        dividerView = layout.findViewById(R.id.category_divider);
-        textView = layout.findViewById(R.id.category_tip);
+        mLayout = (ConstraintLayout) holder.itemView;
+        mDividerView = mLayout.findViewById(R.id.category_divider);
+        mTextView = mLayout.findViewById(R.id.category_tip);
 
-        textView.setVisibility(View.GONE);
-        dividerView.setVisibility(View.VISIBLE);
+        mTextView.setVisibility(View.GONE);
+        mDividerView.setVisibility(View.VISIBLE);
         setLayoutHeight(false);
 
-        if (goneDivider) {
-            dividerView.setVisibility(View.GONE);
-            haveTipHeight = MiuiXUtils.sp2px(getContext(), 33);
-            noTipHeight = MiuiXUtils.sp2px(getContext(), 20);
+        if (shouldGoneDivider) {
+            mDividerView.setVisibility(View.GONE);
+            mHaveTipHeight = MiuiXUtils.sp2px(getContext(), 33);
+            mNoTipHeight = MiuiXUtils.sp2px(getContext(), 20);
             setLayoutHeight(false);
         }
         if (getTitle() != null) {
-            textView.setVisibility(View.VISIBLE);
-            textView.setText(getTitle());
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(getTitle());
             setLayoutHeight(true);
         }
     }
 
     private void setLayoutHeight(boolean haveTip) {
-        ViewGroup.LayoutParams params = layout.getLayoutParams();
-        params.height = haveTip ? haveTipHeight : noTipHeight;
-        layout.setLayoutParams(params);
+        ViewGroup.LayoutParams params = mLayout.getLayoutParams();
+        params.height = haveTip ? mHaveTipHeight : mNoTipHeight;
+        mLayout.setLayoutParams(params);
     }
 }

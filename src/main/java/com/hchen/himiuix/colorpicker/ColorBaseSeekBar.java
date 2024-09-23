@@ -18,12 +18,12 @@ import com.hchen.himiuix.R;
 @SuppressLint("AppCompatCustomView")
 public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChangeListener {
     public static String TAG = "MiuiPreference";
-    protected GradientDrawable gradientDrawable;
-    protected Drawable backgroundImg;
-    protected ColorPickerData colorPickerData;
-    protected OnColorValueChanged valueChanged;
-    protected ColorPickerTag tag = ColorPickerTag.TAG_DEF;
-    protected int[] colors;
+    protected GradientDrawable mGradientDrawable;
+    protected Drawable mBackgroundImg;
+    protected ColorPickerData mColorPickerData;
+    protected OnColorValueChanged mValueChanged;
+    protected ColorPickerTag mColorPickerTag = ColorPickerTag.TAG_DEF;
+    protected int[] mColors;
 
     public enum ColorPickerTag {
         TAG_DEF,
@@ -58,32 +58,32 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
     }
 
     public void updateProgressBackground() {
-        gradientDrawable = new GradientDrawable();
-        gradientDrawable.setColors(colors);
-        gradientDrawable.setShape(GradientDrawable.RECTANGLE);
-        gradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
-        gradientDrawable.setCornerRadius(MiuiXUtils.sp2px(getContext(), 15));
-        gradientDrawable.setSize(-1, MiuiXUtils.sp2px(getContext(), 32));
-        gradientDrawable.setStroke(0, 0);
-        if (backgroundImg == null)
-            setProgressDrawable(gradientDrawable);
+        mGradientDrawable = new GradientDrawable();
+        mGradientDrawable.setColors(mColors);
+        mGradientDrawable.setShape(GradientDrawable.RECTANGLE);
+        mGradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
+        mGradientDrawable.setCornerRadius(MiuiXUtils.sp2px(getContext(), 15));
+        mGradientDrawable.setSize(-1, MiuiXUtils.sp2px(getContext(), 32));
+        mGradientDrawable.setStroke(0, 0);
+        if (mBackgroundImg == null)
+            setProgressDrawable(mGradientDrawable);
         else
-            setProgressDrawable(new LayerDrawable(new Drawable[]{backgroundImg, gradientDrawable}));
+            setProgressDrawable(new LayerDrawable(new Drawable[]{mBackgroundImg, mGradientDrawable}));
     }
 
     public void setColorPickerData(ColorPickerData colorPickerData) {
-        this.colorPickerData = colorPickerData;
+        this.mColorPickerData = colorPickerData;
     }
 
     public void setColorPickerValueChangedListener(OnColorValueChanged valueChanged) {
-        this.valueChanged = valueChanged;
+        this.mValueChanged = valueChanged;
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (valueChanged != null) {
+        if (mValueChanged != null) {
             if (fromUser)
-                valueChanged.changed(tag, progress);
+                mValueChanged.changed(mColorPickerTag, progress);
         }
     }
 

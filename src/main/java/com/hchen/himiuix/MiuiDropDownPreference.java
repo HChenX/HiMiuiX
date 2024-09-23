@@ -30,16 +30,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MiuiDropDownPreference extends MiuiPreference {
-    private MiuiAlertDialog dialog;
+    private MiuiAlertDialog mDialog;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
     private CharSequence mDefValue;
-    private boolean showOnSummary;
+    private boolean shouldShowOnSummary;
     private String mValue;
-    private View view;
+    private View mTouchView;
     private boolean isInitialTime = true;
     private final ArrayList<CharSequence> mEntriesList = new ArrayList<>();
-    private final SparseBooleanArray booleanArray = new SparseBooleanArray();
+    private final SparseBooleanArray mBooleanArray = new SparseBooleanArray();
 
     public MiuiDropDownPreference(@NonNull Context context) {
         this(context, null);
@@ -71,7 +71,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
                     R.styleable.MiuiDropDownPreference_android_entryValues);
             mDefValue = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_defaultValue,
                     R.styleable.MiuiDropDownPreference_android_defaultValue);
-            showOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
+            shouldShowOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
         }
     }
 
@@ -112,7 +112,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
                 persistString(value);
                 makeBooleanArray(value);
                 mValue = value;
-                if (showOnSummary)
+                if (shouldShowOnSummary)
                     setSummary(mEntriesList.get(Integer.parseInt(mValue)));
                 if (!isInitialTime) {
                     notifyChanged();
@@ -157,17 +157,17 @@ public class MiuiDropDownPreference extends MiuiPreference {
     protected void notifyChanged() {
         super.notifyChanged();
         if (mEntryValues.length != mEntries.length) return;
-        if (dialog != null && dialog.listAdapter != null) {
-            dialog.listAdapter.booleanArray = booleanArray;
-            dialog.listAdapter.notifyDataSetChanged();
+        if (mDialog != null && mDialog.mListAdapter != null) {
+            mDialog.mListAdapter.mBooleanArray = mBooleanArray;
+            mDialog.mListAdapter.notifyDataSetChanged();
         }
     }
 
     private void makeBooleanArray(@NonNull String mValue) {
-        booleanArray.clear();
+        mBooleanArray.clear();
         for (int i = 0; i < mEntryValues.length; i++) {
             if (mEntryValues[i].equals(mValue)) {
-                booleanArray.put(i, true);
+                mBooleanArray.put(i, true);
                 break;
             }
         }
@@ -217,7 +217,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     @Override
     protected boolean shouldShowSummary() {
-        return getSummary() != null || showOnSummary;
+        return getSummary() != null || shouldShowOnSummary;
     }
 
     @Override
@@ -267,10 +267,10 @@ public class MiuiDropDownPreference extends MiuiPreference {
         }
         if (event.getAction() == MotionEvent.ACTION_UP) {
             safeCheck();
-            if (dialog != null && dialog.isShowing()) return false;
+            if (mDialog != null && mDialog.isShowing()) return false;
             v.setBackgroundResource(R.color.touch_down);
             v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-            view = v;
+            mTouchView = v;
             float x = event.getRawX();
             float y = event.getRawY();
             showDialogAtPosition(x, y);
@@ -278,64 +278,57 @@ public class MiuiDropDownPreference extends MiuiPreference {
         return false;
     }
 
-    private int screenHeight;
-    private int screenWidth;
-    private int viewX;
-    private int viewY;
-    private int viewWidth;
-    private int viewHeight;
-    private int dialogHeight;
-    private int showX;
-    private int showY;
-    private boolean showRight;
+    private int mDialogHeight;
+    private int mShowX;
+    private int mShowY;
+    private boolean shouldShowRight;
 
     private void showDialogAtPosition(float x, float y) {
-        screenHeight = MiuiXUtils.getScreenSize(getContext()).y;
-        screenWidth = MiuiXUtils.getScreenSize(getContext()).x;
+        int screenHeight = MiuiXUtils.getScreenSize(getContext()).y;
 
         int[] location = new int[2];
         getMiuiPrefMainLayout().getLocationOnScreen(location);
-        viewX = location[0];
-        viewY = location[1];
-        viewWidth = getMiuiPrefMainLayout().getWidth();
-        viewHeight = getMiuiPrefMainLayout().getHeight();
+        int viewX = location[0];
+        int viewY = location[1];
+        int viewWidth = getMiuiPrefMainLayout().getWidth();
+        int viewHeight = getMiuiPrefMainLayout().getHeight();
 
-        dialogHeight = calculateHeight();
+        mDialogHeight = calculateHeight();
         int spaceBelow = screenHeight - (viewY + viewHeight);
-        boolean showBelow = (spaceBelow - dialogHeight) > screenHeight / 8;
-        showRight = x > ((float) (viewX + viewWidth) / 2);
+        boolean showBelow = (spaceBelow - mDialogHeight) > screenHeight / 8;
+        shouldShowRight = x > ((float) (viewX + viewWidth) / 2);
 
-        showX = MiuiXUtils.dp2px(getContext(), 25);
-        showY = showBelow ? viewY + MiuiXUtils.sp2px(getContext(), 5) : viewY - dialogHeight - MiuiXUtils.sp2px(getContext(), 30);
+        mShowX = MiuiXUtils.dp2px(getContext(), 25);
+        mShowY = showBelow ? viewY + MiuiXUtils.sp2px(getContext(), 5) : viewY - mDialogHeight - MiuiXUtils.sp2px(getContext(), 30);
 
         initDialog();
         calculateLayout();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                view.setBackgroundResource(R.color.touch_up);
+                mTouchView.setBackgroundResource(R.color.touch_up);
             }
         });
-        dialog.show();
+        mDialog.show();
     }
 
     private void calculateLayout() {
-        Window window = dialog.getWindow();
+        Window window = mDialog.getWindow();
         WindowManager.LayoutParams params = window.getAttributes();
-        window.setGravity(Gravity.TOP | (showRight ? Gravity.RIGHT : Gravity.LEFT));
-        params.x = showX;
-        params.y = showY;
+        window.setGravity(Gravity.TOP | (shouldShowRight ? Gravity.RIGHT : Gravity.LEFT));
+        params.x = mShowX;
+        params.y = mShowY;
         params.width = calculateWidth();
-        params.height = dialogHeight;
+        params.height = mDialogHeight;
         window.setAttributes(params);
 
-        dialog.recyclerView.post(new Runnable() {
+        mDialog.mRecyclerView.post(new Runnable() {
             @Override
             public void run() {
-                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) dialog.recyclerView.getLayoutParams();
+                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) mDialog.mRecyclerView.getLayoutParams();
                 layoutParams.width = calculateWidth();
-                layoutParams.height = dialogHeight;
-                dialog.recyclerView.setLayoutParams(layoutParams);
+                layoutParams.height = mDialogHeight;
+                mDialog.mRecyclerView.setLayoutParams(layoutParams);
             }
         });
     }
@@ -355,20 +348,20 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     private void initDialog() {
-        dialog = new MiuiAlertDialog(getContext());
-        dialog.alertTitleView.setVisibility(View.GONE); // 隐藏标题
-        dialog.messageView.setVisibility(View.GONE); // 隐藏信息
-        dialog.buttonView.setVisibility(View.GONE); // 隐藏按钮布局
-        dialog.endView.setVisibility(View.GONE); // 隐藏垫底 view
-        dialog.isDropDown = true;
-        dialog.setHapticFeedbackEnabled(true);
-        dialog.setWindowAnimations(R.style.Animation_Dialog_Center);
-        dialog.setCornersRadius(MiuiXUtils.dp2px(getContext(), 20));
-        dialog.listAdapter.booleanArray = booleanArray;
-        dialog.setItems(mEntriesList, new DialogInterface.OnItemsChangeListener() {
+        mDialog = new MiuiAlertDialog(getContext());
+        mDialog.isDropDown = true;
+        mDialog.mTitleView.setVisibility(View.GONE); // 隐藏标题
+        mDialog.mMessageView.setVisibility(View.GONE); // 隐藏信息
+        mDialog.mButtonLayout.setVisibility(View.GONE); // 隐藏按钮布局
+        mDialog.mEndView.setVisibility(View.GONE); // 隐藏垫底 view
+        mDialog.setHapticFeedbackEnabled(true);
+        mDialog.setWindowAnimations(R.style.Animation_Dialog_Center);
+        mDialog.setCornersRadius(MiuiXUtils.dp2px(getContext(), 20));
+        mDialog.mListAdapter.mBooleanArray = mBooleanArray;
+        mDialog.setItems(mEntriesList, new DialogInterface.OnItemsChangeListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, CharSequence item, int which) {
-                if (dialog.listAdapter.booleanArray.get(which)) {
+                if (mDialog.mListAdapter.mBooleanArray.get(which)) {
                     return;
                 }
                 setValue(String.valueOf(which));

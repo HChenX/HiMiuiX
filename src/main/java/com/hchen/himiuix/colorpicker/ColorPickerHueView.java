@@ -32,8 +32,8 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
 
     @Override
     protected void init() {
-        tag = ColorPickerTag.TAG_HUE;
-        colors = new int[]{
+        mColorPickerTag = ColorPickerTag.TAG_HUE;
+        mColors = new int[]{
                 Color.HSVToColor(new float[]{0, 1, 1}),
                 Color.HSVToColor(new float[]{60, 1, 1}),
                 Color.HSVToColor(new float[]{120, 1, 1}),
@@ -55,8 +55,8 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
     public void updateColorPickerHueState(int hue) {
         setProgress(hue);
         callChanged(hue);
-        if (colorPickerData != null)
-            colorPickerData.hue = hue;
+        if (mColorPickerData != null)
+            mColorPickerData.hue = hue;
     }
 
     @Override
@@ -77,8 +77,8 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (colorPickerData != null)
-            colorPickerData.hue = seekBar.getProgress();
+        if (mColorPickerData != null)
+            mColorPickerData.hue = seekBar.getProgress();
     }
 
     public interface OnColorHueChanged {

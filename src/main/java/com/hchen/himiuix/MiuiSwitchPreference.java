@@ -25,20 +25,20 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiSwitchPreference extends MiuiPreference {
-    private ConstraintLayout switchBackgroundLayout;
-    private View thumbView;
+    private ConstraintLayout mSwitchBackgroundLayout;
+    private View mThumbView;
     private CharSequence mSummaryOn;
     private CharSequence mSummaryOff;
     private boolean mChecked;
     private boolean mDisableDependentsState;
     private boolean isInitialTime = true;
-    private ViewPropertyAnimator thumbViewAnimator;
-    private final int animatorDuration = 320;
-    private final float animatorTension = 1.2f;
-    private final View.OnClickListener onClickListener = new View.OnClickListener() {
+    private ViewPropertyAnimator mThumbViewAnimator;
+    private final int ANIMATOR_DURATION = 320;
+    private final float ANIMATOR_TENSION = 1.2f;
+    private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (animating) return;
+            if (isAnimating) return;
             final boolean newValue = !isChecked();
             if (callChangeListener(newValue)) {
                 setChecked(newValue);
@@ -51,18 +51,18 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
     };
-    private final View.OnHoverListener onHoverListener = new View.OnHoverListener() {
+    private final View.OnHoverListener mHoverListener = new View.OnHoverListener() {
         @Override
         public boolean onHover(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
-                onTouchListener.animZoom();
+                mTouchListener.animZoom();
             } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
-                onTouchListener.animRevert();
+                mTouchListener.animRevert();
             } else return false;
             return true;
         }
     };
-    private final OnCustomTouchListener onTouchListener = new OnCustomTouchListener() {
+    private final OnCustomTouchListener mTouchListener = new OnCustomTouchListener() {
         private float switchViewX;
         private boolean shouldHaptic;
         private float maxMoveX;
@@ -76,9 +76,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
                     isMoved = false;
                     v.getParent().requestDisallowInterceptTouchEvent(true);
                     int[] outLocation = new int[2];
-                    switchBackgroundLayout.getLocationOnScreen(outLocation);
+                    mSwitchBackgroundLayout.getLocationOnScreen(outLocation);
                     switchViewX = outLocation[0];
-                    maxMoveX = switchBackgroundLayout.getWidth() - thumbView.getWidth() - MiuiXUtils.sp2px(getContext(), 4.2F);
+                    maxMoveX = mSwitchBackgroundLayout.getWidth() - mThumbView.getWidth() - MiuiXUtils.sp2px(getContext(), 4.2F);
                     minMoveX = MiuiXUtils.sp2px(getContext(), 4.2F);
                     animZoom();
                     break;
@@ -108,14 +108,14 @@ public class MiuiSwitchPreference extends MiuiPreference {
                             finalX = maxMoveX;
                             newCheckedState = true;
                         }
-                        thumbViewAnimator.x(finalX)
-                                .setInterpolator(new AnticipateOvershootInterpolator(animatorTension))
-                                .setDuration(animatorDuration);
+                        mThumbViewAnimator.x(finalX)
+                                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
+                                .setDuration(ANIMATOR_DURATION);
                         if (newCheckedState != isChecked()) {
-                            onClickListener.onClick(null);
-                        } else thumbViewAnimator.start();
+                            mClickListener.onClick(null);
+                        } else mThumbViewAnimator.start();
                     } else
-                        onClickListener.onClick(v);
+                        mClickListener.onClick(v);
                     v.getParent().requestDisallowInterceptTouchEvent(false);
                     break;
                 default:
@@ -131,12 +131,12 @@ public class MiuiSwitchPreference extends MiuiPreference {
         }
 
         public void animZoom() {
-            thumbViewAnimator.scaleX(1.1f)
+            mThumbViewAnimator.scaleX(1.1f)
                     .scaleY(1.1f);
         }
 
         public void animRevert() {
-            thumbViewAnimator.scaleX(1f)
+            mThumbViewAnimator.scaleX(1f)
                     .scaleY(1f);
         }
     };
@@ -193,18 +193,13 @@ public class MiuiSwitchPreference extends MiuiPreference {
         return mSummaryOff;
     }
 
-    @Override
-    protected void onClick(View view) {
-        onClickListener.onClick(view);
-    }
-
     public boolean isChecked() {
         return mChecked;
     }
 
     public void setChecked(boolean checked) {
         final boolean changed = mChecked != checked;
-        if (changed) {
+        if (callChangeListener(changed) || isInitialTime) {
             mChecked = checked;
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
@@ -242,6 +237,107 @@ public class MiuiSwitchPreference extends MiuiPreference {
         isInitialTime = false;
     }
 
+    @Override
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        mSwitchBackgroundLayout = (ConstraintLayout) holder.findViewById(R.id.switch_container);
+        mThumbView = holder.findViewById(R.id.switch_thumb);
+        mThumbViewAnimator = mThumbView.animate();
+        mThumbView.setOnTouchListener(null);
+        mThumbView.setOnHoverListener(null);
+
+        mSwitchBackgroundLayout.setOnClickListener(null);
+        updateSwitchState(true);
+        animateThumbIfNeed(false, isChecked());
+
+        if (shouldShowSummary()) {
+            if (mSummaryOff == null && mSummaryOn == null)
+                getSummaryView().setText(getSummary()); // on 与 off 应当成对出现
+            else {
+                if (mSummaryOn != null && isChecked()) getSummaryView().setText(mSummaryOn);
+                if (mSummaryOff != null && !isChecked()) getSummaryView().setText(mSummaryOff);
+            }
+        }
+        if (isEnabled() && isSelectable()) {
+            mSwitchBackgroundLayout.setOnClickListener(mClickListener);
+            mThumbView.setOnHoverListener(mHoverListener);
+            mThumbView.setOnTouchListener(mTouchListener);
+        }
+    }
+
+    @Override
+    protected boolean shouldShowSummary() {
+        return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
+    }
+
+    @Override
+    protected void onClick(View view) {
+        mClickListener.onClick(view);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean onHover(View v, MotionEvent event) {
+        return super.onHover(v, event);
+    }
+
+    private void updateSwitchState(boolean isInit) {
+        if (isEnabled()) {
+            if (isInit) {
+                mSwitchBackgroundLayout.setBackgroundResource(isChecked() ?
+                        R.drawable.switch_background_on :
+                        R.drawable.switch_background_off);
+            } else {
+                mSwitchBackgroundLayout.setBackgroundResource(R.drawable.switch_transition_background);
+                TransitionDrawable transitionDrawable = (TransitionDrawable) mSwitchBackgroundLayout.getBackground();
+                if (isChecked()) {
+                    transitionDrawable.startTransition(ANIMATOR_DURATION);  // 渐变到 on 状态
+                } else {
+                    transitionDrawable.resetTransition();  // 渐变到 off 状态
+                }
+            }
+            mThumbView.setBackgroundResource(R.drawable.thumb_background);
+        } else {
+            if (isChecked()) {
+                mSwitchBackgroundLayout.setBackgroundResource(R.drawable.switch_background_disable_on);
+                mThumbView.setBackgroundResource(R.drawable.thumb_disable_on_background);
+            } else {
+                mSwitchBackgroundLayout.setBackgroundResource(R.drawable.switch_background_disable_off);
+                mThumbView.setBackgroundResource(R.drawable.thumb_disable_off_background);
+            }
+        }
+    }
+
+    private boolean isAnimating = false;
+
+    private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
+        if (isAnimating) return;
+        int translationX = sp2px(getContext(), 22.8F);
+        if (!useAnimate) {
+            if (toRight) mThumbView.setTranslationX(sp2px(getContext(), 22.8F));
+            else mThumbView.setTranslationX(0);
+            return;
+        }
+        isAnimating = true;
+        int thumbPosition = toRight ? translationX : 0;
+
+        mThumbViewAnimator
+                .translationX(thumbPosition)
+                .setDuration(ANIMATOR_DURATION)
+                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        isAnimating = false;
+                    }
+                })
+                .start();
+    }
+
     @Nullable
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -264,102 +360,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
         setChecked(savedState.mChecked);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        super.onBindViewHolder(holder);
-        switchBackgroundLayout = (ConstraintLayout) holder.findViewById(R.id.switch_container);
-        thumbView = holder.findViewById(R.id.switch_thumb);
-        thumbViewAnimator = thumbView.animate();
-        thumbView.setOnTouchListener(null);
-        thumbView.setOnHoverListener(null);
-
-        switchBackgroundLayout.setOnClickListener(null);
-        updateSwitchState(true);
-        animateThumbIfNeed(false, isChecked());
-
-        if (shouldShowSummary()) {
-            if (mSummaryOff == null && mSummaryOn == null)
-                getSummaryView().setText(getSummary()); // on 与 off 应当成对出现
-            else {
-                if (mSummaryOn != null && isChecked()) getSummaryView().setText(mSummaryOn);
-                if (mSummaryOff != null && !isChecked()) getSummaryView().setText(mSummaryOff);
-            }
-        }
-        if (isEnabled() && isSelectable()) {
-            switchBackgroundLayout.setOnClickListener(onClickListener);
-            thumbView.setOnHoverListener(onHoverListener);
-            thumbView.setOnTouchListener(onTouchListener);
-        }
-    }
-
-    @Override
-    protected boolean shouldShowSummary() {
-        return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return false;
-    }
-
-    @Override
-    public boolean onHover(View v, MotionEvent event) {
-        return super.onHover(v, event);
-    }
-
-    private void updateSwitchState(boolean isInit) {
-        if (isEnabled()) {
-            if (isInit) {
-                switchBackgroundLayout.setBackgroundResource(isChecked() ?
-                        R.drawable.switch_background_on :
-                        R.drawable.switch_background_off);
-            } else {
-                switchBackgroundLayout.setBackgroundResource(R.drawable.switch_transition_background);
-                TransitionDrawable transitionDrawable = (TransitionDrawable) switchBackgroundLayout.getBackground();
-                if (isChecked()) {
-                    transitionDrawable.startTransition(animatorDuration);  // 渐变到 on 状态
-                } else {
-                    transitionDrawable.resetTransition();  // 渐变到 off 状态
-                }
-            }
-            thumbView.setBackgroundResource(R.drawable.thumb_background);
-        } else {
-            if (isChecked()) {
-                switchBackgroundLayout.setBackgroundResource(R.drawable.switch_background_disable_on);
-                thumbView.setBackgroundResource(R.drawable.thumb_disable_on_background);
-            } else {
-                switchBackgroundLayout.setBackgroundResource(R.drawable.switch_background_disable_off);
-                thumbView.setBackgroundResource(R.drawable.thumb_disable_off_background);
-            }
-        }
-    }
-
-    private boolean animating = false;
-
-    private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
-        if (animating) return;
-        int translationX = sp2px(getContext(), 22.8F);
-        if (!useAnimate) {
-            if (toRight) thumbView.setTranslationX(sp2px(getContext(), 22.8F));
-            else thumbView.setTranslationX(0);
-            return;
-        }
-        animating = true;
-        int thumbPosition = toRight ? translationX : 0;
-
-        thumbViewAnimator
-                .translationX(thumbPosition)
-                .setDuration(animatorDuration)
-                .setInterpolator(new AnticipateOvershootInterpolator(animatorTension))
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        animating = false;
-                    }
-                })
-                .start();
     }
 
     private static class SavedState extends BaseSavedState {

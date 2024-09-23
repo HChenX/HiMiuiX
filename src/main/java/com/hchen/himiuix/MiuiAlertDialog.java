@@ -55,28 +55,26 @@ import java.util.HashMap;
 
 public class MiuiAlertDialog implements DialogInterface {
     private static final String TAG = "MiuiPreference";
-    protected ConstraintLayout mainDialog;
-    TextView alertTitleView;
-    TextView messageView;
-    private Button positiveButton;
-    private Button negativeButton;
-    private Button neutralButton;
-    LinearLayout buttonView;
-    View endView;
-    RecyclerView recyclerView;
-    private EditText editTextView;
-    private TextView editTextTipView;
-    private ImageView editImageView;
-    private ConstraintLayout editLayout;
+    protected ConstraintLayout mMainDialog;
+    TextView mTitleView;
+    TextView mMessageView;
+    private Button mPositiveButton;
+    private Button mNegativeButton;
+    private Button mNeutralButton;
+    LinearLayout mButtonLayout;
+    View mEndView;
+    RecyclerView mRecyclerView;
+    private EditText mEditTextView;
+    private TextView mEditTextTipView;
+    private ImageView mEditImageView;
+    private ConstraintLayout mEditLayout;
+    private GradientDrawable mCustomRadius;
     boolean isDropDown = false;
-    private GradientDrawable customRadius;
-    private float radius = -1;
-    private int inputType;
-    private View customView;
-    private int customViewId;
-    private ConstraintLayout customLayout;
+    private float mRadiusValue = -1;
+    private View mCustomView;
+    private int mCustomViewId;
+    private ConstraintLayout mCustomLayout;
     private OnBindView onBindView;
-    private final ArrayList<EditText> editTextViews = new ArrayList<>();
     private static final int ID_POSITIVE_BUTTON = 0;
     private static final int ID_NEGATIVE_BUTTON = 1;
     private static final int ID_NEUTRAL_BUTTON = 2;
@@ -85,35 +83,36 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean isSetNeutralButton;
     private boolean isMultiSelect = false;
     private boolean dismissNow;
-    private ArrayList<CharSequence> items = new ArrayList<>();
-    final ListAdapter listAdapter;
-    private final Context context;
-    private final Dialog dialog;
-    private final Window window;
+    final ListAdapter mListAdapter;
+    private final Context mContext;
+    private final Dialog mDialog;
+    private final Window mWindow;
     private boolean shouldShowEdit = false;
     private boolean hapticFeedbackEnabled;
-    private TextWatcher textWatcher;
-    private boolean needInput;
+    private TextWatcher mTextWatcher;
+    private boolean shouldInput;
     private boolean isCreated;
-    private boolean autoDismiss = true;
-    private OnItemsChangeListener itemsChangeListener;
-    private WeakReference<Handler> handlerWeakReference = null;
-    private final HashMap<TypefaceObject, Typeface> typefaceHashMap = new HashMap<>();
-    private final HashMap<TypefaceObject, Pair<Typeface, Integer>> typefaceStyleHashMap = new HashMap<>();
-    private final android.text.TextWatcher defTextWatcher = new android.text.TextWatcher() {
+    private boolean isAutoDismiss = true;
+    private OnItemsChangeListener mItemsChangedListener;
+    private WeakReference<Handler> mHandlerWeakReference = null;
+    private ArrayList<CharSequence> mItems = new ArrayList<>();
+    private final ArrayList<EditText> mEditTextViews = new ArrayList<>();
+    private final HashMap<TypefaceObject, Typeface> mTypefaceHashMap = new HashMap<>();
+    private final HashMap<TypefaceObject, Pair<Typeface, Integer>> mTypefaceStyleHashMap = new HashMap<>();
+    private final android.text.TextWatcher mDefTextWatcher = new android.text.TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            if (textWatcher != null) textWatcher.beforeTextChanged(s, start, count, after);
+            if (mTextWatcher != null) mTextWatcher.beforeTextChanged(s, start, count, after);
         }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (textWatcher != null) textWatcher.onTextChanged(s, start, before, count);
+            if (mTextWatcher != null) mTextWatcher.onTextChanged(s, start, before, count);
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (textWatcher != null) textWatcher.afterTextChanged(s);
+            if (mTextWatcher != null) mTextWatcher.afterTextChanged(s);
         }
     };
 
@@ -132,14 +131,14 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     public MiuiAlertDialog(@NonNull Context context, @StyleRes int themeResId) {
-        this.context = context;
-        typefaceHashMap.clear();
-        typefaceStyleHashMap.clear();
+        this.mContext = context;
+        mTypefaceHashMap.clear();
+        mTypefaceStyleHashMap.clear();
         initView();
         if (themeResId == 0)
             themeResId = R.style.MiuiAlertDialog;
 
-        dialog = new Dialog(context, themeResId) {
+        mDialog = new Dialog(context, themeResId) {
             @Override
             public void dismiss() {
                 if (!isShowing()) return;
@@ -160,58 +159,58 @@ public class MiuiAlertDialog implements DialogInterface {
                     weakReference.clear();
                     weakReference = null;
                 }
-                if (handlerWeakReference != null) {
-                    handlerWeakReference.clear();
-                    handlerWeakReference = null;
+                if (mHandlerWeakReference != null) {
+                    mHandlerWeakReference.clear();
+                    mHandlerWeakReference = null;
                 }
-                editTextView.removeTextChangedListener(defTextWatcher);
+                mEditTextView.removeTextChangedListener(mDefTextWatcher);
                 super.dismiss();
             }
         };
 
-        window = dialog.getWindow();
-        assert window != null;
-        window.setContentView(mainDialog);
-        window.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams params = window.getAttributes();
+        mWindow = mDialog.getWindow();
+        assert mWindow != null;
+        mWindow.setContentView(mMainDialog);
+        mWindow.setGravity(Gravity.BOTTOM);
+        WindowManager.LayoutParams params = mWindow.getAttributes();
         Point windowPoint = MiuiXUtils.getScreenSize(context);
         params.verticalMargin = (MiuiXUtils.sp2px(context, 16) * 1.0f) / windowPoint.y;
         params.width = MiuiXUtils.isVerticalScreen(context) ? (int) (windowPoint.x / 1.08) : (int) (windowPoint.x / 2.0);
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        window.setAttributes(params);
-        window.setWindowAnimations(R.style.Animation_Dialog);
+        mWindow.setAttributes(params);
+        mWindow.setWindowAnimations(R.style.Animation_Dialog);
 
-        handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
-        listAdapter = new ListAdapter(this);
+        mHandlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
+        mListAdapter = new ListAdapter(this);
         if (context instanceof Activity activity) {
             activity.registerActivityLifecycleCallbacks(new ActivityLifecycle(this));
         }
     }
 
     private void initView() {
-        mainDialog = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.miuix_dialog, null);
-        alertTitleView = mainDialog.findViewById(R.id.alertTitle);
-        messageView = mainDialog.findViewById(android.R.id.message);
-        buttonView = mainDialog.findViewById(R.id.button_view);
-        recyclerView = mainDialog.findViewById(R.id.list_view);
-        positiveButton = mainDialog.findViewById(android.R.id.button2);
-        negativeButton = mainDialog.findViewById(android.R.id.button1);
-        neutralButton = mainDialog.findViewById(android.R.id.button3);
-        endView = mainDialog.findViewById(R.id.end_view);
-        customLayout = mainDialog.findViewById(R.id.dialog_custom);
-        editTextView = mainDialog.findViewById(R.id.edit_text_id);
-        editLayout = mainDialog.findViewById(R.id.edit_layout);
-        editTextTipView = mainDialog.findViewById(R.id.edit_tip);
-        editImageView = mainDialog.findViewById(R.id.edit_image);
-        editLayout.setVisibility(View.GONE);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        editTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mMainDialog = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.miuix_dialog, null);
+        mTitleView = mMainDialog.findViewById(R.id.alertTitle);
+        mMessageView = mMainDialog.findViewById(android.R.id.message);
+        mButtonLayout = mMainDialog.findViewById(R.id.button_view);
+        mRecyclerView = mMainDialog.findViewById(R.id.list_view);
+        mPositiveButton = mMainDialog.findViewById(android.R.id.button2);
+        mNegativeButton = mMainDialog.findViewById(android.R.id.button1);
+        mNeutralButton = mMainDialog.findViewById(android.R.id.button3);
+        mEndView = mMainDialog.findViewById(R.id.end_view);
+        mCustomLayout = mMainDialog.findViewById(R.id.dialog_custom);
+        mEditTextView = mMainDialog.findViewById(R.id.edit_text_id);
+        mEditLayout = mMainDialog.findViewById(R.id.edit_layout);
+        mEditTextTipView = mMainDialog.findViewById(R.id.edit_tip);
+        mEditImageView = mMainDialog.findViewById(R.id.edit_image);
+        mEditLayout.setVisibility(View.GONE);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mEditTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    editLayout.setBackgroundResource(R.drawable.focused_border_input_box);
+                    mEditLayout.setBackgroundResource(R.drawable.focused_border_input_box);
                 } else
-                    editLayout.setBackgroundResource(R.drawable.nofocused_border_input_box);
+                    mEditLayout.setBackgroundResource(R.drawable.nofocused_border_input_box);
             }
         });
     }
@@ -221,58 +220,58 @@ public class MiuiAlertDialog implements DialogInterface {
             if (hapticFeedbackEnabled)
                 v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
             if (id == ID_POSITIVE_BUTTON) {
-                if (textWatcher != null)
-                    textWatcher.onResult(editTextView.getText().toString());
-                if (itemsChangeListener != null) {
+                if (mTextWatcher != null)
+                    mTextWatcher.onResult(mEditTextView.getText().toString());
+                if (mItemsChangedListener != null) {
                     ArrayList<CharSequence> result = new ArrayList<>();
-                    for (int i = 0; i < items.size(); i++) {
-                        if (listAdapter.booleanArray.get(i)) {
-                            result.add(items.get(i));
+                    for (int i = 0; i < mItems.size(); i++) {
+                        if (mListAdapter.mBooleanArray.get(i)) {
+                            result.add(mItems.get(i));
                         }
                     }
-                    itemsChangeListener.onResult(result, items, listAdapter.booleanArray);
+                    mItemsChangedListener.onResult(result, mItems, mListAdapter.mBooleanArray);
                 }
             }
             if (listener != null) listener.onClick(this, id);
-            if (dialog.isShowing() && autoDismiss)
+            if (mDialog.isShowing() && isAutoDismiss)
                 dismiss();
         };
     }
 
     public Window getWindow() {
-        return window;
+        return mWindow;
     }
 
     public MiuiAlertDialog setWindowAnimations(@StyleRes int resId) {
-        window.setWindowAnimations(resId);
+        mWindow.setWindowAnimations(resId);
         return this;
     }
 
     public MiuiAlertDialog setCornersRadius(int radius) {
-        customRadius = new GradientDrawable();
-        customRadius.setColor(context.getColor(R.color.white_or_black));
-        customRadius.setShape(GradientDrawable.RECTANGLE);
-        customRadius.setCornerRadius(radius);
-        this.radius = radius;
+        mCustomRadius = new GradientDrawable();
+        mCustomRadius.setColor(mContext.getColor(R.color.white_or_black));
+        mCustomRadius.setShape(GradientDrawable.RECTANGLE);
+        mCustomRadius.setCornerRadius(radius);
+        this.mRadiusValue = radius;
         return this;
     }
 
     public MiuiAlertDialog setCustomView(View view, OnBindView onBindView) {
         this.onBindView = onBindView;
-        customView = view;
-        customViewId = 0;
+        mCustomView = view;
+        mCustomViewId = 0;
         return this;
     }
 
     public MiuiAlertDialog setCustomView(int viewId, OnBindView onBindView) {
         this.onBindView = onBindView;
-        customViewId = viewId;
-        customView = null;
+        mCustomViewId = viewId;
+        mCustomView = null;
         return this;
     }
 
     public MiuiAlertDialog setItems(@ArrayRes int items, OnItemsChangeListener listener) {
-        return setItems(context.getResources().getTextArray(items), listener);
+        return setItems(mContext.getResources().getTextArray(items), listener);
     }
 
     public MiuiAlertDialog setItems(CharSequence[] items, OnItemsChangeListener listener) {
@@ -281,11 +280,11 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     public MiuiAlertDialog setItems(ArrayList<CharSequence> items, OnItemsChangeListener listener) {
-        this.items = items;
-        listAdapter.update(listener);
-        recyclerView.setVisibility(View.VISIBLE);
-        recyclerView.setAdapter(listAdapter);
-        itemsChangeListener = listener;
+        this.mItems = items;
+        mListAdapter.update(listener);
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mRecyclerView.setAdapter(mListAdapter);
+        mItemsChangedListener = listener;
         return this;
     }
 
@@ -295,92 +294,92 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     public MiuiAlertDialog setTitle(@StringRes int titleResId) {
-        return setTitle(context.getResources().getText(titleResId));
+        return setTitle(mContext.getResources().getText(titleResId));
     }
 
     public MiuiAlertDialog setTitle(CharSequence title) {
-        alertTitleView.setText(title);
-        alertTitleView.setVisibility(View.VISIBLE);
+        mTitleView.setText(title);
+        mTitleView.setVisibility(View.VISIBLE);
         return this;
     }
 
     public MiuiAlertDialog setTitleSize(float size) {
-        alertTitleView.setTextSize(size);
+        mTitleView.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setTextTypeface(MakeTypeface makeTypeface) {
-        makeTypeface.onMakeTypeface(typefaceHashMap);
-        makeTypeface.onMakeTypefaceStyle(typefaceStyleHashMap);
+        makeTypeface.onMakeTypeface(mTypefaceHashMap);
+        makeTypeface.onMakeTypefaceStyle(mTypefaceStyleHashMap);
         return this;
     }
 
     public MiuiAlertDialog setMessage(@StringRes int messageResId) {
-        return setMessage(context.getResources().getText(messageResId));
+        return setMessage(mContext.getResources().getText(messageResId));
     }
 
     public MiuiAlertDialog setMessage(CharSequence message) {
-        this.messageView.setText(message);
-        this.messageView.setVisibility(View.VISIBLE);
+        this.mMessageView.setText(message);
+        this.mMessageView.setVisibility(View.VISIBLE);
         return this;
     }
 
     public MiuiAlertDialog setMessageSize(float size) {
-        messageView.setTextSize(size);
+        mMessageView.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setPositiveButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
-        return setPositiveButton(context.getResources().getText(textId), listener);
+        return setPositiveButton(mContext.getResources().getText(textId), listener);
     }
 
     public MiuiAlertDialog setPositiveButton(CharSequence text, DialogInterface.OnClickListener listener) {
-        positiveButton.setText(text);
-        positiveButton.setOnClickListener(makeButtonClickAction(ID_POSITIVE_BUTTON, listener));
+        mPositiveButton.setText(text);
+        mPositiveButton.setOnClickListener(makeButtonClickAction(ID_POSITIVE_BUTTON, listener));
         isSetPositiveButton = true;
         return this;
     }
 
     public MiuiAlertDialog setPositiveButtonTextSize(float size) {
-        positiveButton.setTextSize(size);
+        mPositiveButton.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setNegativeButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
-        return setNegativeButton(context.getResources().getText(textId), listener);
+        return setNegativeButton(mContext.getResources().getText(textId), listener);
     }
 
     public MiuiAlertDialog setNegativeButton(CharSequence text, DialogInterface.OnClickListener listener) {
-        negativeButton.setText(text);
-        negativeButton.setOnClickListener(makeButtonClickAction(ID_NEGATIVE_BUTTON, listener));
+        mNegativeButton.setText(text);
+        mNegativeButton.setOnClickListener(makeButtonClickAction(ID_NEGATIVE_BUTTON, listener));
         isSetNegativeButton = true;
         return this;
     }
 
     public MiuiAlertDialog setNegativeButtonTextSize(float size) {
-        negativeButton.setTextSize(size);
+        mNegativeButton.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setNeutralButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
-        return setNeutralButton(context.getResources().getText(textId), listener);
+        return setNeutralButton(mContext.getResources().getText(textId), listener);
     }
 
     public MiuiAlertDialog setNeutralButton(CharSequence text, DialogInterface.OnClickListener listener) {
-        neutralButton.setText(text);
-        neutralButton.setVisibility(View.VISIBLE);
-        neutralButton.setOnClickListener(makeButtonClickAction(ID_NEUTRAL_BUTTON, listener));
+        mNeutralButton.setText(text);
+        mNeutralButton.setVisibility(View.VISIBLE);
+        mNeutralButton.setOnClickListener(makeButtonClickAction(ID_NEUTRAL_BUTTON, listener));
         isSetNeutralButton = true;
         return this;
     }
 
     public MiuiAlertDialog setNeutralButtonTextSize(float size) {
-        neutralButton.setTextSize(size);
+        mNeutralButton.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setContentView(@LayoutRes int layoutResID) {
-        window.setContentView(layoutResID);
+        mWindow.setContentView(layoutResID);
         return this;
     }
 
@@ -394,65 +393,64 @@ public class MiuiAlertDialog implements DialogInterface {
 
     public MiuiAlertDialog setEditText(CharSequence defText, boolean needInput, TextWatcher watcher) {
         if (defText != null) {
-            editTextView.setText(defText);
-            editTextView.setSelection(editTextView.getText().length());
+            mEditTextView.setText(defText);
+            mEditTextView.setSelection(mEditTextView.getText().length());
         }
-        this.needInput = needInput;
+        this.shouldInput = needInput;
         if (watcher != null)
-            editTextView.addTextChangedListener(defTextWatcher);
-        textWatcher = watcher;
+            mEditTextView.addTextChangedListener(mDefTextWatcher);
+        mTextWatcher = watcher;
         shouldShowEdit = true;
         return this;
     }
 
     public MiuiAlertDialog setEditTextSize(float size) {
-        editTextView.setTextSize(size);
+        mEditTextView.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setInputType(int type) {
-        inputType = type;
-        editTextView.setInputType(inputType);
+        mEditTextView.setInputType(type);
         return this;
     }
 
     public MiuiAlertDialog setEditHint(CharSequence text) {
-        editTextView.setHint(text);
+        mEditTextView.setHint(text);
         shouldShowEdit = true;
         return this;
     }
 
     public MiuiAlertDialog setEditHint(@StringRes int textResId) {
-        editTextView.setHint(textResId);
+        mEditTextView.setHint(textResId);
         shouldShowEdit = true;
         return this;
     }
 
     public MiuiAlertDialog setEditTextTip(CharSequence textTip) {
-        editTextTipView.setVisibility(View.VISIBLE);
-        editTextTipView.setText(textTip);
+        mEditTextTipView.setVisibility(View.VISIBLE);
+        mEditTextTipView.setText(textTip);
         shouldShowEdit = true;
         return this;
     }
 
     public MiuiAlertDialog setEditTextTip(@StringRes int textTipResId) {
-        return setEditTextTip(context.getText(textTipResId));
+        return setEditTextTip(mContext.getText(textTipResId));
     }
 
     public MiuiAlertDialog setEditTextTipSize(float size) {
-        editTextTipView.setTextSize(size);
+        mEditTextTipView.setTextSize(size);
         return this;
     }
 
     public MiuiAlertDialog setEditTextImage(Drawable drawable) {
-        editImageView.setVisibility(View.VISIBLE);
-        editImageView.setImageDrawable(drawable);
+        mEditImageView.setVisibility(View.VISIBLE);
+        mEditImageView.setImageDrawable(drawable);
         shouldShowEdit = true;
         return this;
     }
 
     public MiuiAlertDialog setEditTextImage(@DrawableRes int drawable) {
-        return setEditTextImage(AppCompatResources.getDrawable(context, drawable));
+        return setEditTextImage(AppCompatResources.getDrawable(mContext, drawable));
     }
 
     public MiuiAlertDialog setHapticFeedbackEnabled(boolean enabled) {
@@ -461,134 +459,134 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     public MiuiAlertDialog setCancelable(boolean cancelable) {
-        dialog.setCancelable(cancelable);
+        mDialog.setCancelable(cancelable);
         return this;
     }
 
     public MiuiAlertDialog setCanceledOnTouchOutside(boolean cancel) {
-        dialog.setCanceledOnTouchOutside(cancel);
+        mDialog.setCanceledOnTouchOutside(cancel);
         return this;
     }
 
     public MiuiAlertDialog setOnDismissListener(OnDismissListener dismissListener) {
-        dialog.setOnDismissListener(dialog -> dismissListener.onDismiss(MiuiAlertDialog.this));
+        mDialog.setOnDismissListener(dialog -> dismissListener.onDismiss(MiuiAlertDialog.this));
         return this;
     }
 
     public MiuiAlertDialog autoDismiss(boolean autoDismiss) {
-        this.autoDismiss = autoDismiss;
+        this.isAutoDismiss = autoDismiss;
         return this;
     }
 
     public Context getContext() {
-        return context;
+        return mContext;
     }
 
     public boolean isShowing() {
-        return dialog.isShowing();
+        return mDialog.isShowing();
     }
 
     public MiuiAlertDialog create() {
         if (isCreated) return this;
         if (isSetNeutralButton) {
-            buttonView.setOrientation(LinearLayout.VERTICAL);
-            margin(negativeButton, MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 25), 0, 0);
-            margin(neutralButton, MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 10), 0);
-            margin(positiveButton, MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 10), 0);
+            mButtonLayout.setOrientation(LinearLayout.VERTICAL);
+            margin(mNegativeButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
+            margin(mNeutralButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 10), 0);
+            margin(mPositiveButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 10), 0);
         } else {
             if (!isSetPositiveButton && !isSetNegativeButton)
-                dialog.setCancelable(true); // 防止无法关闭 dialog
+                mDialog.setCancelable(true); // 防止无法关闭 dialog
             if (!isSetPositiveButton || !isSetNegativeButton) {
-                margin(positiveButton, MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 25), 0, 0);
-                margin(negativeButton, MiuiXUtils.sp2px(context, 25), MiuiXUtils.sp2px(context, 25), 0, 0);
+                margin(mPositiveButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
+                margin(mNegativeButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
             }
         }
-        if (customView != null || customViewId != 0) {
+        if (mCustomView != null || mCustomViewId != 0) {
             setupCustomContent();
         } else {
             if (shouldShowEdit) {
-                editLayout.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE); // 不支持同时显示文本输入框和多选菜单 (至少是我不想写
-                recyclerView.setAdapter(null);
+                mEditLayout.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE); // 不支持同时显示文本输入框和多选菜单 (至少是我不想写
+                mRecyclerView.setAdapter(null);
             } else {
-                RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(recyclerView);
-                float radius = (this.radius == -1) ? MiuiXUtils.sp2px(context, 32) : this.radius;
+                RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(mRecyclerView);
+                float radius = (this.mRadiusValue == -1) ? MiuiXUtils.sp2px(mContext, 32) : this.mRadiusValue;
                 cornerRadius.setCornerRadius(radius);
-                if (items != null && !isDropDown) {
+                if (mItems != null && !isDropDown) {
                     cornerRadius.setCornerRadius(0);
-                    ViewGroup.LayoutParams layout = recyclerView.getLayoutParams();
-                    int height = (MiuiXUtils.sp2px(context, 56) * (items.size())) + MiuiXUtils.sp2px(context, 20);
-                    int maxHeight = MiuiXUtils.isVerticalScreen(context) ? MiuiXUtils.getScreenSize(context).y / 3 : (int) (MiuiXUtils.getScreenSize(context).y / 2.5);
+                    ViewGroup.LayoutParams layout = mRecyclerView.getLayoutParams();
+                    int height = (MiuiXUtils.sp2px(mContext, 56) * (mItems.size())) + MiuiXUtils.sp2px(mContext, 20);
+                    int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ? MiuiXUtils.getScreenSize(mContext).y / 3 : (int) (MiuiXUtils.getScreenSize(mContext).y / 2.5);
                     layout.height = Math.min(height, maxHeight);
-                    recyclerView.setLayoutParams(layout);
+                    mRecyclerView.setLayoutParams(layout);
 
                     if (isSetPositiveButton || isSetNegativeButton || isSetNeutralButton) {
-                        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) buttonView.getLayoutParams();
-                        layoutParams.topMargin = MiuiXUtils.sp2px(context, 20);
-                        buttonView.setLayoutParams(layoutParams);
+                        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) mButtonLayout.getLayoutParams();
+                        layoutParams.topMargin = MiuiXUtils.sp2px(mContext, 20);
+                        mButtonLayout.setLayoutParams(layoutParams);
                     } else {
-                        endView.setVisibility(View.GONE);
-                        buttonView.setVisibility(View.GONE);
+                        mEndView.setVisibility(View.GONE);
+                        mButtonLayout.setVisibility(View.GONE);
                         cornerRadius.setCornerRadius(-1, -1, radius, radius);
                     }
 
-                    if (alertTitleView.getVisibility() == View.GONE && messageView.getVisibility() == View.GONE) {
+                    if (mTitleView.getVisibility() == View.GONE && mMessageView.getVisibility() == View.GONE) {
                         cornerRadius.setCornerRadius(radius, radius, -1, -1);
                     }
                 }
-                recyclerView.addItemDecoration(cornerRadius);
+                mRecyclerView.addItemDecoration(cornerRadius);
             }
         }
-        if (!isSetNeutralButton) neutralButton.setVisibility(View.GONE);
-        if (!isSetNegativeButton) negativeButton.setVisibility(View.GONE);
-        if (!isSetPositiveButton) positiveButton.setVisibility(View.GONE);
-        if (customRadius != null) mainDialog.setBackground(customRadius);
-        if (messageView.getVisibility() == View.VISIBLE && alertTitleView.getVisibility() == View.GONE) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) messageView.getLayoutParams();
-            params.topMargin = MiuiXUtils.sp2px(context, 25);
-            messageView.setLayoutParams(params);
+        if (!isSetNeutralButton) mNeutralButton.setVisibility(View.GONE);
+        if (!isSetNegativeButton) mNegativeButton.setVisibility(View.GONE);
+        if (!isSetPositiveButton) mPositiveButton.setVisibility(View.GONE);
+        if (mCustomRadius != null) mMainDialog.setBackground(mCustomRadius);
+        if (mMessageView.getVisibility() == View.VISIBLE && mTitleView.getVisibility() == View.GONE) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mMessageView.getLayoutParams();
+            params.topMargin = MiuiXUtils.sp2px(mContext, 25);
+            mMessageView.setLayoutParams(params);
         }
         setTextTypeface();
-        dialog.create();
+        mDialog.create();
         isCreated = true;
         return this;
     }
 
     public void show() {
         if (!isCreated) create();
-        dialog.setOnShowListener(new android.content.DialogInterface.OnShowListener() {
+        mDialog.setOnShowListener(new android.content.DialogInterface.OnShowListener() {
             @Override
             public void onShow(android.content.DialogInterface d) {
-                if (needInput)
+                if (shouldInput)
                     showInputIfNeed();
             }
         });
-        dialog.show();
+        mDialog.show();
     }
 
     public void cancel() {
-        dialog.cancel();
+        mDialog.cancel();
     }
 
     public void dismiss() {
-        dialog.dismiss();
+        mDialog.dismiss();
     }
 
     private void dismissNow() {
         dismissNow = true;
-        dialog.dismiss();
+        mDialog.dismiss();
     }
 
     private void setTextTypeface() {
-        if (typefaceHashMap.isEmpty()) {
-            if (typefaceStyleHashMap.isEmpty())
+        if (mTypefaceHashMap.isEmpty()) {
+            if (mTypefaceStyleHashMap.isEmpty())
                 return;
             else {
-                typefaceStyleHashMap.forEach((typefaceObject, typefaceIntegerPair) ->
+                mTypefaceStyleHashMap.forEach((typefaceObject, typefaceIntegerPair) ->
                         setTypeface(typefaceObject, typefaceIntegerPair.first, typefaceIntegerPair.second));
             }
         } else {
-            typefaceHashMap.forEach((typefaceObject, typeface) ->
+            mTypefaceHashMap.forEach((typefaceObject, typeface) ->
                     setTypeface(typefaceObject, typeface, NORMAL));
         }
     }
@@ -596,57 +594,57 @@ public class MiuiAlertDialog implements DialogInterface {
     private void setTypeface(TypefaceObject typefaceObject, Typeface typeface, int style) {
         switch (typefaceObject) {
             case TYPEFACE_ALERT_TITLE -> {
-                alertTitleView.setTypeface(typeface, style);
+                mTitleView.setTypeface(typeface, style);
             }
             case TYPEFACE_MESSAGE -> {
-                messageView.setTypeface(typeface, style);
+                mMessageView.setTypeface(typeface, style);
             }
             case TYPEFACE_POSITIVE_TEXT -> {
-                positiveButton.setTypeface(typeface, style);
+                mPositiveButton.setTypeface(typeface, style);
             }
             case TYPEFACE_NEGATIVE_TEXT -> {
-                negativeButton.setTypeface(typeface, style);
+                mNegativeButton.setTypeface(typeface, style);
             }
             case TYPEFACE_NEUTRAL_TEXT -> {
-                neutralButton.setTypeface(typeface, style);
+                mNeutralButton.setTypeface(typeface, style);
             }
             case TYPEFACE_EDIT -> {
-                editTextView.setTypeface(typeface, style);
+                mEditTextView.setTypeface(typeface, style);
             }
             case TYPEFACE_EDIT_TIP -> {
-                editTextTipView.setTypeface(typeface, style);
+                mEditTextTipView.setTypeface(typeface, style);
             }
         }
     }
 
     private void setupCustomContent() {
-        View view = customView != null ? customView :
-                (customViewId != 0 ? LayoutInflater.from(context).inflate(customViewId, customLayout, false) : null);
+        View view = mCustomView != null ? mCustomView :
+                (mCustomViewId != 0 ? LayoutInflater.from(mContext).inflate(mCustomViewId, mCustomLayout, false) : null);
         if (view == null) return;
         ViewGroup viewParent = (ViewGroup) view.getParent();
-        if (viewParent != customLayout) {
+        if (viewParent != mCustomLayout) {
             if (viewParent != null)
                 viewParent.removeView(view);
-            customLayout.addView(view);
+            mCustomLayout.addView(view);
         }
-        customLayout.setVisibility(View.VISIBLE);
+        mCustomLayout.setVisibility(View.VISIBLE);
 
-        checkChildAddEditText(customLayout);
+        checkChildAddEditText(mCustomLayout);
 
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) customLayout.getLayoutParams();
-        params.setMarginStart(MiuiXUtils.sp2px(context, 25));
-        params.setMarginEnd(MiuiXUtils.sp2px(context, 25));
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCustomLayout.getLayoutParams();
+        params.setMarginStart(MiuiXUtils.sp2px(mContext, 25));
+        params.setMarginEnd(MiuiXUtils.sp2px(mContext, 25));
         if (isSetNegativeButton || isSetPositiveButton || isSetNeutralButton)
-            params.bottomMargin = MiuiXUtils.sp2px(context, 25);
-        params.topMargin = MiuiXUtils.sp2px(context, 25);
-        customLayout.setLayoutParams(params);
+            params.bottomMargin = MiuiXUtils.sp2px(mContext, 25);
+        params.topMargin = MiuiXUtils.sp2px(mContext, 25);
+        mCustomLayout.setLayoutParams(params);
 
         if (onBindView != null)
             onBindView.onBindView(view);
 
-        editLayout.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setAdapter(null);
+        mEditLayout.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
+        mRecyclerView.setAdapter(null);
     }
 
     private void checkChildAddEditText(ViewGroup customLayout) {
@@ -656,7 +654,7 @@ public class MiuiAlertDialog implements DialogInterface {
                 checkChildAddEditText(viewGroup);
             }
             if (v instanceof EditText) {
-                editTextViews.add((EditText) v);
+                mEditTextViews.add((EditText) v);
             }
         }
     }
@@ -664,20 +662,20 @@ public class MiuiAlertDialog implements DialogInterface {
     private WeakReference<ResultReceiver> weakReference = null;
 
     private void hideInputIfNeed(EditText editText, Runnable runnable) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible(editText)) {
             if (weakReference != null && weakReference.get() == null) {
                 weakReference.clear();
                 weakReference = null;
             }
             if (weakReference == null) {
-                weakReference = new WeakReference<>(new ResultReceiver(handlerWeakReference.get()) {
+                weakReference = new WeakReference<>(new ResultReceiver(mHandlerWeakReference.get()) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        if (handlerWeakReference == null || handlerWeakReference.get() == null) {
-                            handlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
+                        if (mHandlerWeakReference == null || mHandlerWeakReference.get() == null) {
+                            mHandlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
                         }
-                        handlerWeakReference.get().postDelayed(runnable, 300);
+                        mHandlerWeakReference.get().postDelayed(runnable, 300);
                     }
                 });
             }
@@ -686,7 +684,7 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     private void hideInputNow(EditText editText) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible(editText)) {
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         }
@@ -694,11 +692,11 @@ public class MiuiAlertDialog implements DialogInterface {
 
     private @Nullable EditText getVisibleEditText() {
         EditText edit = null;
-        if (editLayout.getVisibility() == View.VISIBLE) {
-            if (isInputVisible(editTextView))
-                edit = editTextView;
+        if (mEditLayout.getVisibility() == View.VISIBLE) {
+            if (isInputVisible(mEditTextView))
+                edit = mEditTextView;
         } else {
-            for (EditText e : editTextViews) {
+            for (EditText e : mEditTextViews) {
                 if (isInputVisible(e)) {
                     edit = e;
                     break;
@@ -715,16 +713,16 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     private void showInputIfNeed() {
-        editTextView.setFocusable(true);
-        editTextView.setFocusableInTouchMode(true);
-        editTextView.requestFocus();
-        if (!isInputVisible(editTextView)) {
-            WindowInsetsController windowInsetsController = window.getDecorView().getWindowInsetsController();
+        mEditTextView.setFocusable(true);
+        mEditTextView.setFocusableInTouchMode(true);
+        mEditTextView.requestFocus();
+        if (!isInputVisible(mEditTextView)) {
+            WindowInsetsController windowInsetsController = mWindow.getDecorView().getWindowInsetsController();
             if (windowInsetsController != null)
                 windowInsetsController.show(WindowInsets.Type.ime());
             else {
-                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(editTextView, 0);
+                InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(mEditTextView, 0);
             }
         }
     }
@@ -753,38 +751,38 @@ public class MiuiAlertDialog implements DialogInterface {
     }
 
     public static class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
-        private final MiuiAlertDialog dialog;
-        SparseBooleanArray booleanArray = new SparseBooleanArray();
-        private OnItemsChangeListener listener;
-        private GradientDrawable drawableTop;
-        private GradientDrawable drawableBottom;
+        private final MiuiAlertDialog mDialog;
+        SparseBooleanArray mBooleanArray = new SparseBooleanArray();
+        private OnItemsChangeListener mListener;
+        private GradientDrawable mDrawableTop;
+        private GradientDrawable mDrawableBottom;
         private boolean isChecked;
 
         protected ListAdapter(MiuiAlertDialog dialog) {
-            this.dialog = dialog;
+            this.mDialog = dialog;
         }
 
         private void setDrawableColor(@ColorInt int color) {
-            drawableTop = new GradientDrawable();
-            drawableBottom = new GradientDrawable();
-            drawableTop.setColor(color);
-            drawableBottom.setColor(color);
-            float radius = (dialog.radius == -1) ? MiuiXUtils.sp2px(dialog.context, 32) : dialog.radius;
-            if (isChecked || dialog.isSetNegativeButton || dialog.isSetPositiveButton || dialog.isSetNeutralButton
-                    || dialog.alertTitleView.getVisibility() == View.VISIBLE || dialog.messageView.getVisibility() == View.VISIBLE) {
+            mDrawableTop = new GradientDrawable();
+            mDrawableBottom = new GradientDrawable();
+            mDrawableTop.setColor(color);
+            mDrawableBottom.setColor(color);
+            float radius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.sp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
+            if (isChecked || mDialog.isSetNegativeButton || mDialog.isSetPositiveButton || mDialog.isSetNeutralButton
+                    || mDialog.mTitleView.getVisibility() == View.VISIBLE || mDialog.mMessageView.getVisibility() == View.VISIBLE) {
                 isChecked = true;
-                if (!dialog.isDropDown) radius = 0;
+                if (!mDialog.isDropDown) radius = 0;
             }
-            if (dialog.alertTitleView.getVisibility() == View.GONE && dialog.messageView.getVisibility() == View.GONE && !dialog.isDropDown) {
-                float TopRadius = (dialog.radius == -1) ? MiuiXUtils.sp2px(dialog.context, 32) : dialog.radius;
-                drawableTop.setCornerRadii(new float[]{TopRadius, TopRadius, TopRadius, TopRadius, 0, 0, 0, 0});
+            if (mDialog.mTitleView.getVisibility() == View.GONE && mDialog.mMessageView.getVisibility() == View.GONE && !mDialog.isDropDown) {
+                float TopRadius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.sp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
+                mDrawableTop.setCornerRadii(new float[]{TopRadius, TopRadius, TopRadius, TopRadius, 0, 0, 0, 0});
             } else
-                drawableTop.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
-            drawableBottom.setCornerRadii(new float[]{0, 0, 0, 0, radius, radius, radius, radius});
+                mDrawableTop.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});
+            mDrawableBottom.setCornerRadii(new float[]{0, 0, 0, 0, radius, radius, radius, radius});
         }
 
         public void update(OnItemsChangeListener listener) {
-            this.listener = listener;
+            this.mListener = listener;
         }
 
         @NonNull
@@ -800,30 +798,30 @@ public class MiuiAlertDialog implements DialogInterface {
 
         @Override
         public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
-            CharSequence s = dialog.items.get(position);
+            CharSequence s = mDialog.mItems.get(position);
             setFirstOrEndView(holder, position);
-            holder.switchView.setText(s);
-            holder.switchView.setHapticFeedbackEnabled(false);
-            boolean isChecked = booleanArray.get(position);
+            holder.mSwitchView.setText(s);
+            holder.mSwitchView.setHapticFeedbackEnabled(false);
+            boolean isChecked = mBooleanArray.get(position);
             checkState(holder, position);
 
-            holder.switchView.setOnCheckedChangeListener(null);
-            holder.switchView.setOnHoverListener(null);
-            holder.switchView.setChecked(isChecked);
+            holder.mSwitchView.setOnCheckedChangeListener(null);
+            holder.mSwitchView.setOnHoverListener(null);
+            holder.mSwitchView.setChecked(isChecked);
 
-            holder.switchView.setOnCheckedChangeListener((b, i) -> {
-                if (dialog.isMultiSelect) booleanArray.put(position, i);
+            holder.mSwitchView.setOnCheckedChangeListener((b, i) -> {
+                if (mDialog.isMultiSelect) mBooleanArray.put(position, i);
                 checkState(holder, position);
-                if (dialog.hapticFeedbackEnabled)
-                    holder.mainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-                if (listener != null) listener.onClick(dialog, s, position);
-                if (!dialog.isMultiSelect)
-                    dialog.dismiss();
+                if (mDialog.hapticFeedbackEnabled)
+                    holder.mMainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                if (mListener != null) mListener.onClick(mDialog, s, position);
+                if (!mDialog.isMultiSelect)
+                    mDialog.dismiss();
             });
-            holder.switchView.setOnHoverListener((v, event) -> {
+            holder.mSwitchView.setOnHoverListener((v, event) -> {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_HOVER_MOVE -> {
-                        holder.mainLayout.setBackgroundResource(R.color.touch_down);
+                        holder.mMainLayout.setBackgroundResource(R.color.touch_down);
                     }
                     case MotionEvent.ACTION_HOVER_EXIT -> {
                         checkState(holder, position);
@@ -837,66 +835,66 @@ public class MiuiAlertDialog implements DialogInterface {
         }
 
         private void checkState(@NonNull ListViewHolder holder, int position) {
-            if (booleanArray.get(position)) {
-                setDrawableColor(dialog.context.getColor(R.color.list_state_background));
-                if (position == 0) holder.mainLayout.setBackground(drawableTop);
-                else if (position == dialog.items.size() - 1) {
-                    holder.mainLayout.setBackground(drawableBottom);
+            if (mBooleanArray.get(position)) {
+                setDrawableColor(mDialog.mContext.getColor(R.color.list_state_background));
+                if (position == 0) holder.mMainLayout.setBackground(mDrawableTop);
+                else if (position == mDialog.mItems.size() - 1) {
+                    holder.mMainLayout.setBackground(mDrawableBottom);
                 } else
-                    holder.mainLayout.setBackgroundResource(R.drawable.list_choose_item_background);
-                holder.switchView.setTextColor(dialog.context.getColor(R.color.list_choose_text));
-                holder.imageView.setVisibility(View.VISIBLE);
+                    holder.mMainLayout.setBackgroundResource(R.drawable.list_choose_item_background);
+                holder.mSwitchView.setTextColor(mDialog.mContext.getColor(R.color.list_choose_text));
+                holder.mImageView.setVisibility(View.VISIBLE);
             } else {
-                setDrawableColor(dialog.context.getColor(R.color.list_background));
-                if (position == 0) holder.mainLayout.setBackground(drawableTop);
-                else if (position == dialog.items.size() - 1) {
-                    holder.mainLayout.setBackground(drawableBottom);
-                } else holder.mainLayout.setBackgroundResource(R.drawable.list_item_background);
-                holder.switchView.setTextColor(dialog.context.getColor(R.color.list_text));
-                holder.imageView.setVisibility(View.GONE);
+                setDrawableColor(mDialog.mContext.getColor(R.color.list_background));
+                if (position == 0) holder.mMainLayout.setBackground(mDrawableTop);
+                else if (position == mDialog.mItems.size() - 1) {
+                    holder.mMainLayout.setBackground(mDrawableBottom);
+                } else holder.mMainLayout.setBackgroundResource(R.drawable.list_item_background);
+                holder.mSwitchView.setTextColor(mDialog.mContext.getColor(R.color.list_text));
+                holder.mImageView.setVisibility(View.GONE);
             }
         }
 
         private void setFirstOrEndView(@NonNull ListViewHolder holder, int position) {
-            if (position == 0 || position == dialog.items.size() - 1) {
-                holder.firstView.setVisibility(View.VISIBLE);
-                holder.endView.setVisibility(View.VISIBLE);
+            if (position == 0 || position == mDialog.mItems.size() - 1) {
+                holder.mFirstView.setVisibility(View.VISIBLE);
+                holder.mEndView.setVisibility(View.VISIBLE);
             } else {
-                holder.firstView.setVisibility(View.GONE);
-                holder.endView.setVisibility(View.GONE);
+                holder.mFirstView.setVisibility(View.GONE);
+                holder.mEndView.setVisibility(View.GONE);
             }
         }
 
         @Override
         public int getItemCount() {
-            return dialog.items.size();
+            return mDialog.mItems.size();
         }
 
         public static class ListViewHolder extends RecyclerView.ViewHolder {
-            ConstraintLayout mainLayout;
-            View firstView;
-            View endView;
-            SwitchCompat switchView;
-            ImageView imageView;
+            ConstraintLayout mMainLayout;
+            View mFirstView;
+            View mEndView;
+            SwitchCompat mSwitchView;
+            ImageView mImageView;
 
             public ListViewHolder(@NonNull View itemView) {
                 super(itemView);
-                mainLayout = (ConstraintLayout) itemView;
-                firstView = itemView.findViewById(R.id.first_view);
-                endView = itemView.findViewById(R.id.end_view);
-                switchView = itemView.findViewById(R.id.list_item);
-                imageView = itemView.findViewById(R.id.list_image);
-                imageView.setVisibility(View.GONE);
+                mMainLayout = (ConstraintLayout) itemView;
+                mFirstView = itemView.findViewById(R.id.first_view);
+                mEndView = itemView.findViewById(R.id.end_view);
+                mSwitchView = itemView.findViewById(R.id.list_item);
+                mImageView = itemView.findViewById(R.id.list_image);
+                mImageView.setVisibility(View.GONE);
             }
         }
     }
 
     /** @noinspection ClassCanBeRecord */
     private static class ActivityLifecycle implements Application.ActivityLifecycleCallbacks {
-        private final MiuiAlertDialog dialog;
+        private final MiuiAlertDialog mDialog;
 
         public ActivityLifecycle(MiuiAlertDialog dialog) {
-            this.dialog = dialog;
+            this.mDialog = dialog;
         }
 
         @Override
@@ -929,8 +927,8 @@ public class MiuiAlertDialog implements DialogInterface {
 
         @Override
         public void onActivityPreDestroyed(@NonNull Activity activity) {
-            if (dialog.isShowing()) {
-                dialog.dismissNow();
+            if (mDialog.isShowing()) {
+                mDialog.dismissNow();
             }
         }
     }

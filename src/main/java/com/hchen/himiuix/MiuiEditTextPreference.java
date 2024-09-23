@@ -24,15 +24,15 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiEditTextPreference extends MiuiPreference {
-    private ConstraintLayout layout;
-    private EditText editTextView;
-    private TextView tipTextView;
-    private ImageView imageView;
-    private CharSequence hint;
-    private Drawable drawable;
-    private TextWatcher watcher;
-    private int type = -1;
-    private View.OnClickListener imageClickListener;
+    private ConstraintLayout mLayout;
+    private EditText mEditTextView;
+    private TextView mTipTextView;
+    private ImageView mImageView;
+    private CharSequence mHint;
+    private Drawable mDrawable;
+    private TextWatcher mWatcher;
+    private int mInputType = -1;
+    private View.OnClickListener mImageClickListener;
 
     public MiuiEditTextPreference(@NonNull Context context) {
         this(context, null);
@@ -50,8 +50,8 @@ public class MiuiEditTextPreference extends MiuiPreference {
     public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiEditTextPreference, defStyleAttr, defStyleRes)) {
-            hint = TypedArrayUtils.getString(array, R.styleable.MiuiEditTextPreference_hint, R.styleable.MiuiEditTextPreference_android_hint);
-            type = array.getInt(R.styleable.MiuiEditTextPreference_android_inputType, -1);
+            mHint = TypedArrayUtils.getString(array, R.styleable.MiuiEditTextPreference_hint, R.styleable.MiuiEditTextPreference_android_hint);
+            mInputType = array.getInt(R.styleable.MiuiEditTextPreference_android_inputType, -1);
         }
     }
 
@@ -65,16 +65,16 @@ public class MiuiEditTextPreference extends MiuiPreference {
     }
 
     public void setHint(CharSequence hint) {
-        this.hint = hint;
+        this.mHint = hint;
         notifyChanged();
     }
 
     public CharSequence getHint() {
-        return hint;
+        return mHint;
     }
 
     public void setTextWatcher(TextWatcher watcher) {
-        this.watcher = watcher;
+        this.mWatcher = watcher;
         notifyChanged();
     }
 
@@ -83,89 +83,89 @@ public class MiuiEditTextPreference extends MiuiPreference {
     }
 
     public void setImage(Drawable drawable) {
-        this.drawable = drawable;
+        this.mDrawable = drawable;
         setIcon(drawable);
         notifyChanged();
     }
 
     public Drawable getImage() {
-        return drawable;
+        return mDrawable;
     }
 
     public void setInputType(int type) {
-        this.type = type;
+        this.mInputType = type;
     }
 
     public int getInputType() {
-        return type;
+        return mInputType;
     }
 
     public void onImageClickListener(View.OnClickListener clickListener) {
-        imageClickListener = clickListener;
+        mImageClickListener = clickListener;
     }
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        layout = holder.itemView.findViewById(R.id.edit_layout);
-        editTextView = holder.itemView.findViewById(R.id.edit_text_id);
-        tipTextView = holder.itemView.findViewById(R.id.edit_tip);
-        imageView = holder.itemView.findViewById(R.id.edit_image);
+        mLayout = holder.itemView.findViewById(R.id.edit_layout);
+        mEditTextView = holder.itemView.findViewById(R.id.edit_text_id);
+        mTipTextView = holder.itemView.findViewById(R.id.edit_tip);
+        mImageView = holder.itemView.findViewById(R.id.edit_image);
 
-        tipTextView.setVisibility(View.GONE);
+        mTipTextView.setVisibility(View.GONE);
         if (getTitle() != null) {
-            tipTextView.setVisibility(View.VISIBLE);
-            tipTextView.setText(getTitle());
+            mTipTextView.setVisibility(View.VISIBLE);
+            mTipTextView.setText(getTitle());
         }
-        if (hint != null) editTextView.setHint(hint);
-        else editTextView.setHint("请输入");
+        if (mHint != null) mEditTextView.setHint(mHint);
+        else mEditTextView.setHint("请输入");
 
-        imageView.setVisibility(View.GONE);
-        imageView.setOnClickListener(null);
+        mImageView.setVisibility(View.GONE);
+        mImageView.setOnClickListener(null);
         if (getIcon() != null) {
             getIcon().setAlpha(isEnabled() ? 255 : 125);
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setImageDrawable(getIcon());
+            mImageView.setVisibility(View.VISIBLE);
+            mImageView.setImageDrawable(getIcon());
         }
 
-        editTextView.setEnabled(isEnabled());
-        editTextView.setOnFocusChangeListener(null);
-        if (watcher != null) 
-            editTextView.removeTextChangedListener(watcher);
-        editTextView.clearFocus();
+        mEditTextView.setEnabled(isEnabled());
+        mEditTextView.setOnFocusChangeListener(null);
+        if (mWatcher != null)
+            mEditTextView.removeTextChangedListener(mWatcher);
+        mEditTextView.clearFocus();
         if (isEnabled()) {
-            tipTextView.setTextColor(getContext().getColor(R.color.tittle));
-            editTextView.setHintTextColor(getContext().getColor(R.color.summary));
-            if (imageView.getVisibility() != View.GONE)
-                imageView.setOnClickListener(imageClickListener);
-            if (watcher != null)
-                editTextView.addTextChangedListener(watcher);
+            mTipTextView.setTextColor(getContext().getColor(R.color.tittle));
+            mEditTextView.setHintTextColor(getContext().getColor(R.color.summary));
+            if (mImageView.getVisibility() != View.GONE)
+                mImageView.setOnClickListener(mImageClickListener);
+            if (mWatcher != null)
+                mEditTextView.addTextChangedListener(mWatcher);
 
-            if (type != -1) editTextView.setInputType(type);
-            else editTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            if (mInputType != -1) mEditTextView.setInputType(mInputType);
+            else mEditTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
-            editTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            mEditTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (hasFocus) {
-                        layout.setBackgroundResource(R.drawable.focused_border_input_box);
+                        mLayout.setBackgroundResource(R.drawable.focused_border_input_box);
                     } else {
-                        layout.setBackgroundResource(R.drawable.nofocused_border_input_box);
+                        mLayout.setBackgroundResource(R.drawable.nofocused_border_input_box);
                         hideInputIfNeed();
                     }
                 }
             });
         } else {
-            tipTextView.setTextColor(getContext().getColor(R.color.tittle_d));
-            editTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
+            mTipTextView.setTextColor(getContext().getColor(R.color.tittle_d));
+            mEditTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
         }
     }
 
     private boolean isInputVisible() {
-        return editTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+        return mEditTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 
     private void hideInputIfNeed() {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (isInputVisible()) imm.hideSoftInputFromWindow(editTextView.getWindowToken(), 0);
+        if (isInputVisible()) imm.hideSoftInputFromWindow(mEditTextView.getWindowToken(), 0);
     }
 }

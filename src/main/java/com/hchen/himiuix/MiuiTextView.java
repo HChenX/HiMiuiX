@@ -11,8 +11,8 @@ import androidx.annotation.Nullable;
 
 @SuppressLint("AppCompatCustomView")
 public class MiuiTextView extends TextView {
-    private boolean focusable;
-    private boolean singeLineCenter;
+    private boolean shouldFocusable;
+    private boolean shouldSingeLineCenter;
 
     public MiuiTextView(Context context) {
         super(context);
@@ -36,20 +36,20 @@ public class MiuiTextView extends TextView {
 
     private void init(Context context, AttributeSet attrs) {
         try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiTextView)) {
-            focusable = typedArray.getBoolean(R.styleable.MiuiTextView_focusable, false);
-            singeLineCenter = typedArray.getBoolean(R.styleable.MiuiTextView_singeLineCenter, false);
+            shouldFocusable = typedArray.getBoolean(R.styleable.MiuiTextView_focusable, false);
+            shouldSingeLineCenter = typedArray.getBoolean(R.styleable.MiuiTextView_singeLineCenter, false);
         }
     }
 
     @Override
     public boolean isFocused() {
-        return focusable;
+        return shouldFocusable;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (getLineCount() <= 1 && singeLineCenter) {
+        if (getLineCount() <= 1 && shouldSingeLineCenter) {
             setGravity(Gravity.CENTER_HORIZONTAL);
         }
     }

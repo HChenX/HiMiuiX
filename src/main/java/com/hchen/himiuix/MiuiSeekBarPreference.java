@@ -22,23 +22,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MiuiSeekBarPreference extends MiuiPreference {
-    private ConstraintLayout mainLayout;
-    private MiuiSeekBar seekBarView;
-    private TextView numberView;
+    private ConstraintLayout mMainLayout;
+    private MiuiSeekBar mSeekBarView;
+    private TextView mNumberView;
     private boolean mTrackingTouch;
     private int mDisplayDividerValue;
-    private CharSequence format;
+    private CharSequence mFormat;
     private int mDefValue;
     private int mSeekBarValue;
-    private int minValue;
-    private int maxValue;
-    private int stepValue;
-    private int stepCount;
+    private int mMinValue;
+    private int mMaxValue;
+    private int mStepValue;
+    private int mStepCount;
     private boolean shouldStep;
-    private boolean dialogEnabled;
+    private boolean isDialogEnabled;
     private boolean mShowSeekBarValue;
-    private boolean showDefTip = true;
-    private String defValueString;
+    private boolean shouldShowDefTip = true;
+    private String mDefValueString;
     private boolean isInitialTime = true;
 
     private final SeekBar.OnSeekBarChangeListener changeListener = new SeekBar.OnSeekBarChangeListener() {
@@ -46,10 +46,10 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (fromUser && mTrackingTouch) {
                 int stepAfterValue = getStepAfterValueIfNeed(progress);
-                ((MiuiSeekBar) seekBar).setShowDefaultPoint((stepAfterValue != mDefValue) && showDefTip);
-                if (stepAfterValue == maxValue || stepAfterValue == minValue
+                ((MiuiSeekBar) seekBar).setShowDefaultPoint((stepAfterValue != mDefValue) && shouldShowDefTip);
+                if (stepAfterValue == mMaxValue || stepAfterValue == mMinValue
                         || stepAfterValue == mDefValue) {
-                    mainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                    mMainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
                 }
                 updateLabelValue(stepAfterValue);
             }
@@ -90,15 +90,15 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         setLayoutResource(R.layout.miuix_seekbar);
         try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MiuiSeekBarPreference,
                 defStyleAttr, defStyleRes)) {
-            minValue = a.getInt(R.styleable.MiuiSeekBarPreference_minValue, 0);
-            maxValue = a.getInt(R.styleable.MiuiSeekBarPreference_maxValue, 100);
-            stepValue = a.getInt(R.styleable.MiuiSeekBarPreference_stepValue, 1);
-            format = a.getString(R.styleable.MiuiSeekBarPreference_format);
+            mMinValue = a.getInt(R.styleable.MiuiSeekBarPreference_minValue, 0);
+            mMaxValue = a.getInt(R.styleable.MiuiSeekBarPreference_maxValue, 100);
+            mStepValue = a.getInt(R.styleable.MiuiSeekBarPreference_stepValue, 1);
+            mFormat = a.getString(R.styleable.MiuiSeekBarPreference_format);
             mShowSeekBarValue = a.getBoolean(R.styleable.MiuiSeekBarPreference_showSeekBarValue, false);
             mDisplayDividerValue = a.getInt(R.styleable.MiuiSeekBarPreference_displayDividerValue, -1);
-            dialogEnabled = a.getBoolean(R.styleable.MiuiSeekBarPreference_dialogEnabled, false);
-            showDefTip = a.getBoolean(R.styleable.MiuiSeekBarPreference_showDefTip, true);
-            defValueString = a.getString(R.styleable.MiuiSeekBarPreference_defValueString);
+            isDialogEnabled = a.getBoolean(R.styleable.MiuiSeekBarPreference_dialogEnabled, false);
+            shouldShowDefTip = a.getBoolean(R.styleable.MiuiSeekBarPreference_showDefTip, true);
+            mDefValueString = a.getString(R.styleable.MiuiSeekBarPreference_defValueString);
             if (mDisplayDividerValue != -1) {
                 double d = Math.log10(mDisplayDividerValue);
                 if (d != Math.floor(d)) {
@@ -110,8 +110,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     private void setValue(int value) {
-        if (value < minValue) value = minValue;
-        if (value > maxValue) value = maxValue;
+        if (value < mMinValue) value = mMinValue;
+        if (value > mMaxValue) value = mMaxValue;
         isStepNumber(value);
         if (value != mSeekBarValue) {
             if (isInitialTime || callChangeListener(value)) {
@@ -141,43 +141,43 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        mainLayout = (ConstraintLayout) holder.itemView;
-        seekBarView = mainLayout.findViewById(R.id.seekbar);
-        numberView = mainLayout.findViewById(R.id.seekbar_number);
-        Drawable seekBarDrawable = seekBarView.getProgressDrawable();
+        mMainLayout = (ConstraintLayout) holder.itemView;
+        mSeekBarView = mMainLayout.findViewById(R.id.seekbar);
+        mNumberView = mMainLayout.findViewById(R.id.seekbar_number);
+        Drawable seekBarDrawable = mSeekBarView.getProgressDrawable();
 
-        numberView.setVisibility(mShowSeekBarValue ? View.VISIBLE : View.GONE);
-        seekBarView.isHapticFeedbackEnabled();
-        seekBarView.setOnSeekBarChangeListener(changeListener);
-        seekBarView.setMax(shouldStep ? stepCount : maxValue);
-        seekBarView.setMin(shouldStep ? 0 : minValue);
+        mNumberView.setVisibility(mShowSeekBarValue ? View.VISIBLE : View.GONE);
+        mSeekBarView.isHapticFeedbackEnabled();
+        mSeekBarView.setOnSeekBarChangeListener(changeListener);
+        mSeekBarView.setMax(shouldStep ? mStepCount : mMaxValue);
+        mSeekBarView.setMin(shouldStep ? 0 : mMinValue);
 
-        seekBarView.setProgress(getStepBeforeIfNeed(mSeekBarValue));
+        mSeekBarView.setProgress(getStepBeforeIfNeed(mSeekBarValue));
         if (shouldStep) {
-            seekBarView.setShouldStep(true);
-            seekBarView.setDefStep(getStepBeforeIfNeed(mDefValue));
-        } else seekBarView.setDefValue(mDefValue);
+            mSeekBarView.setShouldStep(true);
+            mSeekBarView.setDefStep(getStepBeforeIfNeed(mDefValue));
+        } else mSeekBarView.setDefValue(mDefValue);
         if (mSeekBarValue != mDefValue)
-            seekBarView.setShowDefaultPoint(showDefTip);
+            mSeekBarView.setShowDefaultPoint(shouldShowDefTip);
 
-        seekBarView.setHapticFeedbackEnabled(false);
-        seekBarView.setEnabled(isEnabled());
+        mSeekBarView.setHapticFeedbackEnabled(false);
+        mSeekBarView.setEnabled(isEnabled());
         updateLabelValue(mSeekBarValue);
         if (isEnabled()) {
             seekBarDrawable.setAlpha(255);
-            numberView.setTextColor(getContext().getColor(R.color.tittle));
+            mNumberView.setTextColor(getContext().getColor(R.color.tittle));
         } else {
             seekBarDrawable.setAlpha(125);
-            numberView.setTextColor(getContext().getColor(R.color.tittle_d));
+            mNumberView.setTextColor(getContext().getColor(R.color.tittle_d));
         }
     }
 
-    private View view;
-    private MiuiAlertDialog miuiAlertDialog;
+    private View mTouchView;
+    private MiuiAlertDialog mDialog;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (!dialogEnabled) {
+        if (!isDialogEnabled) {
             return super.onTouch(v, event);
         }
         int action = event.getAction();
@@ -186,17 +186,17 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         } else if (action == MotionEvent.ACTION_CANCEL) {
             v.setBackgroundResource(R.color.touch_up);
         } else if (action == MotionEvent.ACTION_UP) {
-            if (miuiAlertDialog != null && miuiAlertDialog.isShowing())
+            if (mDialog != null && mDialog.isShowing())
                 return false;
             v.setBackgroundResource(R.color.touch_down);
-            view = v;
+            mTouchView = v;
             CharSequence def;
             if (mDisplayDividerValue != -1)
                 def = String.valueOf((float) mSeekBarValue / (float) mDisplayDividerValue);
             else
                 def = String.valueOf(mSeekBarValue);
 
-            miuiAlertDialog = new MiuiAlertDialog(getContext())
+            mDialog = new MiuiAlertDialog(getContext())
                     .setTitle(getTitle())
                     .setMessage(getSummary())
                     .setHapticFeedbackEnabled(true)
@@ -208,7 +208,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                                 f = Float.parseFloat((String) s) * mDisplayDividerValue;
                             int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
                             setValue(result);
-                            seekBarView.setShowDefaultPoint((result != mDefValue) && showDefTip);
+                            mSeekBarView.setShowDefaultPoint((result != mDefValue) && shouldShowDefTip);
                             setProgressIfNeed(getStepBeforeIfNeed(result));
                         }
                     })
@@ -216,17 +216,17 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                     .setPositiveButton("确定", null)
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->
-                            view.setBackgroundResource(R.color.touch_up));
-            miuiAlertDialog.show();
+                            mTouchView.setBackgroundResource(R.color.touch_up));
+            mDialog.show();
         }
         return false;
     }
 
     private void calculateStep() {
-        if (stepValue != 1) {
-            stepCount = Math.round((float) (maxValue - minValue) / stepValue);
-            if ((stepCount * stepValue) != (maxValue - minValue)) {
-                maxValue = minValue + (stepCount * stepValue); // 确保跳跃为整数
+        if (mStepValue != 1) {
+            mStepCount = Math.round((float) (mMaxValue - mMinValue) / mStepValue);
+            if ((mStepCount * mStepValue) != (mMaxValue - mMinValue)) {
+                mMaxValue = mMinValue + (mStepCount * mStepValue); // 确保跳跃为整数
             }
             shouldStep = true;
             return;
@@ -237,8 +237,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private void isStepNumber(int value) {
         if (shouldStep) {
             ArrayList<Integer> steps = new ArrayList<>();
-            for (int i = 0; i <= stepCount; i++) {
-                steps.add(minValue + (i * stepValue));
+            for (int i = 0; i <= mStepCount; i++) {
+                steps.add(mMinValue + (i * mStepValue));
             }
             if (steps.contains(value)) return;
             throw new RuntimeException("Default value incorrect!" +
@@ -254,7 +254,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     // 获取叠加跳跃后的值；是应该储存的最终值
     private int getStepAfterValueIfNeed(int progress) {
         if (shouldStep) {
-            return minValue + (progress * stepValue);
+            return mMinValue + (progress * mStepValue);
         }
         return progress;
     }
@@ -262,7 +262,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     // 从值解析出跳跃步数；作为 seekbar 使用的阶数
     private int getStepBeforeIfNeed(int value) {
         if (shouldStep) {
-            return (value - minValue) / stepValue;
+            return (value - mMinValue) / mStepValue;
         }
         return value;
     }
@@ -270,27 +270,27 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private void setProgressIfNeed(int value) {
         if (shouldStep) {
             if (value < 0) value = 0;
-            if (value > stepCount) value = stepCount;
+            if (value > mStepCount) value = mStepCount;
         } else {
-            if (value < minValue) value = minValue;
-            if (value > maxValue) value = maxValue;
+            if (value < mMinValue) value = mMinValue;
+            if (value > mMaxValue) value = mMaxValue;
         }
-        seekBarView.setProgress(value);
+        mSeekBarView.setProgress(value);
     }
 
     private void updateLabelValue(int value) {
-        if (numberView == null) return;
-        if (numberView.getVisibility() == View.VISIBLE) {
-            if (defValueString != null && value == mDefValue) {
-                numberView.setText(defValueString);
+        if (mNumberView == null) return;
+        if (mNumberView.getVisibility() == View.VISIBLE) {
+            if (mDefValueString != null && value == mDefValue) {
+                mNumberView.setText(mDefValueString);
                 return;
             }
             String s = String.valueOf(value);
             if (mDisplayDividerValue != -1) {
                 s = String.valueOf(((float) value / mDisplayDividerValue));
             }
-            String t = s + (format != null ? format : "");
-            numberView.setText(t);
+            String t = s + (mFormat != null ? mFormat : "");
+            mNumberView.setText(t);
         }
     }
 
@@ -304,10 +304,10 @@ public class MiuiSeekBarPreference extends MiuiPreference {
 
         final SavedState savedState = new SavedState(parcelable);
         savedState.mSeekbarValue = mSeekBarValue;
-        savedState.mMin = minValue;
-        savedState.mMax = maxValue;
-        savedState.stepCount = stepCount;
-        savedState.stepValue = stepValue;
+        savedState.mMin = mMinValue;
+        savedState.mMax = mMaxValue;
+        savedState.mStepCount = mStepCount;
+        savedState.mStepValue = mStepValue;
         savedState.shouldStep = shouldStep;
 
         return savedState;
@@ -323,10 +323,10 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
         mSeekBarValue = savedState.mSeekbarValue;
-        minValue = savedState.mMin;
-        maxValue = savedState.mMax;
-        stepValue = savedState.stepValue;
-        stepCount = savedState.stepCount;
+        mMinValue = savedState.mMin;
+        mMaxValue = savedState.mMax;
+        mStepValue = savedState.mStepValue;
+        mStepCount = savedState.mStepCount;
         shouldStep = savedState.shouldStep;
         notifyChanged();
     }
@@ -348,8 +348,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         int mSeekbarValue;
         int mMin;
         int mMax;
-        int stepValue;
-        int stepCount;
+        int mStepValue;
+        int mStepCount;
         boolean shouldStep;
 
         public SavedState(Parcel source) {
@@ -358,8 +358,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             mSeekbarValue = source.readInt();
             mMin = source.readInt();
             mMax = source.readInt();
-            stepValue = source.readInt();
-            stepCount = source.readInt();
+            mStepValue = source.readInt();
+            mStepCount = source.readInt();
             shouldStep = source.readBoolean();
         }
 
@@ -374,8 +374,8 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             dest.writeInt(mSeekbarValue);
             dest.writeInt(mMin);
             dest.writeInt(mMax);
-            dest.writeInt(stepValue);
-            dest.writeInt(stepCount);
+            dest.writeInt(mStepValue);
+            dest.writeInt(mStepCount);
             dest.writeBoolean(shouldStep);
         }
     }

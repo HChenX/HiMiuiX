@@ -13,14 +13,15 @@ import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.preference.PreferenceViewHolder;
 
@@ -32,7 +33,7 @@ import com.hchen.himiuix.colorpicker.ColorPickerLightnessView;
 import com.hchen.himiuix.colorpicker.ColorPickerSaturationView;
 
 public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChanged {
-    private MiuiAlertDialog alertDialog;
+    private MiuiAlertDialog mAlertDialog;
     private int mColor;
     private boolean isInitialTime = true;
 
@@ -100,15 +101,15 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
     @Override
     protected void onClick(View view) {
-        if (alertDialog != null && alertDialog.isShowing()) return;
+        if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         colorPickerData = new ColorPickerData();
-        alertDialog = new MiuiAlertDialog(getContext());
-        alertDialog.setTitle(getTitle());
-        alertDialog.setMessage(getSummary());
-        alertDialog.autoDismiss(false);
-        alertDialog.setHapticFeedbackEnabled(true);
-        alertDialog.setCustomView(R.layout.miuix_color_picker, new MiuiAlertDialog.OnBindView() {
+        mAlertDialog = new MiuiAlertDialog(getContext());
+        mAlertDialog.setTitle(getTitle());
+        mAlertDialog.setMessage(getSummary());
+        mAlertDialog.autoDismiss(false);
+        mAlertDialog.setHapticFeedbackEnabled(true);
+        mAlertDialog.setCustomView(R.layout.miuix_color_picker, new MiuiAlertDialog.OnBindView() {
             private boolean isEditFocus = false;
 
             @Override
@@ -170,17 +171,16 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 });
             }
         });
-        alertDialog.getWindow().setDecorFitsSystemWindows(false);
-        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-        alertDialog.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        mAlertDialog.getWindow().setDecorFitsSystemWindows(false);
+        ViewCompat.setOnApplyWindowInsetsListener(mAlertDialog.getWindow().getDecorView(), new OnApplyWindowInsetsListener() {
             private int oldHeight = -1;
-
+            
             @NonNull
             @Override
-            public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
-                int bottom = insets.getInsets(WindowInsets.Type.ime()).bottom;
-                int dialogHeight = alertDialog.getWindow().getDecorView().getHeight();
-                if (insets.isVisible(WindowInsets.Type.ime())) {
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                int bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+                int dialogHeight = mAlertDialog.getWindow().getDecorView().getHeight();
+                if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                     if (bottom == 0 || oldHeight != -1) return insets;
                     int screenY = MiuiXUtils.getScreenSize(getContext()).y;
                     if (bottom + dialogHeight + MiuiXUtils.sp2px(getContext(), 100) > screenY) {
@@ -201,7 +201,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 return insets;
             }
         });
-        alertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        mAlertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (editTextView.getText().length() < 8) {
@@ -212,8 +212,8 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 }
             }
         });
-        alertDialog.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
-        alertDialog.show();
+        mAlertDialog.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        mAlertDialog.show();
     }
 
     @Override

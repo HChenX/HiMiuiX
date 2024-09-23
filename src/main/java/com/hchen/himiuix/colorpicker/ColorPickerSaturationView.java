@@ -27,8 +27,8 @@ public class ColorPickerSaturationView extends ColorBaseSeekBar implements Color
 
     @Override
     protected void init() {
-        tag = ColorPickerTag.TAG_SATURATION;
-        colors = new int[]{
+        mColorPickerTag = ColorPickerTag.TAG_SATURATION;
+        mColors = new int[]{
                 Color.HSVToColor(new float[]{0, 0, 1}),
                 Color.HSVToColor(new float[]{0, 1, 1})
         };
@@ -39,19 +39,19 @@ public class ColorPickerSaturationView extends ColorBaseSeekBar implements Color
 
     public void updateColorPickerSaturationState(int saturation) {
         setProgress(saturation);
-        if (colorPickerData != null)
-            colorPickerData.saturation = saturation;
+        if (mColorPickerData != null)
+            mColorPickerData.saturation = saturation;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (colorPickerData != null)
-            colorPickerData.saturation = seekBar.getProgress();
+        if (mColorPickerData != null)
+            mColorPickerData.saturation = seekBar.getProgress();
     }
 
     @Override
     public void onColorHueChanged(float changed) {
-        colors = new int[]{
+        mColors = new int[]{
                 Color.HSVToColor(new float[]{changed, 0, 1}),
                 Color.HSVToColor(new float[]{changed, 1, 1}),
         };
