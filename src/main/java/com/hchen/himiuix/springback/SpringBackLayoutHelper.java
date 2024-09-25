@@ -22,70 +22,81 @@ import android.view.ViewGroup;
 
 public class SpringBackLayoutHelper {
     private static final int INVALID_POINTER = -1;
-    int mActivePointerId = -1;
-    float mInitialDownX;
-    float mInitialDownY;
-    int mScrollOrientation;
+    public int mActivePointerId = -1;
+    public float mInitialDownX;
+    public float mInitialDownY;
+    public int mScrollOrientation;
     private final ViewGroup mTarget;
-    int mTargetScrollOrientation;
+    public int mTargetScrollOrientation;
     private final int mTouchSlop;
 
-    public SpringBackLayoutHelper(ViewGroup target, int orientation) {
-        mTarget = target;
-        mTargetScrollOrientation = orientation;
-        mTouchSlop = ViewConfiguration.get(target.getContext()).getScaledTouchSlop();
+    public SpringBackLayoutHelper(ViewGroup viewGroup, int i2) {
+        this.mTarget = viewGroup;
+        this.mTargetScrollOrientation = i2;
+        this.mTouchSlop = ViewConfiguration.get(viewGroup.getContext()).getScaledTouchSlop();
     }
 
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        checkOrientation(ev);
-        boolean disallowIntercept = mScrollOrientation != 0 && mScrollOrientation != mTargetScrollOrientation;
-        mTarget.requestDisallowInterceptTouchEvent(disallowIntercept);
-        return !disallowIntercept;
+    public void checkOrientation(MotionEvent motionEvent) {
+        int findPointerIndex;
+        int actionMasked = motionEvent.getActionMasked();
+        if (actionMasked != 0) {
+            if (actionMasked != 1) {
+                if (actionMasked == 2) {
+                    int i2 = this.mActivePointerId;
+                    if (i2 != -1 && (findPointerIndex = motionEvent.findPointerIndex(i2)) >= 0) {
+                        float y2 = motionEvent.getY(findPointerIndex);
+                        float x2 = motionEvent.getX(findPointerIndex);
+                        float f2 = y2 - this.mInitialDownY;
+                        float f3 = x2 - this.mInitialDownX;
+                        if (Math.abs(f3) > this.mTouchSlop || Math.abs(f2) > this.mTouchSlop) {
+                            this.mScrollOrientation = Math.abs(f3) <= Math.abs(f2) ? 2 : 1;
+                            return;
+                        }
+                        return;
+                    }
+                    return;
+                }
+                if (actionMasked != 3) {
+                    return;
+                }
+            }
+            this.mScrollOrientation = 0;
+            this.mTarget.requestDisallowInterceptTouchEvent(false);
+            return;
+        }
+        int pointerId = motionEvent.getPointerId(0);
+        this.mActivePointerId = pointerId;
+        int findPointerIndex2 = motionEvent.findPointerIndex(pointerId);
+        if (findPointerIndex2 < 0) {
+            return;
+        }
+        this.mInitialDownY = motionEvent.getY(findPointerIndex2);
+        this.mInitialDownX = motionEvent.getX(findPointerIndex2);
+        this.mScrollOrientation = 0;
     }
 
-    public boolean isTouchInTarget(MotionEvent ev) {
-        int findPointerIndex = ev.findPointerIndex(ev.getPointerId(0));
-        if (findPointerIndex >= 0) {
-            float y = ev.getY(findPointerIndex);
-            float x = ev.getX(findPointerIndex);
-            int[] iArr = new int[]{0, 0};
-            mTarget.getLocationInWindow(iArr);
-            int i = iArr[0];
-            int i2 = iArr[1];
-            return (new Rect(i, i2, mTarget.getWidth() + i, mTarget.getHeight() + i2)).contains((int)x, (int)y);
-        } else {
+    public boolean isTouchInTarget(MotionEvent motionEvent) {
+        int findPointerIndex = motionEvent.findPointerIndex(motionEvent.getPointerId(0));
+        if (findPointerIndex < 0) {
             return false;
         }
+        float y2 = motionEvent.getY(findPointerIndex);
+        float x2 = motionEvent.getX(findPointerIndex);
+        int[] iArr = {0, 0};
+        this.mTarget.getLocationInWindow(iArr);
+        int i2 = iArr[0];
+        int i3 = iArr[1];
+        return new Rect(i2, i3, this.mTarget.getWidth() + i2, this.mTarget.getHeight() + i3).contains((int) x2, (int) y2);
     }
 
-    public void checkOrientation(MotionEvent ev) {
-        int actionMasked = ev.getActionMasked();
-        int findPointerIndex;
-        switch (actionMasked) {
-            case MotionEvent.ACTION_DOWN:
-                mActivePointerId = ev.getPointerId(0);
-                findPointerIndex = ev.findPointerIndex(mActivePointerId);
-                if (findPointerIndex >= 0) {
-                    mInitialDownY = ev.getY(findPointerIndex);
-                    mInitialDownX = ev.getX(findPointerIndex);
-                    mScrollOrientation = 0;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                mScrollOrientation = 0;
-                mTarget.requestDisallowInterceptTouchEvent(false);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (mActivePointerId != -1) {
-                    findPointerIndex = ev.findPointerIndex(mActivePointerId);
-                    if (findPointerIndex >= 0) {
-                        float x = ev.getX(findPointerIndex) - mInitialDownX;
-                        float y = ev.getY(findPointerIndex) - mInitialDownY;
-                        if (Math.abs(x) > (float)mTouchSlop || Math.abs(y) > (float)mTouchSlop) {
-                            mScrollOrientation = Math.abs(x) <= Math.abs(y) ? 2 : 1;
-                        }
-                    }
-                }
+    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+        checkOrientation(motionEvent);
+        int i2 = this.mScrollOrientation;
+        if (i2 != 0 && i2 != this.mTargetScrollOrientation) {
+            this.mTarget.requestDisallowInterceptTouchEvent(true);
+            return false;
         }
+        this.mTarget.requestDisallowInterceptTouchEvent(false);
+        return true;
     }
 }

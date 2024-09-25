@@ -16,5 +16,5 @@
 package com.hchen.himiuix.springback;
 
 public interface NestedCurrentFling {
-    boolean onNestedCurrentFling(float var1, float var2);
+    boolean onNestedCurrentFling(float f2, float f3);
 }

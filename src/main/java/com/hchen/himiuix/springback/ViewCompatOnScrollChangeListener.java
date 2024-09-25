@@ -15,16 +15,10 @@
  */
 package com.hchen.himiuix.springback;
 
-public class SpringOperator {
-    private final double damping;
-    private final double tension;
+import android.view.View;
 
-    public SpringOperator(float f2, float f3) {
-        this.tension = Math.pow(6.283185307179586d / (double) f3, 2.0d);
-        this.damping = (f2 * 12.566370614359172d) / (double) f3;
-    }
+public interface ViewCompatOnScrollChangeListener {
+    void onScrollChange(View view, int i2, int i3, int i4, int i5);
 
-    public double updateVelocity(double d2, float f2, double d3, double d4) {
-        return (d2 * (1.0d - (this.damping * f2))) + ((float) (this.tension * (d3 - d4) * f2));
-    }
+    void onStateChanged(int i2, int i3, boolean z2);
 }

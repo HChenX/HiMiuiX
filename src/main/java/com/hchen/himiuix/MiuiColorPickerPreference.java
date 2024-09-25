@@ -15,6 +15,7 @@
  */
 package com.hchen.himiuix;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -186,25 +188,26 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 });
             }
         });
-        mAlertDialog.getWindow().setDecorFitsSystemWindows(false);
-        ViewCompat.setOnApplyWindowInsetsListener(mAlertDialog.getWindow().getDecorView(), new OnApplyWindowInsetsListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(((Activity) getContext()).getWindow().getDecorView(), new OnApplyWindowInsetsListener() {
             private int oldHeight = -1;
-            
+
             @NonNull
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                 int bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+                Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                int systemBarHeight = systemBar.top + systemBar.bottom;
                 int dialogHeight = mAlertDialog.getWindow().getDecorView().getHeight();
                 if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                     if (bottom == 0 || oldHeight != -1) return insets;
                     int screenY = MiuiXUtils.getScreenSize(getContext()).y;
-                    if (bottom + dialogHeight + MiuiXUtils.sp2px(getContext(), 100) > screenY) {
+                    if (bottom + dialogHeight + systemBarHeight >= screenY) {
                         if (oldHeight == -1) {
                             oldHeight = nestedScrollView.getHeight();
                         }
 
                         ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
-                        layoutParams.height = oldHeight - MiuiXUtils.sp2px(getContext(), 100);
+                        layoutParams.height = oldHeight - systemBarHeight;
                         nestedScrollView.setLayoutParams(layoutParams);
                     }
                 } else if (oldHeight != -1) {
