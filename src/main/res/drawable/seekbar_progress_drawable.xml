@@ -5,9 +5,9 @@
         android:id="@android:id/background"
         android:gravity="center|fill_horizontal">
         <shape>
-            <corners android:radius="15sp" />
+            <corners android:radius="15dp" />
             <solid android:color="@color/seekbar_background" />
-            <size android:height="29sp" />
+            <size android:height="29dp" />
         </shape>
     </item>
     
@@ -16,9 +16,9 @@
         android:gravity="center|fill_horizontal">
         <clip>
             <shape>
-                <corners android:radius="15sp" />
+                <corners android:radius="15dp" />
                 <solid android:color="@color/seekbar_progress" />
-                <size android:height="29sp" />
+                <size android:height="29dp" />
             </shape>
         </clip>
     </item>

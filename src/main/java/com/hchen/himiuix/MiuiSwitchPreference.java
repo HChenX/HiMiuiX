@@ -15,7 +15,7 @@
  */
 package com.hchen.himiuix;
 
-import static com.hchen.himiuix.MiuiXUtils.sp2px;
+import static com.hchen.himiuix.MiuiXUtils.dp2px;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -100,8 +100,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
                     int[] outLocation = new int[2];
                     mSwitchBackgroundLayout.getLocationInWindow(outLocation);
                     switchViewX = outLocation[0];
-                    maxMoveX = mSwitchBackgroundLayout.getWidth() - mThumbView.getWidth() - MiuiXUtils.sp2px(getContext(), ANIMATION_START_END_OFFSET);
-                    minMoveX = MiuiXUtils.sp2px(getContext(), ANIMATION_START_END_OFFSET);
+                    maxMoveX = mSwitchBackgroundLayout.getWidth() - mThumbView.getWidth() - dp2px(getContext(), ANIMATION_START_END_OFFSET);
+                    minMoveX = dp2px(getContext(), ANIMATION_START_END_OFFSET);
                     v.getParent().requestDisallowInterceptTouchEvent(true);
                     animZoom();
                     break;
@@ -353,9 +353,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
         if (isAnimating) return;
-        int translationX = sp2px(getContext(), THUMB_END_X);
+        int translationX = dp2px(getContext(), THUMB_END_X);
         if (!useAnimate) {
-            if (toRight) mThumbView.setTranslationX(sp2px(getContext(), THUMB_END_X));
+            if (toRight) mThumbView.setTranslationX(dp2px(getContext(), THUMB_END_X));
             else mThumbView.setTranslationX(0);
             return;
         }

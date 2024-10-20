@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="67sp"
-    android:paddingStart="30sp"
-    android:paddingTop="10sp"
-    android:paddingEnd="30sp"
-    android:paddingBottom="10sp">
+    android:minHeight="67dp"
+    android:paddingStart="30dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="30dp"
+    android:paddingBottom="10dp">
 
     <include
         android:id="@+id/seekbar_tittle"
@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="bottom"
-        android:paddingEnd="2sp"
+        android:paddingEnd="2dp"
         android:textColor="@color/summary"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/seekbar"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:hardwareAccelerated="true"
-        android:paddingTop="5sp"
+        android:paddingTop="5dp"
         android:progressDrawable="@drawable/seekbar_progress_drawable"
         android:thumb="@null"
         app:layout_constraintLeft_toLeftOf="parent"

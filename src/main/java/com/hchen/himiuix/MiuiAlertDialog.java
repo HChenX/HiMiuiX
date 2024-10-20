@@ -168,7 +168,7 @@ public class MiuiAlertDialog implements DialogInterface {
         mWindow.setGravity(Gravity.BOTTOM);
         WindowManager.LayoutParams params = mWindow.getAttributes();
         Point windowPoint = MiuiXUtils.getWindowSize(context);
-        params.verticalMargin = (MiuiXUtils.sp2px(context, 16) * 1.0f) / windowPoint.y;
+        params.verticalMargin = (MiuiXUtils.dp2px(context, 16) * 1.0f) / windowPoint.y;
         params.width = MiuiXUtils.isVerticalScreen(context) ? (int) (windowPoint.x / 1.08) : (int) (windowPoint.x / 2.0);
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindow.setAttributes(params);
@@ -484,15 +484,15 @@ public class MiuiAlertDialog implements DialogInterface {
         if (isCreated) return this;
         if (isSetNeutralButton) {
             mButtonLayout.setOrientation(LinearLayout.VERTICAL);
-            margin(mNegativeButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
-            margin(mNeutralButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 10), 0);
-            margin(mPositiveButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 10), 0);
+            margin(mNegativeButton, MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 25), 0, 0);
+            margin(mNeutralButton, MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 10), 0);
+            margin(mPositiveButton, MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 10), 0);
         } else {
             if (!isSetPositiveButton && !isSetNegativeButton)
                 mDialog.setCancelable(true); // 防止无法关闭 dialog
             if (!isSetPositiveButton || !isSetNegativeButton) {
-                margin(mPositiveButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
-                margin(mNegativeButton, MiuiXUtils.sp2px(mContext, 25), MiuiXUtils.sp2px(mContext, 25), 0, 0);
+                margin(mPositiveButton, MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 25), 0, 0);
+                margin(mNegativeButton, MiuiXUtils.dp2px(mContext, 25), MiuiXUtils.dp2px(mContext, 25), 0, 0);
             }
         }
         if (mCustomView != null || mCustomViewId != 0) {
@@ -504,19 +504,19 @@ public class MiuiAlertDialog implements DialogInterface {
                 mRecyclerView.setAdapter(null);
             } else {
                 RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(mRecyclerView);
-                float radius = (this.mRadiusValue == -1) ? MiuiXUtils.sp2px(mContext, 32) : this.mRadiusValue;
+                float radius = (this.mRadiusValue == -1) ? MiuiXUtils.dp2px(mContext, 32) : this.mRadiusValue;
                 cornerRadius.setCornerRadius(radius);
                 if (mItems != null && !isDropDown) {
                     cornerRadius.setCornerRadius(0);
                     ViewGroup.LayoutParams layout = mRecyclerView.getLayoutParams();
-                    int height = (MiuiXUtils.sp2px(mContext, 56) * (mItems.size())) + MiuiXUtils.sp2px(mContext, 20);
+                    int height = (MiuiXUtils.dp2px(mContext, 56) * (mItems.size())) + MiuiXUtils.dp2px(mContext, 20);
                     int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ? MiuiXUtils.getWindowSize(mContext).y / 3 : (int) (MiuiXUtils.getWindowSize(mContext).y / 2.5);
                     layout.height = Math.min(height, maxHeight);
                     mRecyclerView.setLayoutParams(layout);
 
                     if (isSetPositiveButton || isSetNegativeButton || isSetNeutralButton) {
                         ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) mButtonLayout.getLayoutParams();
-                        layoutParams.topMargin = MiuiXUtils.sp2px(mContext, 20);
+                        layoutParams.topMargin = MiuiXUtils.dp2px(mContext, 20);
                         mButtonLayout.setLayoutParams(layoutParams);
                     } else {
                         mEndView.setVisibility(View.GONE);
@@ -537,7 +537,7 @@ public class MiuiAlertDialog implements DialogInterface {
         if (mCustomRadius != null) mMainDialog.setBackground(mCustomRadius);
         if (mMessageView.getVisibility() == View.VISIBLE && mTitleView.getVisibility() == View.GONE) {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mMessageView.getLayoutParams();
-            params.topMargin = MiuiXUtils.sp2px(mContext, 25);
+            params.topMargin = MiuiXUtils.dp2px(mContext, 25);
             mMessageView.setLayoutParams(params);
         }
         setTextTypeface();
@@ -626,11 +626,11 @@ public class MiuiAlertDialog implements DialogInterface {
         checkChildAddEditText(mCustomLayout);
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCustomLayout.getLayoutParams();
-        params.setMarginStart(MiuiXUtils.sp2px(mContext, 25));
-        params.setMarginEnd(MiuiXUtils.sp2px(mContext, 25));
+        params.setMarginStart(MiuiXUtils.dp2px(mContext, 25));
+        params.setMarginEnd(MiuiXUtils.dp2px(mContext, 25));
         if (isSetNegativeButton || isSetPositiveButton || isSetNeutralButton)
-            params.bottomMargin = MiuiXUtils.sp2px(mContext, 25);
-        params.topMargin = MiuiXUtils.sp2px(mContext, 25);
+            params.bottomMargin = MiuiXUtils.dp2px(mContext, 25);
+        params.topMargin = MiuiXUtils.dp2px(mContext, 25);
         mCustomLayout.setLayoutParams(params);
 
         if (onBindView != null)
@@ -753,14 +753,14 @@ public class MiuiAlertDialog implements DialogInterface {
             mDrawableBottom = new GradientDrawable();
             mDrawableTop.setColor(color);
             mDrawableBottom.setColor(color);
-            float radius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.sp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
+            float radius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.dp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
             if (isChecked || mDialog.isSetNegativeButton || mDialog.isSetPositiveButton || mDialog.isSetNeutralButton
                     || mDialog.mTitleView.getVisibility() == View.VISIBLE || mDialog.mMessageView.getVisibility() == View.VISIBLE) {
                 isChecked = true;
                 if (!mDialog.isDropDown) radius = 0;
             }
             if (mDialog.mTitleView.getVisibility() == View.GONE && mDialog.mMessageView.getVisibility() == View.GONE && !mDialog.isDropDown) {
-                float TopRadius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.sp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
+                float TopRadius = (mDialog.mRadiusValue == -1) ? MiuiXUtils.dp2px(mDialog.mContext, 32) : mDialog.mRadiusValue;
                 mDrawableTop.setCornerRadii(new float[]{TopRadius, TopRadius, TopRadius, TopRadius, 0, 0, 0, 0});
             } else
                 mDrawableTop.setCornerRadii(new float[]{radius, radius, radius, radius, 0, 0, 0, 0});

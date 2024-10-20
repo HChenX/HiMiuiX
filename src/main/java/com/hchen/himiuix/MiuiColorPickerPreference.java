@@ -199,7 +199,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                 int bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
                 Insets systemBar = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-                int systemBarHeight = systemBar.top + (btBottom <= 0 ? MiuiXUtils.sp2px(getContext(), 5) /* 无小白条时轻微顶起 */ : btBottom);
+                int systemBarHeight = systemBar.top + (btBottom <= 0 ? MiuiXUtils.dp2px(getContext(), 5) /* 无小白条时轻微顶起 */ : btBottom);
                 if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                     if (bottom == 0) return insets;
                     int screenY = MiuiXUtils.getScreenSize(getContext()).y;

@@ -314,7 +314,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         shouldShowRight = x > ((float) (viewX + viewWidth) / 2);
 
         mShowX = MiuiXUtils.dp2px(getContext(), 25);
-        mShowY = showBelow ? viewY + MiuiXUtils.sp2px(getContext(), 5) : viewY - mDialogHeight - MiuiXUtils.sp2px(getContext(), 30);
+        mShowY = showBelow ? viewY + MiuiXUtils.dp2px(getContext(), 5) : viewY - mDialogHeight - MiuiXUtils.dp2px(getContext(), 30);
 
         initDialog();
         calculateLayout();
@@ -356,7 +356,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     private int calculateHeight() {
         if (mEntryValues != null) {
             int count = mEntryValues.length;
-            int height = (MiuiXUtils.sp2px(getContext(), 56) * (count)) + MiuiXUtils.sp2px(getContext(), 20);
+            int height = (MiuiXUtils.dp2px(getContext(), 56) * (count)) + MiuiXUtils.dp2px(getContext(), 20);
             int maxHeight = MiuiXUtils.isVerticalScreen(getContext()) ? MiuiXUtils.getWindowSize(getContext()).y / 3 : (int) (MiuiXUtils.getWindowSize(getContext()).y / 2.1);
             return Math.min(height, maxHeight);
         } else return WRAP_CONTENT;

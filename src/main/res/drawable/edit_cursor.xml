@@ -2,6 +2,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/edit_cursor" />
     <size
-        android:width="2sp"
-        android:height="40sp" />
+        android:width="2dp"
+        android:height="40dp" />
 </shape>

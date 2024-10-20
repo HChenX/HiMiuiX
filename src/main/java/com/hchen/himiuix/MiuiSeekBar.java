@@ -60,7 +60,7 @@ public class MiuiSeekBar extends SeekBar {
 
         if (showDefaultPoint) {
             int width = getWidth();
-            int height = getHeight() + MiuiXUtils.sp2px(getContext(), 5); // seekbar padding 量
+            int height = getHeight() + MiuiXUtils.dp2px(getContext(), 5); // seekbar padding 量
 
             float scaleWidth = (float) width / (getMax() - getMin());
             float xPosition = scaleWidth * (shouldStep ? (mDefStep) : (mDefValue - getMin()));

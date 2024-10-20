@@ -8,15 +8,15 @@
     android:focusable="false"
     android:focusableInTouchMode="false"
     android:longClickable="false"
-    android:paddingStart="30sp"
-    android:paddingTop="10sp"
-    android:paddingEnd="30sp"
-    android:paddingBottom="10sp">
+    android:paddingStart="30dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="30dp"
+    android:paddingBottom="10dp">
 
     <View
         android:id="@+id/category_divider"
         android:layout_width="match_parent"
-        android:layout_height="2sp"
+        android:layout_height="2dp"
         android:background="@drawable/category_background"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -26,7 +26,7 @@
         android:id="@+id/category_tip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5sp"
+        android:paddingTop="5dp"
         android:maxLines="1"
         android:scrollbars="none"
         android:singleLine="true"

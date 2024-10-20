@@ -68,7 +68,7 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
     protected void init() {
         updateProgressBackground();
         setThumb(AppCompatResources.getDrawable(getContext(), R.drawable.color_picker_circle_with_hole));
-        setThumbOffset(MiuiXUtils.sp2px(getContext(), -3));
+        setThumbOffset(MiuiXUtils.dp2px(getContext(), -3));
         setOnSeekBarChangeListener(this);
     }
 
@@ -77,8 +77,8 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
         mGradientDrawable.setColors(mColors);
         mGradientDrawable.setShape(GradientDrawable.RECTANGLE);
         mGradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
-        mGradientDrawable.setCornerRadius(MiuiXUtils.sp2px(getContext(), 15));
-        mGradientDrawable.setSize(-1, MiuiXUtils.sp2px(getContext(), 29));
+        mGradientDrawable.setCornerRadius(MiuiXUtils.dp2px(getContext(), 15));
+        mGradientDrawable.setSize(-1, MiuiXUtils.dp2px(getContext(), 29));
         mGradientDrawable.setStroke(0, 0);
         if (mBackgroundImg == null)
             setProgressDrawable(mGradientDrawable);

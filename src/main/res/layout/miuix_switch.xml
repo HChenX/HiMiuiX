@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="67sp"
-    android:paddingStart="30sp"
-    android:paddingTop="10sp"
-    android:paddingEnd="30sp"
-    android:paddingBottom="10sp">
+    android:minHeight="67dp"
+    android:paddingStart="30dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="30dp"
+    android:paddingBottom="10dp">
 
     <include
         android:id="@+id/switch_tittle_summary"
         layout="@layout/miuix_tittle_summary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20sp"
+        android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/switch_container"
@@ -23,8 +23,8 @@
     <!-- 开关按钮部分 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/switch_container"
-        android:layout_width="53.2sp"
-        android:layout_height="30.5sp"
+        android:layout_width="53.2dp"
+        android:layout_height="30.5dp"
         android:background="@drawable/switch_background_off"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,9 +34,9 @@
         <!-- 圆形按钮 -->
         <View
             android:id="@+id/switch_thumb"
-            android:layout_width="21.5sp"
+            android:layout_width="21.5dp"
             android:layout_height="21.5dp"
-            android:layout_margin="4.2sp"
+            android:layout_margin="4.2dp"
             android:background="@drawable/thumb_background"
             android:longClickable="true"
             app:layout_constraintBottom_toBottomOf="parent"

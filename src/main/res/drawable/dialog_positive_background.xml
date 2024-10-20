@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners android:radius="16dp" />
+    <corners android:radius="15dp" />
     <solid android:color="@color/dialog_po_background" />
-    <size android:height="48sp" />
+    <size android:height="48dp" />
 </shape>
