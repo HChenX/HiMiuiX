@@ -90,10 +90,12 @@ public class MiuiPreference extends Preference {
 
     public void setViewId(int viewId) {
         mViewId = viewId;
+        notifyChanged();
     }
 
     public void setTipText(String tipText) {
         mTipText = tipText;
+        notifyChanged();
     }
 
     public String getTipText() {
@@ -123,7 +125,7 @@ public class MiuiPreference extends Preference {
         mArrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
         mColorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
         if (mColorSelectView != null) mColorSelectView.setVisibility(View.GONE);
-
+        
         mTittleView.setText(getTitle());
         updateSummaryIfNeed();
         loadArrowRight();

@@ -109,14 +109,16 @@ public class MiuiEditTextPreference extends MiuiPreference {
 
     public void setInputType(int type) {
         this.mInputType = type;
+        notifyChanged();
     }
 
     public int getInputType() {
         return mInputType;
     }
 
-    public void onImageClickListener(View.OnClickListener clickListener) {
+    public void setImageClickListener(View.OnClickListener clickListener) {
         mImageClickListener = clickListener;
+        notifyChanged();
     }
 
     @Override

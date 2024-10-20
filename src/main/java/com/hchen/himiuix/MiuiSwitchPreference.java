@@ -98,7 +98,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 case MotionEvent.ACTION_DOWN:
                     isMoved = false;
                     int[] outLocation = new int[2];
-                    mSwitchBackgroundLayout.getLocationOnScreen(outLocation);
+                    mSwitchBackgroundLayout.getLocationInWindow(outLocation);
                     switchViewX = outLocation[0];
                     maxMoveX = mSwitchBackgroundLayout.getWidth() - mThumbView.getWidth() - MiuiXUtils.sp2px(getContext(), ANIMATION_START_END_OFFSET);
                     minMoveX = MiuiXUtils.sp2px(getContext(), ANIMATION_START_END_OFFSET);
@@ -192,6 +192,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     public void setSummaryOn(CharSequence mSummaryOn) {
         this.mSummaryOn = mSummaryOn;
+        notifyChanged();
     }
 
     public void setSummaryOn(@StringRes int mSummaryOn) {
@@ -204,6 +205,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     public void setSummaryOff(CharSequence mSummaryOff) {
         this.mSummaryOff = mSummaryOff;
+        notifyChanged();
     }
 
     public void setSummaryOff(@StringRes int mSummaryOff) {
@@ -236,6 +238,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     public void setDisableDependentsState(boolean disableDependentsState) {
         mDisableDependentsState = disableDependentsState;
+        notifyChanged();
     }
 
     public boolean getDisableDependentsState() {

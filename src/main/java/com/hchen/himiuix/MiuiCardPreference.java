@@ -78,30 +78,50 @@ public class MiuiCardPreference extends MiuiPreference {
 
     public void setBackgroundColor(int color) {
         mBackgroundColor = color;
+        notifyChanged();
     }
 
     public void setIconArrowRight(boolean arrowRight) {
         mIconArrowRight = arrowRight;
+        notifyChanged();
     }
 
     public void setIconCancel(boolean cancel) {
         mIconCancel = cancel;
+        notifyChanged();
     }
 
     public void setIconColor(int color) {
         mIconColor = color;
+        notifyChanged();
     }
 
     public void setCustomViewId(@LayoutRes int viewId) {
-        mCustomView = LayoutInflater.from(getContext()).inflate(viewId, mCustomLayout, false);
+        setCustomView(LayoutInflater.from(getContext()).inflate(viewId, mCustomLayout, false));
     }
 
     public void setCustomView(View v) {
         mCustomView = v;
+        notifyChanged();
     }
 
     public void removeCustomView() {
         mCustomView = null;
+        notifyChanged();
+    }
+
+    public void setCustomViewCallBack(OnBindView onBindView) {
+        this.onBindView = onBindView;
+        notifyChanged();
+    }
+
+    public void setIconClickListener(View.OnClickListener clickListener) {
+        mIconClickListener = v -> {
+            if (clickListener != null)
+                clickListener.onClick(v);
+            v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+        };
+        notifyChanged();
     }
 
     @Override
@@ -150,19 +170,7 @@ public class MiuiCardPreference extends MiuiPreference {
         if (mImageView.getVisibility() == View.VISIBLE)
             mImageView.setOnClickListener(mIconClickListener);
     }
-
-    public void setCustomViewCallBack(OnBindView onBindView) {
-        this.onBindView = onBindView;
-    }
-
-    public void setIconClickListener(View.OnClickListener clickListener) {
-        mIconClickListener = v -> {
-            if (clickListener != null)
-                clickListener.onClick(v);
-            v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        };
-    }
-
+    
     public interface OnBindView {
         void onBindView(View view);
     }

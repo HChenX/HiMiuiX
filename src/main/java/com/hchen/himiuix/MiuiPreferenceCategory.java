@@ -38,7 +38,7 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
     public MiuiPreferenceCategory(@NonNull Context context) {
         this(context, null);
     }
-    
+
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.style.MiuiPreference_Category);
     }
@@ -64,6 +64,7 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
     public void setGoneDivider(boolean goneDivider) {
         this.shouldGoneDivider = goneDivider;
+        notifyChanged();
     }
 
     public boolean isGoneDivider() {
