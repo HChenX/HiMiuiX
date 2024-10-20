@@ -38,9 +38,8 @@ public interface DialogInterface {
         void onDismiss(DialogInterface dialog);
     }
 
-    interface TextWatcher {
-        default void beforeTextChanged(CharSequence s, int start,
-                                       int count, int after) {
+    interface TextWatcher extends android.text.TextWatcher {
+        default void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
 
         default void onTextChanged(CharSequence s, int start, int before, int count) {

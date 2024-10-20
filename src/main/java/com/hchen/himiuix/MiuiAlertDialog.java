@@ -27,9 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.ResultReceiver;
-import android.text.Editable;
 import android.util.Pair;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
@@ -114,22 +112,6 @@ public class MiuiAlertDialog implements DialogInterface {
     private final ArrayList<EditText> mEditTextViews = new ArrayList<>();
     private final HashMap<TypefaceObject, Typeface> mTypefaceHashMap = new HashMap<>();
     private final HashMap<TypefaceObject, Pair<Typeface, Integer>> mTypefaceStyleHashMap = new HashMap<>();
-    private final android.text.TextWatcher mDefTextWatcher = new android.text.TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            if (mTextWatcher != null) mTextWatcher.beforeTextChanged(s, start, count, after);
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (mTextWatcher != null) mTextWatcher.onTextChanged(s, start, before, count);
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (mTextWatcher != null) mTextWatcher.afterTextChanged(s);
-        }
-    };
 
     public enum TypefaceObject {
         TYPEFACE_ALERT_TITLE,
@@ -170,15 +152,12 @@ public class MiuiAlertDialog implements DialogInterface {
             }
 
             public void dismissDialog() {
-                if (weakReference != null) {
-                    weakReference.clear();
-                    weakReference = null;
-                }
                 if (mHandlerWeakReference != null) {
                     mHandlerWeakReference.clear();
                     mHandlerWeakReference = null;
                 }
-                mEditTextView.removeTextChangedListener(mDefTextWatcher);
+                if (mTextWatcher != null)
+                    mEditTextView.removeTextChangedListener(mTextWatcher);
                 super.dismiss();
             }
         };
@@ -188,14 +167,14 @@ public class MiuiAlertDialog implements DialogInterface {
         mWindow.setContentView(mMainDialog);
         mWindow.setGravity(Gravity.BOTTOM);
         WindowManager.LayoutParams params = mWindow.getAttributes();
-        Point windowPoint = MiuiXUtils.getScreenSize(context);
+        Point windowPoint = MiuiXUtils.getWindowSize(context);
         params.verticalMargin = (MiuiXUtils.sp2px(context, 16) * 1.0f) / windowPoint.y;
         params.width = MiuiXUtils.isVerticalScreen(context) ? (int) (windowPoint.x / 1.08) : (int) (windowPoint.x / 2.0);
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindow.setAttributes(params);
         mWindow.setWindowAnimations(R.style.Animation_Dialog);
 
-        mHandlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
+        mHandlerWeakReference = new WeakReference<>(new Handler(context.getApplicationContext().getMainLooper()));
         mListAdapter = new ListAdapter(this);
         if (context instanceof Activity activity) {
             activity.registerActivityLifecycleCallbacks(new ActivityLifecycle(this));
@@ -413,7 +392,7 @@ public class MiuiAlertDialog implements DialogInterface {
         }
         this.shouldInput = needInput;
         if (watcher != null)
-            mEditTextView.addTextChangedListener(mDefTextWatcher);
+            mEditTextView.addTextChangedListener(watcher);
         mTextWatcher = watcher;
         shouldShowEdit = true;
         return this;
@@ -531,7 +510,7 @@ public class MiuiAlertDialog implements DialogInterface {
                     cornerRadius.setCornerRadius(0);
                     ViewGroup.LayoutParams layout = mRecyclerView.getLayoutParams();
                     int height = (MiuiXUtils.sp2px(mContext, 56) * (mItems.size())) + MiuiXUtils.sp2px(mContext, 20);
-                    int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ? MiuiXUtils.getScreenSize(mContext).y / 3 : (int) (MiuiXUtils.getScreenSize(mContext).y / 2.5);
+                    int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ? MiuiXUtils.getWindowSize(mContext).y / 3 : (int) (MiuiXUtils.getWindowSize(mContext).y / 2.5);
                     layout.height = Math.min(height, maxHeight);
                     mRecyclerView.setLayoutParams(layout);
 
@@ -674,27 +653,19 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
-    private WeakReference<ResultReceiver> weakReference = null;
-
     private void hideInputIfNeed(EditText editText, Runnable runnable) {
         InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible(editText)) {
-            if (weakReference != null && weakReference.get() == null) {
-                weakReference.clear();
-                weakReference = null;
-            }
-            if (weakReference == null) {
-                weakReference = new WeakReference<>(new ResultReceiver(mHandlerWeakReference.get()) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        if (mHandlerWeakReference == null || mHandlerWeakReference.get() == null) {
-                            mHandlerWeakReference = new WeakReference<>(new Handler(Looper.getMainLooper()));
-                        }
-                        mHandlerWeakReference.get().postDelayed(runnable, 300);
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0, new ResultReceiver(mHandlerWeakReference.get()) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    if (mHandlerWeakReference == null || mHandlerWeakReference.get() == null) {
+                        runnable.run();
+                        return;
                     }
-                });
-            }
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0, weakReference.get());
+                    mHandlerWeakReference.get().postDelayed(runnable, 300);
+                }
+            });
         }
     }
 
@@ -943,6 +914,8 @@ public class MiuiAlertDialog implements DialogInterface {
         @Override
         public void onActivityPreDestroyed(@NonNull Activity activity) {
             if (mDialog.isShowing()) {
+                mDialog.mHandlerWeakReference.clear();
+                mDialog.mHandlerWeakReference = null;
                 mDialog.dismissNow();
             }
         }

@@ -191,7 +191,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private MiuiAlertDialog mDialog;
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    protected boolean onTouch(View v, MotionEvent event) {
         if (!isDialogEnabled) {
             return super.onTouch(v, event);
         }

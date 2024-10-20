@@ -145,7 +145,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         int index = getValueIndex();
         return index >= 0 && mEntries != null ? mEntries[index] : null;
     }
-    
+
     public void setValueIndex(int index) {
         if (mEntryValues != null) {
             setValue(mEntryValues[index].toString());
@@ -166,7 +166,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         }
         return -1;
     }
-    
+
     @Override
     @SuppressLint("NotifyDataSetChanged")
     protected void notifyChanged() {
@@ -272,7 +272,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    protected boolean onTouch(View v, MotionEvent event) {
         if (!isEnabled()) return false;
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -299,7 +299,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     private boolean shouldShowRight;
 
     private void showDialogAtPosition(float x, float y) {
-        int screenHeight = MiuiXUtils.getScreenSize(getContext()).y;
+        int screenHeight = MiuiXUtils.getWindowSize(getContext()).y;
 
         int[] location = new int[2];
         getMiuiPrefMainLayout().getLocationOnScreen(location);
@@ -349,7 +349,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     private int calculateWidth() {
-        Point point = MiuiXUtils.getScreenSize(getContext());
+        Point point = MiuiXUtils.getWindowSize(getContext());
         return MiuiXUtils.isVerticalScreen(getContext()) ? (int) (point.x / 2.1) : (int) (point.x / 3.4);
     }
 
@@ -357,7 +357,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
         if (mEntryValues != null) {
             int count = mEntryValues.length;
             int height = (MiuiXUtils.sp2px(getContext(), 56) * (count)) + MiuiXUtils.sp2px(getContext(), 20);
-            int maxHeight = MiuiXUtils.isVerticalScreen(getContext()) ? MiuiXUtils.getScreenSize(getContext()).y / 3 : (int) (MiuiXUtils.getScreenSize(getContext()).y / 2.1);
+            int maxHeight = MiuiXUtils.isVerticalScreen(getContext()) ? MiuiXUtils.getWindowSize(getContext()).y / 3 : (int) (MiuiXUtils.getWindowSize(getContext()).y / 2.1);
             return Math.min(height, maxHeight);
         } else return WRAP_CONTENT;
     }

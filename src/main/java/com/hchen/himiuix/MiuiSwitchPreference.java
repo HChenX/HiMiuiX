@@ -56,7 +56,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             if (isAnimating) return;
             final boolean newValue = !isChecked();
             if (callChangeListener(newValue)) {
-                setChecked(newValue);
+                innerSetChecked(newValue);
                 updateSwitchState(false);
                 animateThumbIfNeed(true, isChecked());
                 if (mSummaryOn != null && isChecked()) getSummaryView().setText(mSummaryOn);
@@ -213,8 +213,12 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     public void setChecked(boolean checked) {
+        innerSetChecked(checked);
+    }
+
+    private void innerSetChecked(boolean checked) {
         final boolean changed = mChecked != checked;
-        if (callChangeListener(changed) || isInitialTime) {
+        if (changed || isInitialTime) {
             mChecked = checked;
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
@@ -248,7 +252,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         super.onSetInitialValue(defaultValue);
         if (defaultValue == null) defaultValue = false;
-        setChecked(getPersistedBoolean((Boolean) defaultValue));
+        innerSetChecked(getPersistedBoolean((Boolean) defaultValue));
         isInitialTime = false;
     }
 
@@ -291,12 +295,12 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    protected boolean onTouch(View v, MotionEvent event) {
         return false;
     }
 
     @Override
-    public boolean onHover(View v, MotionEvent event) {
+    protected boolean onHover(View v, MotionEvent event) {
         return super.onHover(v, event);
     }
 
@@ -374,7 +378,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
-        setChecked(savedState.mChecked);
+        innerSetChecked(savedState.mChecked);
     }
 
     private static class SavedState extends BaseSavedState {

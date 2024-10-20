@@ -349,7 +349,7 @@ public class MiuiPreference extends Preference {
         }
     }
 
-    public boolean onTouch(View v, MotionEvent event) {
+    protected boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
         // Log.i(TAG, "onTouch finger: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
         //         + " action: " + action);
@@ -362,7 +362,7 @@ public class MiuiPreference extends Preference {
         return false;
     }
 
-    public boolean onHover(View v, MotionEvent event) {
+    protected boolean onHover(View v, MotionEvent event) {
         int action = event.getAction();
         // Log.i(TAG, "onTouch mouse: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
         //         + " action: " + action);
