@@ -78,7 +78,7 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
         mGradientDrawable.setShape(GradientDrawable.RECTANGLE);
         mGradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
         mGradientDrawable.setCornerRadius(MiuiXUtils.sp2px(getContext(), 15));
-        mGradientDrawable.setSize(-1, MiuiXUtils.sp2px(getContext(), 32));
+        mGradientDrawable.setSize(-1, MiuiXUtils.sp2px(getContext(), 29));
         mGradientDrawable.setStroke(0, 0);
         if (mBackgroundImg == null)
             setProgressDrawable(mGradientDrawable);

@@ -71,7 +71,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     }
 
     @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiColorPickerPreference,
                 defStyleAttr, defStyleRes)) {

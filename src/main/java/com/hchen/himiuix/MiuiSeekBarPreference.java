@@ -101,7 +101,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_seekbar);
         try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MiuiSeekBarPreference,
                 defStyleAttr, defStyleRes)) {

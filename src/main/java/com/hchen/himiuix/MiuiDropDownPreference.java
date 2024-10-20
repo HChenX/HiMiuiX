@@ -77,7 +77,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     @Override
     @SuppressLint({"RestrictedApi", "PrivateResource"})
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
             mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
@@ -226,7 +226,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean disableArrowRightView() {
+    protected boolean shouldDisableArrowRightView() {
         return true;
     }
 

@@ -59,15 +59,14 @@ public class MiuiSeekBar extends SeekBar {
         super.onDraw(canvas);
 
         if (showDefaultPoint) {
-            int width = getWidth() - MiuiXUtils.sp2px(getContext(), 50);
-            int height = getHeight() - MiuiXUtils.sp2px(getContext(), 20);
+            int width = getWidth();
+            int height = getHeight() + MiuiXUtils.sp2px(getContext(), 5); // seekbar padding 量
 
             float scaleWidth = (float) width / (getMax() - getMin());
-            float xPosition = scaleWidth * (shouldStep ? (mDefStep) : (mDefValue - getMin()))
-                    + MiuiXUtils.sp2px(getContext(), 25);
+            float xPosition = scaleWidth * (shouldStep ? (mDefStep) : (mDefValue - getMin()));
             float yPosition = (float) height / 2;
 
-            canvas.drawCircle(xPosition, yPosition, (float) height / 5, mPaint);
+            canvas.drawCircle(xPosition, yPosition, (float) height / 6, mPaint);
         }
     }
 

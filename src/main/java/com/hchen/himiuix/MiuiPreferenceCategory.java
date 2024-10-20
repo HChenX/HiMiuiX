@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,10 +33,12 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
     private ConstraintLayout mLayout;
     private View mDividerView;
     private TextView mTextView;
-    private int mNoTipHeight;
-    private int mHaveTipHeight;
     private boolean shouldGoneDivider;
 
+    public MiuiPreferenceCategory(@NonNull Context context) {
+        this(context, null);
+    }
+    
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.style.MiuiPreference_Category);
     }
@@ -55,8 +56,6 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
         setLayoutResource(R.layout.miuix_category);
         setSelectable(false);
         setPersistent(false);
-        mNoTipHeight = MiuiXUtils.sp2px(context, 50);
-        mHaveTipHeight = MiuiXUtils.sp2px(context, 63);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreferenceCategory,
                 defStyleAttr, defStyleRes)) {
             shouldGoneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, false);
@@ -84,7 +83,7 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
     @Override
     public boolean shouldDisableDependents() {
-        return !super.isEnabled();
+        return false;
     }
 
     @Override
@@ -95,24 +94,11 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
         mTextView.setVisibility(View.GONE);
         mDividerView.setVisibility(View.VISIBLE);
-        setLayoutHeight(false);
 
-        if (shouldGoneDivider) {
-            mDividerView.setVisibility(View.GONE);
-            mHaveTipHeight = MiuiXUtils.sp2px(getContext(), 33);
-            mNoTipHeight = MiuiXUtils.sp2px(getContext(), 20);
-            setLayoutHeight(false);
-        }
+        if (shouldGoneDivider) mDividerView.setVisibility(View.GONE);
         if (getTitle() != null) {
             mTextView.setVisibility(View.VISIBLE);
             mTextView.setText(getTitle());
-            setLayoutHeight(true);
         }
-    }
-
-    private void setLayoutHeight(boolean haveTip) {
-        ViewGroup.LayoutParams params = mLayout.getLayoutParams();
-        params.height = haveTip ? mHaveTipHeight : mNoTipHeight;
-        mLayout.setLayoutParams(params);
     }
 }

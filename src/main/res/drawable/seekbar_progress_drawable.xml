@@ -7,7 +7,7 @@
         <shape>
             <corners android:radius="15sp" />
             <solid android:color="@color/seekbar_background" />
-            <size android:height="32sp" />
+            <size android:height="29sp" />
         </shape>
     </item>
     
@@ -18,7 +18,7 @@
             <shape>
                 <corners android:radius="15sp" />
                 <solid android:color="@color/seekbar_progress" />
-                <size android:height="32sp" />
+                <size android:height="29sp" />
             </shape>
         </clip>
     </item>

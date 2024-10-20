@@ -71,7 +71,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
     }
 
     @Override
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_edit);
     }
 
