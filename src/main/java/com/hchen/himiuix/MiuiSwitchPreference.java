@@ -17,12 +17,14 @@ package com.hchen.himiuix;
 
 import static com.hchen.himiuix.MiuiXUtils.dp2px;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -52,15 +54,53 @@ public class MiuiSwitchPreference extends MiuiPreference {
     private final float ANIMATOR_TENSION = 1.2f;
     private final float ANIMATION_START_END_OFFSET = 4.2f;
     private final float THUMB_END_X = 22.8f;
+    private TransitionDrawable offToOnTransition;
+    private TransitionDrawable onToOffTransition;
+    private static final int HANDLER_ANIMATION_START = 1;
+    private static final int HANDLED_ANIMATION_DOING = 2;
+    private static final int HANDLED_ANIMATION_NEXT = 3;
+    private static final int HANDLED_ANIMATION_DONE = 4;
+    private static final int HANDLER_NO_ANIMATION = 5;
+    private final Handler animationHandler = new Handler(Looper.getMainLooper()) {
+        private boolean shouldNextAnimation = false;
+        private boolean nextValue = false;
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            boolean newValue = msg.obj instanceof Boolean && (boolean) msg.obj;
+            switch (msg.what) {
+                case HANDLER_ANIMATION_START -> {
+                    animateThumbIfNeed(true, newValue);
+                }
+                case HANDLED_ANIMATION_DOING -> {
+                    animationHandler.sendEmptyMessage(HANDLED_ANIMATION_DONE);
+                }
+                case HANDLED_ANIMATION_NEXT -> {
+                    assert msg.obj instanceof Object[];
+                    Object[] objs = (Object[]) msg.obj;
+                    shouldNextAnimation = (boolean) objs[0];
+                    nextValue = (boolean) objs[1];
+                }
+                case HANDLED_ANIMATION_DONE -> {
+                    if (shouldNextAnimation)
+                        animationHandler.sendMessage(SwitchStateMessage.create(HANDLER_ANIMATION_START, nextValue));
+                    shouldNextAnimation = false;
+                }
+                case HANDLER_NO_ANIMATION -> {
+                    animateThumbIfNeed(false, newValue);
+                }
+            }
+        }
+    };
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (isAnimating) return;
+            if (animationHandler.hasMessages(HANDLED_ANIMATION_DOING))
+                return;
             final boolean newValue = !isChecked();
             if (callChangeListener(newValue)) {
-                innerSetChecked(newValue);
-                updateSwitchState(false);
-                animateThumbIfNeed(true, isChecked());
+                innerSetChecked(newValue, true);
+                animationHandler.sendMessage(SwitchStateMessage.create(HANDLER_ANIMATION_START, newValue));
                 if (mSummaryOn != null && isChecked()) getSummaryView().setText(mSummaryOn);
                 if (mSummaryOff != null && !isChecked()) getSummaryView().setText(mSummaryOff);
             }
@@ -139,6 +179,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
                         } else mThumbViewAnimator.start();
                     } else
                         mClickListener.onClick(v);
+                    v.performClick();
                     v.getParent().requestDisallowInterceptTouchEvent(false);
                     break;
                 default:
@@ -182,6 +223,10 @@ public class MiuiSwitchPreference extends MiuiPreference {
     @SuppressLint("RestrictedApi")
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_switch);
+        Drawable[] switchOffToOnDrawables = MiuiXUtils.getDrawables(getContext(), R.drawable.switch_background_off, R.drawable.switch_background_on);
+        Drawable[] switchOnToOffDrawables = MiuiXUtils.getDrawables(getContext(), R.drawable.switch_background_on, R.drawable.switch_background_off);
+        offToOnTransition = new TransitionDrawable(switchOffToOnDrawables);
+        onToOffTransition = new TransitionDrawable(switchOnToOffDrawables);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiSwitchPreference, defStyleAttr, defStyleRes)) {
             mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOn, R.styleable.MiuiSwitchPreference_android_summaryOn);
             mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOff, R.styleable.MiuiSwitchPreference_android_summaryOff);
@@ -221,16 +266,20 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     public void setChecked(boolean checked) {
-        innerSetChecked(checked);
+        innerSetChecked(checked, false);
     }
 
-    private void innerSetChecked(boolean checked) {
+    private void innerSetChecked(boolean checked, boolean fromUser) {
         final boolean changed = mChecked != checked;
         if (changed || isInitialTime) {
             mChecked = checked;
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
             if (!isInitialTime) {
+                if (!fromUser && animationHandler.hasMessages(HANDLED_ANIMATION_DOING)) {
+                    animationHandler.sendMessage(
+                            SwitchStateMessage.create(HANDLED_ANIMATION_NEXT, new Object[]{true, checked}));
+                }
                 notifyChanged();
             }
         }
@@ -261,7 +310,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         super.onSetInitialValue(defaultValue);
         if (defaultValue == null) defaultValue = false;
-        innerSetChecked(getPersistedBoolean((Boolean) defaultValue));
+        innerSetChecked(getPersistedBoolean((Boolean) defaultValue), false);
         isInitialTime = false;
     }
 
@@ -275,8 +324,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         mThumbView.setOnTouchListener(null);
         mThumbView.setOnHoverListener(null);
         mSwitchBackgroundLayout.setOnClickListener(null);
-        updateSwitchState(true);
-        animateThumbIfNeed(false, isChecked());
+        animationHandler.sendMessage(SwitchStateMessage.create(HANDLER_NO_ANIMATION, isChecked()));
 
         updateSummaryIfNeed();
         if (isEnabled() && isSelectable()) {
@@ -285,7 +333,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             mThumbView.setOnTouchListener(mSwitchAnimationAction);
         }
     }
-    
+
     @Override
     protected boolean shouldShowSummary() {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
@@ -322,20 +370,40 @@ public class MiuiSwitchPreference extends MiuiPreference {
         }
     }
 
-    private void updateSwitchState(boolean isInit) {
+    private void animateThumbIfNeed(boolean useAnimation, boolean toRight) {
+        if (animationHandler.hasMessages(HANDLED_ANIMATION_DOING))
+            return;
+        updateSwitchState(useAnimation);
+        int translationX = dp2px(getContext(), THUMB_END_X);
+        if (!useAnimation) {
+            if (toRight) mThumbView.setTranslationX(translationX);
+            else mThumbView.setTranslationX(0);
+            return;
+        }
+        int thumbPosition = toRight ? translationX : 0;
+
+        mThumbViewAnimator
+                .translationX(thumbPosition)
+                .setDuration(ANIMATOR_DURATION)
+                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
+                .start();
+        animationHandler.sendEmptyMessageDelayed(HANDLED_ANIMATION_DOING, ANIMATOR_DURATION);
+    }
+
+    private void updateSwitchState(boolean useAnimation) {
         if (isEnabled()) {
-            if (isInit) {
+            if (useAnimation) {
+                if (isChecked()) {
+                    mSwitchBackgroundLayout.setBackground(offToOnTransition);
+                    offToOnTransition.startTransition(ANIMATOR_DURATION);
+                } else {
+                    mSwitchBackgroundLayout.setBackground(onToOffTransition);
+                    onToOffTransition.startTransition(ANIMATOR_DURATION);
+                }
+            } else {
                 mSwitchBackgroundLayout.setBackgroundResource(isChecked() ?
                         R.drawable.switch_background_on :
                         R.drawable.switch_background_off);
-            } else {
-                mSwitchBackgroundLayout.setBackgroundResource(R.drawable.switch_transition_background);
-                TransitionDrawable transitionDrawable = (TransitionDrawable) mSwitchBackgroundLayout.getBackground();
-                if (isChecked()) {
-                    transitionDrawable.startTransition(ANIMATOR_DURATION);  // 渐变到 on 状态
-                } else {
-                    transitionDrawable.resetTransition();  // 渐变到 off 状态
-                }
             }
             mThumbView.setBackgroundResource(R.drawable.thumb_background);
         } else {
@@ -347,32 +415,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 mThumbView.setBackgroundResource(R.drawable.thumb_disable_off_background);
             }
         }
-    }
-
-    private boolean isAnimating = false;
-
-    private void animateThumbIfNeed(boolean useAnimate, boolean toRight) {
-        if (isAnimating) return;
-        int translationX = dp2px(getContext(), THUMB_END_X);
-        if (!useAnimate) {
-            if (toRight) mThumbView.setTranslationX(dp2px(getContext(), THUMB_END_X));
-            else mThumbView.setTranslationX(0);
-            return;
-        }
-        isAnimating = true;
-        int thumbPosition = toRight ? translationX : 0;
-
-        mThumbViewAnimator
-                .translationX(thumbPosition)
-                .setDuration(ANIMATOR_DURATION)
-                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        isAnimating = false;
-                    }
-                })
-                .start();
     }
 
     @Nullable
@@ -396,7 +438,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
-        innerSetChecked(savedState.mChecked);
+        innerSetChecked(savedState.mChecked, false);
     }
 
     private static class SavedState extends BaseSavedState {
@@ -428,6 +470,15 @@ public class MiuiSwitchPreference extends MiuiPreference {
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeInt(mChecked ? 1 : 0);
+        }
+    }
+
+    private static class SwitchStateMessage {
+        public static Message create(int what, Object value) {
+            Message message = Message.obtain();
+            message.what = what;
+            message.obj = value;
+            return message;
         }
     }
 

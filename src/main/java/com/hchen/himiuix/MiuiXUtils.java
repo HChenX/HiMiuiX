@@ -19,8 +19,16 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.view.Display;
 import android.view.WindowManager;
+
+import androidx.annotation.DrawableRes;
+import androidx.appcompat.content.res.AppCompatResources;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class MiuiXUtils {
     private static final Point windowSizePoint = new Point();
@@ -112,5 +120,16 @@ public class MiuiXUtils {
         // 获取字体的缩放密度
         float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
+    }
+
+    // 获取 Drawable
+    public static Drawable getDrawable(Context context, @DrawableRes int id) {
+        return AppCompatResources.getDrawable(context, id);
+    }
+
+    public static Drawable[] getDrawables(Context context, @DrawableRes int... ids) {
+        return Arrays.stream(ids).mapToObj(value -> AppCompatResources.getDrawable(context, value))
+                .collect(Collectors.toCollection(ArrayList::new))
+                .toArray(new Drawable[]{});
     }
 }

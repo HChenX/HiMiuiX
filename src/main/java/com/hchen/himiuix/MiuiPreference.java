@@ -311,8 +311,6 @@ public class MiuiPreference extends Preference {
 
     protected boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
-        // Log.i(TAG, "onTouch finger: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
-        //         + " action: " + action);
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
             if (action == MotionEvent.ACTION_DOWN) {
                 v.setBackgroundResource(R.color.touch_down);
@@ -324,8 +322,6 @@ public class MiuiPreference extends Preference {
 
     protected boolean onHover(View v, MotionEvent event) {
         int action = event.getAction();
-        // Log.i(TAG, "onTouch mouse: " + (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
-        //         + " action: " + action);
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
             if (action == MotionEvent.ACTION_HOVER_MOVE) {
                 v.setBackgroundResource(R.color.touch_down);
