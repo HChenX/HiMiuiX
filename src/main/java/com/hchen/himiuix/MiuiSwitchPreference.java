@@ -56,6 +56,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     private final float THUMB_END_X = 22.8f;
     private TransitionDrawable offToOnTransition;
     private TransitionDrawable onToOffTransition;
+    private static final int HANDLER_ANIMATION_READY = 0;
     private static final int HANDLER_ANIMATION_START = 1;
     private static final int HANDLED_ANIMATION_DOING = 2;
     private static final int HANDLED_ANIMATION_NEXT = 3;
@@ -69,7 +70,10 @@ public class MiuiSwitchPreference extends MiuiPreference {
         public void handleMessage(@NonNull Message msg) {
             boolean newValue = msg.obj instanceof Boolean && (boolean) msg.obj;
             switch (msg.what) {
+                case HANDLER_ANIMATION_READY -> {
+                }
                 case HANDLER_ANIMATION_START -> {
+                    animationHandler.removeMessages(HANDLER_ANIMATION_READY);
                     animateThumbIfNeed(true, newValue);
                 }
                 case HANDLED_ANIMATION_DOING -> {
@@ -97,13 +101,12 @@ public class MiuiSwitchPreference extends MiuiPreference {
         public void onClick(View v) {
             if (animationHandler.hasMessages(HANDLED_ANIMATION_DOING))
                 return;
+            animationHandler.sendEmptyMessageDelayed(HANDLER_ANIMATION_READY, ANIMATOR_DURATION);
             final boolean newValue = !isChecked();
             if (callChangeListener(newValue)) {
                 innerSetChecked(newValue, true);
                 animationHandler.sendMessage(SwitchStateMessage.create(HANDLER_ANIMATION_START, newValue));
-                if (mSummaryOn != null && isChecked()) getSummaryView().setText(mSummaryOn);
-                if (mSummaryOff != null && !isChecked()) getSummaryView().setText(mSummaryOff);
-            }
+            } else animationHandler.removeMessages(HANDLER_ANIMATION_READY);
             if (v != null)
                 v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         }
@@ -276,7 +279,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
             if (!isInitialTime) {
-                if (!fromUser && animationHandler.hasMessages(HANDLED_ANIMATION_DOING)) {
+                if (!fromUser && (animationHandler.hasMessages(HANDLED_ANIMATION_DOING)
+                        || animationHandler.hasMessages(HANDLER_ANIMATION_READY))) {
                     animationHandler.sendMessage(
                             SwitchStateMessage.create(HANDLED_ANIMATION_NEXT, new Object[]{true, checked}));
                 }
@@ -317,6 +321,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        isInitialTime = false;
         mSwitchBackgroundLayout = (ConstraintLayout) holder.findViewById(R.id.switch_container);
         mThumbView = holder.findViewById(R.id.switch_thumb);
 
