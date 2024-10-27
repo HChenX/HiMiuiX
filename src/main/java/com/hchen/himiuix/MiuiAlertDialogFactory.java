@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -39,6 +40,7 @@ import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -54,34 +56,31 @@ import java.util.HashMap;
 public class MiuiAlertDialogFactory {
     private final static String TAG = "MiuiPreference";
     private final Context mContext;
-    private MiuiAlertDialogBaseFactory baseFactory;
+    private final int mThemeResId;
+    private final boolean mEnableDropDownMode;
 
-    protected MiuiAlertDialogFactory(Context context) {
+    protected MiuiAlertDialogFactory(Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
         mContext = context;
+        mThemeResId = themeResId;
+        mEnableDropDownMode = enableDropDownMode;
     }
 
-    protected void init(@StyleRes int themeResId) {
-        Dialog mDialog = new Dialog(mContext, themeResId) {
-            @Override
-            public void dismiss() {
-                super.dismiss();
-            }
-        };
-        baseFactory = MiuiXUtils.isVerticalScreen(mContext) ?
-                new MiuiAlertDialogVerticalFactory(mDialog) : new MiuiAlertDialogHorizontalFactory(mDialog);
+    protected MiuiAlertDialogBaseFactory init() {
+        Dialog mDialog = new Dialog(mContext, mThemeResId);
+        MiuiAlertDialogBaseFactory baseFactory;
+        if (mEnableDropDownMode)
+            baseFactory = new MiuiAlertDialogDropDownFactory(mDialog);
+        else {
+            baseFactory = MiuiXUtils.isVerticalScreen(mContext) ?
+                    new MiuiAlertDialogVerticalFactory(mDialog) : new MiuiAlertDialogHorizontalFactory(mDialog);
+        }
         baseFactory.init();
-    }
-
-    protected MiuiAlertDialogBaseFactory getMiuiDialogBaseFactory() {
         return baseFactory;
     }
 
     private static class MiuiAlertDialogVerticalFactory extends MiuiAlertDialogBaseFactory {
-
-        private MiuiAlertDialogVerticalFactory(Dialog dialog) {
-            mDialog = dialog;
-            mWindow = mDialog.getWindow();
-            mContext = mDialog.getContext();
+        public MiuiAlertDialogVerticalFactory(Dialog dialog) {
+            super(dialog);
         }
 
         @Override
@@ -217,18 +216,18 @@ public class MiuiAlertDialogFactory {
             if (mItems == null) {
                 throw new RuntimeException("MiuiAlertDialog: Enable list select view, but items is null?? are you sure?");
             }
-            RecyclerView recyclerView = new MiuiAlertDialogRecyclerView(mContext).getRecyclerView();
-            recyclerView.setAdapter(new MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter(this));
+            mRecyclerView = new MiuiAlertDialogRecyclerView(mContext).getRecyclerView();
+            mRecyclerView.setAdapter(mListAdapter = new MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter(this));
 
-            ViewGroup viewGroup = recyclerView;
+            ViewGroup viewGroup = mRecyclerView;
             if (isEnableListSpringBack) {
                 SpringBackLayout springBackLayout = (SpringBackLayout) (viewGroup = new SpringBackLayout(mContext));
-                springBackLayout.setTarget(recyclerView);
-                addView(springBackLayout, recyclerView);
+                springBackLayout.setTarget(mRecyclerView);
+                addView(springBackLayout, mRecyclerView);
             }
 
             addView(mCustomLayout, viewGroup);
-            ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+            ViewGroup.LayoutParams params = mRecyclerView.getLayoutParams();
             int height = (MiuiXUtils.dp2px(mContext, 58) * (mItems.size()));
             int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ? MiuiXUtils.getWindowSize(mContext).y / 3 : (int) (MiuiXUtils.getWindowSize(mContext).y / 2.5);
             params.height = Math.min(height, maxHeight);
@@ -281,9 +280,8 @@ public class MiuiAlertDialogFactory {
     }
 
     private static class MiuiAlertDialogHorizontalFactory extends MiuiAlertDialogBaseFactory {
-
-        private MiuiAlertDialogHorizontalFactory(Dialog dialog) {
-            mDialog = dialog;
+        public MiuiAlertDialogHorizontalFactory(Dialog dialog) {
+            super(dialog);
         }
 
         @Override
@@ -303,6 +301,122 @@ public class MiuiAlertDialogFactory {
         @Override
         public void show() {
             mDialog.show();
+        }
+
+        @Override
+        public void cancel() {
+            mDialog.cancel();
+        }
+
+        @Override
+        public void dismiss() {
+            mDialog.dismiss();
+        }
+    }
+
+    protected static class MiuiAlertDialogDropDownFactory extends MiuiAlertDialogBaseFactory {
+        private View mRootView;
+
+        public MiuiAlertDialogDropDownFactory(Dialog dialog) {
+            super(dialog);
+        }
+
+        @Override
+        public void init() {
+            mMainDialogLayout = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.miuix_dropdown_dialog, null);
+
+            mWindow.setContentView(mMainDialogLayout);
+            mWindow.setWindowAnimations(R.style.Animation_Dialog_Center);
+        }
+
+        private void loadListSelectView() {
+            mRecyclerView = new MiuiAlertDialogRecyclerView(mContext).getRecyclerView();
+            addView(mMainDialogLayout, mRecyclerView);
+
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            mRecyclerView.setAdapter(mListAdapter = new MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter(this));
+
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mRecyclerView.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            mRecyclerView.setLayoutParams(params);
+
+            RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(mRecyclerView);
+            cornerRadius.setCornerRadius(MiuiXUtils.dp2px(mContext, 20));
+            mRecyclerView.addItemDecoration(cornerRadius);
+        }
+
+        public void setRootPreferenceView(View rootView) {
+            mRootView = rootView;
+        }
+
+        public void showDialogByTouchPosition(float x, float y) {
+            int dialogHeight = calculateHeight();
+            int windowHeight = MiuiXUtils.getWindowSize(mContext).y;
+            int[] location = new int[2];
+            mRootView.getLocationOnScreen(location);
+            int viewX = location[0];
+            int viewY = location[1];
+            int viewWidth = mRootView.getWidth();
+            int viewHeight = mRootView.getHeight();
+
+            int spaceBelow = windowHeight - (viewY + viewHeight);
+            boolean showBelow = (spaceBelow - dialogHeight) > windowHeight / 8;
+            boolean shouldShowRight = x > ((float) (viewX + viewWidth) / 2);
+
+            mWindow.setGravity(Gravity.TOP | (shouldShowRight ? Gravity.RIGHT : Gravity.LEFT));
+            WindowManager.LayoutParams params = mWindow.getAttributes();
+            params.x = MiuiXUtils.dp2px(mContext, 30);
+            params.y = showBelow ?
+                    viewY + MiuiXUtils.dp2px(mContext, 15) /* 浅浅的下沉 */ :
+                    viewY - dialogHeight - MiuiXUtils.dp2px(mContext, 25)/* 浅浅的上抬 */;
+            params.width = calculateWidth();
+            params.height = dialogHeight;
+            mWindow.setAttributes(params);
+        }
+
+
+        private int calculateWidth() {
+            final int[] textWidth = {-1};
+            mItems.forEach(sequence -> {
+                int width = sequence.length() * MiuiXUtils.sp2px(mContext, 18);
+                if (width > textWidth[0])
+                    textWidth[0] = width;
+            });
+
+            textWidth[0] = textWidth[0] + MiuiXUtils.dp2px(mContext, 80 + 45);
+            Point point = MiuiXUtils.getWindowSize(mContext);
+            int maxWidth = MiuiXUtils.isVerticalScreen(mContext) ? (int) (point.x / 1.8) : (int) (point.x / 3.4);
+
+            return Math.min(textWidth[0], maxWidth);
+        }
+
+        private int calculateHeight() {
+            if (mItems != null) {
+                int height = MiuiXUtils.dp2px(mContext, 58) * mItems.size();
+                int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ?
+                        (int) (MiuiXUtils.getWindowSize(mContext).y / 2.7) : // 竖屏最大高度
+                        (int) (MiuiXUtils.getWindowSize(mContext).y / 2.1); // 横屏最大高度
+                return Math.min(height, maxHeight);
+            } else return ViewGroup.LayoutParams.WRAP_CONTENT;
+        }
+
+        @Override
+        public void create() {
+            if (isCreated) return;
+            loadListSelectView();
+            mDialog.create();
+            isCreated = true;
+        }
+
+        @Override
+        public void show() {
+            if (!isCreated) create();
+            mDialog.show();
+        }
+
+        @Override
+        public boolean isShowing() {
+            return mDialog.isShowing();
         }
 
         @Override
@@ -344,11 +458,20 @@ public class MiuiAlertDialogFactory {
         public DialogInterface.TextWatcher mTextWatcher;
         public boolean isEnableListSelect;
         public ArrayList<CharSequence> mItems;
+        protected RecyclerView mRecyclerView;
+        protected MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter mListAdapter;
         protected SparseBooleanArray mBooleanArray = new SparseBooleanArray();
         public DialogInterface.OnItemsClickListener mItemsClickListener;
         public boolean isEnableListSpringBack;
+        public boolean isEnableMultiSelect;
         public boolean isEnableHapticFeedback;
         public boolean isCreated;
+
+        public MiuiAlertDialogBaseFactory(Dialog dialog) {
+            mDialog = dialog;
+            mWindow = mDialog.getWindow();
+            mContext = mDialog.getContext();
+        }
 
         public abstract void init();
 
@@ -450,7 +573,7 @@ public class MiuiAlertDialogFactory {
             return mRecyclerView;
         }
 
-        private static class MiuiAlertDialogListAdapter extends RecyclerView.Adapter<MiuiAlertDialogListAdapter.MiuiAlertDialogListViewHolder> {
+        protected static class MiuiAlertDialogListAdapter extends RecyclerView.Adapter<MiuiAlertDialogListAdapter.MiuiAlertDialogListViewHolder> {
             private final MiuiAlertDialogBaseFactory mBaseFactory;
 
             private MiuiAlertDialogListAdapter(MiuiAlertDialogBaseFactory baseFactory) {
@@ -477,12 +600,15 @@ public class MiuiAlertDialogFactory {
                 holder.layout.setOnTouchListener((v, event) -> holder.switchCompat.onTouchEvent(event));
                 holder.imageView.setOnTouchListener((v, event) -> holder.switchCompat.onTouchEvent(event));
                 holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked1) -> {
-                    mBaseFactory.mBooleanArray.put(position, isChecked1);
+                    if (mBaseFactory.isEnableMultiSelect)
+                        mBaseFactory.mBooleanArray.put(position, isChecked1);
                     updateSate(holder, position);
                     if (mBaseFactory.isEnableHapticFeedback)
                         holder.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
                     if (mBaseFactory.mItemsClickListener != null)
                         mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
+                    if (!mBaseFactory.isEnableMultiSelect)
+                        mBaseFactory.dismiss();
                 });
             }
 
@@ -494,7 +620,7 @@ public class MiuiAlertDialogFactory {
                 } else {
                     holder.layout.setBackgroundResource(R.drawable.list_item_background);
                     holder.switchCompat.setTextColor(mBaseFactory.mContext.getColor(R.color.list_text));
-                    holder.imageView.setVisibility(View.GONE);
+                    holder.imageView.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -515,6 +641,26 @@ public class MiuiAlertDialogFactory {
                     imageView = itemView.findViewById(R.id.list_image);
                 }
             }
+        }
+    }
+
+    public static class MiuiSwitchCompat extends SwitchCompat {
+
+        public MiuiSwitchCompat(@NonNull Context context) {
+            super(context);
+        }
+
+        public MiuiSwitchCompat(@NonNull Context context, @Nullable AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public MiuiSwitchCompat(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+        }
+
+        @Override
+        public boolean isFocused() {
+            return true;
         }
     }
 }

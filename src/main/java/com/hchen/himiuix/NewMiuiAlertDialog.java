@@ -22,6 +22,7 @@ import static com.hchen.himiuix.MiuiAlertDialogFactory.MiuiAlertDialogBaseFactor
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
@@ -31,20 +32,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class NewMiuiAlertDialog {
-    private final MiuiAlertDialogFactory mDialogFactory;
     private final MiuiAlertDialogFactory.MiuiAlertDialogBaseFactory mBaseFactory;
 
     public NewMiuiAlertDialog(@NonNull Context context) {
-        this(context, 0);
+        this(context, R.style.MiuiAlertDialog);
     }
 
     public NewMiuiAlertDialog(@NonNull Context context, @StyleRes int themeResId) {
-        mDialogFactory = new MiuiAlertDialogFactory(context);
-        if (themeResId == 0)
-            themeResId = R.style.MiuiAlertDialog;
-        mDialogFactory.init(themeResId);
+        this(context, themeResId, false);
+    }
 
-        mBaseFactory = mDialogFactory.getMiuiDialogBaseFactory();
+    protected NewMiuiAlertDialog(@NonNull Context context, boolean enableDropDownMode) {
+        this(context, R.style.MiuiAlertDialog, enableDropDownMode);
+    }
+
+    protected NewMiuiAlertDialog(@NonNull Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
+        mBaseFactory = new MiuiAlertDialogFactory(context, themeResId, enableDropDownMode).init();
+    }
+
+    public Window getWindow() {
+        return mBaseFactory.mWindow;
+    }
+
+    protected MiuiAlertDialogFactory.MiuiAlertDialogBaseFactory getBaseFactory() {
+        return mBaseFactory;
     }
 
     public NewMiuiAlertDialog setTitle(CharSequence title) {
@@ -117,15 +128,34 @@ public class NewMiuiAlertDialog {
         mBaseFactory.isEnableListSpringBack = enable;
         return this;
     }
+    
+    public NewMiuiAlertDialog setEnableMultiSelect(boolean enable){
+        mBaseFactory.isEnableMultiSelect = enable;
+        return this;
+    }
 
     public NewMiuiAlertDialog setItems(CharSequence[] items, DialogInterface.OnItemsClickListener itemsChangeListener) {
-        mBaseFactory.mItems = new ArrayList<>(Arrays.asList(items));
+        return setItems(new ArrayList<>(Arrays.asList(items)), itemsChangeListener);
+    }
+    
+    public NewMiuiAlertDialog setItems(ArrayList<CharSequence> items, DialogInterface.OnItemsClickListener itemsChangeListener) {
+        mBaseFactory.mItems = items;
         mBaseFactory.mItemsClickListener = itemsChangeListener;
         return this;
     }
 
     public NewMiuiAlertDialog setHapticFeedbackEnabled(boolean enabled) {
         mBaseFactory.isEnableHapticFeedback = enabled;
+        return this;
+    }
+
+    public NewMiuiAlertDialog setWindowAnimations(@StyleRes int resId) {
+        mBaseFactory.mWindow.setWindowAnimations(resId);
+        return this;
+    }
+
+    public NewMiuiAlertDialog setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
+        mBaseFactory.mDialog.setOnDismissListener(dialog -> onDismissListener.onDismiss(mBaseFactory));
         return this;
     }
 

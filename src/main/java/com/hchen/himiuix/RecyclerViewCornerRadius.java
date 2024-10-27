@@ -1,6 +1,6 @@
 /*
  * This file is part of HiMiuiX.
-
+ *
  * HiMiuiX is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -10,7 +10,7 @@
  * See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
-
+ *
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
 package com.hchen.himiuix;
@@ -18,16 +18,16 @@ package com.hchen.himiuix;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.Region;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
     public static final String TAG = "RecyclerViewCornerRadius";
 
-    private RectF rectF;
-    private Path path;
+    private final RectF rectF = new RectF();
+    private final Path path = new Path();
 
     private float topLeftRadius = 0;
     private float topRightRadius = 0;
@@ -38,27 +38,25 @@ public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                rectF = new RectF(0, 0, recyclerView.getMeasuredWidth(), recyclerView.getMeasuredHeight());
-
-                path = new Path();
-                path.reset();
-                path.addRoundRect(rectF, new float[]{
-                        topLeftRadius, topLeftRadius,
-                        topRightRadius, topRightRadius,
-                        bottomLeftRadius, bottomLeftRadius,
-                        bottomRightRadius, bottomRightRadius
-                }, Path.Direction.CCW);
-
+                updatePath(recyclerView);
                 recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
     }
 
+    private void updatePath(RecyclerView recyclerView) {
+        rectF.set(0, 0, recyclerView.getMeasuredWidth(), recyclerView.getMeasuredHeight());
+        path.reset();
+        path.addRoundRect(rectF, new float[]{
+                topLeftRadius, topLeftRadius,
+                topRightRadius, topRightRadius,
+                bottomLeftRadius, bottomLeftRadius,
+                bottomRightRadius, bottomRightRadius
+        }, Path.Direction.CCW);
+    }
+
     public void setCornerRadius(float radius) {
-        this.topLeftRadius = radius;
-        this.topRightRadius = radius;
-        this.bottomLeftRadius = radius;
-        this.bottomRightRadius = radius;
+        setCornerRadius(radius, radius, radius, radius);
     }
 
     public void setCornerRadius(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
@@ -69,13 +67,12 @@ public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
     }
 
     private float defOrChange(float def, float change) {
-        if (change == -1) return def;
-        return change;
+        return change == -1 ? def : change;
     }
 
     @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         c.clipRect(rectF);
-        c.clipPath(path, Region.Op.INTERSECT);
+        c.clipPath(path);
     }
 }
