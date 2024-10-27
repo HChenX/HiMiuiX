@@ -111,7 +111,7 @@
 
             <include
                 android:id="@+id/color_picker_text_view"
-                layout="@layout/miuix_edit"
+                layout="@layout/miuix_preference_edit"
                 android:layout_width="160dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="35dp"

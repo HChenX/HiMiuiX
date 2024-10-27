@@ -29,7 +29,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.hchen.himiuix.MiuiTextView
-        android:id="@android:id/message"
+        android:id="@+id/alertMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="26dp"
@@ -46,7 +46,7 @@
         app:singeLineCenter="true" />
 
     <include
-        layout="@layout/miuix_edit"
+        layout="@layout/miuix_preference_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
@@ -150,7 +150,7 @@
             android:scrollbars="none"
             android:stateListAnimator="@null"
             android:text="确定"
-            android:textColor="@color/dialog_button3"
+            android:textColor="@color/dialog_button2"
             android:textSize="16sp"
             app:backgroundTint="@null"
             app:layout_constraintLeft_toRightOf="@android:id/button3"

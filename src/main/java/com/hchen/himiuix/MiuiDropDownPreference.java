@@ -272,7 +272,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean onTouch(View v, MotionEvent event) {
+    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
         if (!isEnabled()) return false;
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -373,9 +373,9 @@ public class MiuiDropDownPreference extends MiuiPreference {
         mDialog.setWindowAnimations(R.style.Animation_Dialog_Center);
         mDialog.setCornersRadius(MiuiXUtils.dp2px(getContext(), 20));
         mDialog.mListAdapter.mBooleanArray = mBooleanArray;
-        mDialog.setItems(mEntriesList, new DialogInterface.OnItemsChangeListener() {
+        mDialog.setItems(mEntriesList, new DialogInterface.OnItemsClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, CharSequence item, int which) {
+            public void onClick(DialogInterface dialog, CharSequence item, int which) {
                 if (mDialog.mListAdapter.mBooleanArray.get(which)) {
                     return;
                 }

@@ -34,7 +34,7 @@ public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
     private float bottomLeftRadius = 0;
     private float bottomRightRadius = 0;
 
-    public RecyclerViewCornerRadius(final RecyclerView recyclerView) {
+    protected RecyclerViewCornerRadius(final RecyclerView recyclerView) {
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {

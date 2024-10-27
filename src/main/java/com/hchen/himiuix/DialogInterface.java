@@ -16,21 +16,27 @@
 package com.hchen.himiuix;
 
 import android.text.Editable;
-import android.util.SparseBooleanArray;
 
 import java.util.ArrayList;
 
 public interface DialogInterface {
+    int BUTTON_POSITIVE = -1;
+    int BUTTON_NEGATIVE = -2;
+    int BUTTON_NEUTRAL = -3;
+
+    void cancel();
+
     void dismiss();
 
     interface OnClickListener {
         void onClick(DialogInterface dialog, int which);
     }
 
-    interface OnItemsChangeListener {
-        void onClick(DialogInterface dialogInterface, CharSequence item, int which);
+    interface OnItemsClickListener {
+        default void onClick(DialogInterface dialog, CharSequence item, int which) {
+        }
 
-        default void onResult(ArrayList<CharSequence> selectedItems, ArrayList<CharSequence> items, SparseBooleanArray booleanArray) {
+        default void onResult(DialogInterface dialog, ArrayList<CharSequence> items, ArrayList<CharSequence> selectedItems) {
         }
     }
 
@@ -48,6 +54,6 @@ public interface DialogInterface {
         default void afterTextChanged(Editable s) {
         }
 
-        void onResult(CharSequence s);
+        void onResult(DialogInterface dialog, CharSequence s);
     }
 }

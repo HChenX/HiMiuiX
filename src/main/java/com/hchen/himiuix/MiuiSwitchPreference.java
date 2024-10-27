@@ -345,18 +345,18 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    protected void onClick(View view) {
+    protected void onMainLayoutClick(View view) {
         mClickListener.onClick(view);
     }
 
     @Override
-    protected boolean onTouch(View v, MotionEvent event) {
+    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
         return false;
     }
 
     @Override
-    protected boolean onHover(View v, MotionEvent event) {
-        return super.onHover(v, event);
+    protected boolean onMainLayoutHover(View v, MotionEvent event) {
+        return super.onMainLayoutHover(v, event);
     }
 
     private void updateSummaryIfNeed() {

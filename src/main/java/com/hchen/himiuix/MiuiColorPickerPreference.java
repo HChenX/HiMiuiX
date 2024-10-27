@@ -24,7 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
@@ -81,8 +80,12 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     }
 
     public void setValue(int color) {
+        innerSetValue(color, false);
+    }
+
+    private void innerSetValue(int color, boolean formUser) {
         if (mColor != color) {
-            if (isInitialTime || callChangeListener(color)) {
+            if (isInitialTime || (!formUser || callChangeListener(color))) {
                 mColor = color;
                 persistInt(color);
                 if (!isInitialTime) {
@@ -95,7 +98,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     @Override
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         if (defaultValue == null) defaultValue = -1;
-        setValue(getPersistedInt((Integer) defaultValue));
+        innerSetValue(getPersistedInt((Integer) defaultValue), false);
         isInitialTime = false;
     }
 
@@ -105,6 +108,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         getColorSelectView().setVisibility(View.VISIBLE);
         getColorSelectView().setGrayedOut(!isEnabled());
         getColorSelectView().setColor(mColor);
+        isInitialTime = false;
     }
 
     private NestedScrollView nestedScrollView;
@@ -117,7 +121,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private View showColorView;
 
     @Override
-    protected void onClick(View view) {
+    protected void onMainLayoutClick(View view) {
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         colorPickerData = new ColorPickerData();
@@ -166,15 +170,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 editTextView.setOnFocusChangeListener((v, hasFocus) -> isEditFocus = hasFocus);
                 editTextView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefABCDEF"));
                 editTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
-                editTextView.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    }
-
+                editTextView.addTextChangedListener(new TextWatcherAdapter() {
                     @Override
                     public void afterTextChanged(Editable s) {
                         if (!isEditFocus) return;
@@ -229,7 +225,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 if (editTextView.getText().length() < 8) {
                     Toast.makeText(getContext(), "Color 值应是 8 位！", Toast.LENGTH_SHORT).show();
                 } else {
-                    setValue(colorPickerData.HSVToColor());
+                    innerSetValue(colorPickerData.HSVToColor(), true);
                     dialog.dismiss();
                 }
             }

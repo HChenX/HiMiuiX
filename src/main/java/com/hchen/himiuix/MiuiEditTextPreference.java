@@ -72,7 +72,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
 
     @Override
     protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        setLayoutResource(R.layout.miuix_edit);
+        setLayoutResource(R.layout.miuix_preference_edit);
     }
 
     public void setHint(@StringRes int hintRes) {
@@ -100,7 +100,6 @@ public class MiuiEditTextPreference extends MiuiPreference {
     public void setImage(Drawable drawable) {
         this.mDrawable = drawable;
         setIcon(drawable);
-        notifyChanged();
     }
 
     public Drawable getImage() {
@@ -134,7 +133,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
             mTipTextView.setText(getTitle());
         }
         if (mHint != null) mEditTextView.setHint(mHint);
-        else mEditTextView.setHint("请输入");
+        else mEditTextView.setHint("");
 
         mImageView.setVisibility(View.GONE);
         mImageView.setOnClickListener(null);
@@ -176,13 +175,13 @@ public class MiuiEditTextPreference extends MiuiPreference {
             mEditTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
         }
     }
-
-    private boolean isInputVisible() {
-        return mEditTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
-    }
-
+    
     private void hideInputIfNeed() {
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (isInputVisible()) imm.hideSoftInputFromWindow(mEditTextView.getWindowToken(), 0);
+    }
+
+    private boolean isInputVisible() {
+        return mEditTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 }

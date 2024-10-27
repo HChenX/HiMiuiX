@@ -3,7 +3,7 @@
     <color name="dialog_background">#242424</color>
     <color name="dialog_text">#EAEAEA</color>
     <color name="dialog_button1">#C8C8C8</color>
-    <color name="dialog_button3">#EAF2FD</color>
+    <color name="dialog_button2">#EAF2FD</color>
     <color name="dialog_na_background">#454545</color>
     <color name="dialog_po_background">#267AF7</color>
     <color name="edit_border">#267AF7</color>

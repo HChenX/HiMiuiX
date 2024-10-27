@@ -58,7 +58,7 @@ public class MiuiPreference extends Preference {
             performClick(v);
             if (!isEnabled() || !isSelectable())
                 return;
-            MiuiPreference.this.onClick(v);
+            MiuiPreference.this.onMainLayoutClick(v);
         }
     };
 
@@ -131,11 +131,11 @@ public class MiuiPreference extends Preference {
         loadArrowRight();
         loadIcon(getIcon());
         loadTipView();
-        setColor();
+        updateColor();
 
         if (isEnabled()) {
-            mMainLayout.setOnTouchListener(MiuiPreference.this::onTouch);
-            mMainLayout.setOnHoverListener(MiuiPreference.this::onHover);
+            mMainLayout.setOnTouchListener(MiuiPreference.this::onMainLayoutTouch);
+            mMainLayout.setOnHoverListener(MiuiPreference.this::onMainLayoutHover);
         }
         mMainLayout.setClickable(isSelectable());
         mMainLayout.setFocusable(isSelectable());
@@ -157,7 +157,7 @@ public class MiuiPreference extends Preference {
         }
     }
 
-    private void setColor() {
+    private void updateColor() {
         int titleColor, summaryOrTipColor;
         if (isEnabled()) {
             titleColor = getContext().getColor(R.color.tittle);
@@ -219,10 +219,7 @@ public class MiuiPreference extends Preference {
             }
         }
     }
-
-    protected void onClick(View view) {
-    }
-
+    
     protected boolean shouldShowSummary() {
         return getSummary() != null;
     }
@@ -309,7 +306,10 @@ public class MiuiPreference extends Preference {
             preference.mDependents.remove(this);
     }
 
-    protected boolean onTouch(View v, MotionEvent event) {
+    protected void onMainLayoutClick(View view) {
+    }
+    
+    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
         int action = event.getAction();
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
             if (action == MotionEvent.ACTION_DOWN) {
@@ -320,7 +320,7 @@ public class MiuiPreference extends Preference {
         return false;
     }
 
-    protected boolean onHover(View v, MotionEvent event) {
+    protected boolean onMainLayoutHover(View v, MotionEvent event) {
         int action = event.getAction();
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
             if (action == MotionEvent.ACTION_HOVER_MOVE) {

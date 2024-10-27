@@ -191,9 +191,9 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private MiuiAlertDialog mDialog;
 
     @Override
-    protected boolean onTouch(View v, MotionEvent event) {
+    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
         if (!isDialogEnabled) {
-            return super.onTouch(v, event);
+            return super.onMainLayoutTouch(v, event);
         }
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -217,7 +217,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                     .setHapticFeedbackEnabled(true)
                     .setEditText(def, true, new DialogInterface.TextWatcher() {
                         @Override
-                        public void onResult(CharSequence s) {
+                        public void onResult(DialogInterface dialog, CharSequence s) {
                             float f = Float.MIN_VALUE;
                             if (mDisplayDividerValue != -1)
                                 f = Float.parseFloat((String) s) * mDisplayDividerValue;

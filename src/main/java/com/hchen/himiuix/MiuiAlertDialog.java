@@ -18,7 +18,6 @@ package com.hchen.himiuix;
 import static android.graphics.Typeface.NORMAL;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Point;
@@ -106,7 +105,7 @@ public class MiuiAlertDialog implements DialogInterface {
     private boolean shouldInput;
     private boolean isCreated;
     private boolean isAutoDismiss = true;
-    private OnItemsChangeListener mItemsChangedListener;
+    private OnItemsClickListener mItemsChangedListener;
     private WeakReference<Handler> mHandlerWeakReference = null;
     private ArrayList<CharSequence> mItems = new ArrayList<>();
     private final ArrayList<EditText> mEditTextViews = new ArrayList<>();
@@ -184,7 +183,7 @@ public class MiuiAlertDialog implements DialogInterface {
     private void initView() {
         mMainDialog = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.miuix_dialog, null);
         mTitleView = mMainDialog.findViewById(R.id.alertTitle);
-        mMessageView = mMainDialog.findViewById(android.R.id.message);
+        mMessageView = mMainDialog.findViewById(R.id.alertMessage);
         mButtonLayout = mMainDialog.findViewById(R.id.button_view);
         mRecyclerView = mMainDialog.findViewById(R.id.list_view);
         mPositiveButton = mMainDialog.findViewById(android.R.id.button2);
@@ -215,7 +214,7 @@ public class MiuiAlertDialog implements DialogInterface {
                 v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
             if (id == ID_POSITIVE_BUTTON) {
                 if (mTextWatcher != null)
-                    mTextWatcher.onResult(mEditTextView.getText().toString());
+                    mTextWatcher.onResult(this, mEditTextView.getText().toString());
                 if (mItemsChangedListener != null) {
                     ArrayList<CharSequence> result = new ArrayList<>();
                     for (int i = 0; i < mItems.size(); i++) {
@@ -223,7 +222,7 @@ public class MiuiAlertDialog implements DialogInterface {
                             result.add(mItems.get(i));
                         }
                     }
-                    mItemsChangedListener.onResult(result, mItems, mListAdapter.mBooleanArray);
+                    mItemsChangedListener.onResult(this, mItems, result);
                 }
             }
             if (listener != null) listener.onClick(this, id);
@@ -264,16 +263,16 @@ public class MiuiAlertDialog implements DialogInterface {
         return this;
     }
 
-    public MiuiAlertDialog setItems(@ArrayRes int items, OnItemsChangeListener listener) {
+    public MiuiAlertDialog setItems(@ArrayRes int items, OnItemsClickListener listener) {
         return setItems(mContext.getResources().getTextArray(items), listener);
     }
 
-    public MiuiAlertDialog setItems(CharSequence[] items, OnItemsChangeListener listener) {
+    public MiuiAlertDialog setItems(CharSequence[] items, OnItemsClickListener listener) {
         ArrayList<CharSequence> list = new ArrayList<>(Arrays.asList(items));
         return setItems(list, listener);
     }
 
-    public MiuiAlertDialog setItems(ArrayList<CharSequence> items, OnItemsChangeListener listener) {
+    public MiuiAlertDialog setItems(ArrayList<CharSequence> items, OnItemsClickListener listener) {
         this.mItems = items;
         mListAdapter.update(listener);
         mRecyclerView.setVisibility(View.VISIBLE);
@@ -739,7 +738,7 @@ public class MiuiAlertDialog implements DialogInterface {
     public static class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
         private final MiuiAlertDialog mDialog;
         SparseBooleanArray mBooleanArray = new SparseBooleanArray();
-        private OnItemsChangeListener mListener;
+        private OnItemsClickListener mListener;
         private GradientDrawable mDrawableTop;
         private GradientDrawable mDrawableBottom;
         private boolean isChecked;
@@ -767,7 +766,7 @@ public class MiuiAlertDialog implements DialogInterface {
             mDrawableBottom.setCornerRadii(new float[]{0, 0, 0, 0, radius, radius, radius, radius});
         }
 
-        public void update(OnItemsChangeListener listener) {
+        public void update(OnItemsClickListener listener) {
             this.mListener = listener;
         }
 
@@ -842,13 +841,6 @@ public class MiuiAlertDialog implements DialogInterface {
         }
 
         private void setFirstOrEndView(@NonNull ListViewHolder holder, int position) {
-            if (position == 0 || position == mDialog.mItems.size() - 1) {
-                holder.mFirstView.setVisibility(View.VISIBLE);
-                holder.mEndView.setVisibility(View.VISIBLE);
-            } else {
-                holder.mFirstView.setVisibility(View.GONE);
-                holder.mEndView.setVisibility(View.GONE);
-            }
         }
 
         @Override
@@ -858,16 +850,12 @@ public class MiuiAlertDialog implements DialogInterface {
 
         public static class ListViewHolder extends RecyclerView.ViewHolder {
             ConstraintLayout mMainLayout;
-            View mFirstView;
-            View mEndView;
             SwitchCompat mSwitchView;
             ImageView mImageView;
 
             public ListViewHolder(@NonNull View itemView) {
                 super(itemView);
                 mMainLayout = (ConstraintLayout) itemView;
-                mFirstView = itemView.findViewById(R.id.first_view);
-                mEndView = itemView.findViewById(R.id.end_view);
                 mSwitchView = itemView.findViewById(R.id.list_item);
                 mImageView = itemView.findViewById(R.id.list_image);
                 mImageView.setVisibility(View.GONE);
@@ -875,40 +863,11 @@ public class MiuiAlertDialog implements DialogInterface {
         }
     }
 
-    /** @noinspection ClassCanBeRecord */
-    private static class ActivityLifecycle implements Application.ActivityLifecycleCallbacks {
+    private static class ActivityLifecycle extends ActivityLifecycleCallbacksAdapter {
         private final MiuiAlertDialog mDialog;
 
         public ActivityLifecycle(MiuiAlertDialog dialog) {
             this.mDialog = dialog;
-        }
-
-        @Override
-        public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-        }
-
-        @Override
-        public void onActivityStarted(@NonNull Activity activity) {
-        }
-
-        @Override
-        public void onActivityResumed(@NonNull Activity activity) {
-        }
-
-        @Override
-        public void onActivityPaused(@NonNull Activity activity) {
-        }
-
-        @Override
-        public void onActivityStopped(@NonNull Activity activity) {
-        }
-
-        @Override
-        public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
-        }
-
-        @Override
-        public void onActivityDestroyed(@NonNull Activity activity) {
         }
 
         @Override
