@@ -190,7 +190,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     private View mTouchView;
-    private NewMiuiAlertDialog mDialog;
+    private MiuiAlertDialog mDialog;
 
     @Override
     protected boolean onMainLayoutTouch(View v, MotionEvent event) {
@@ -213,7 +213,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             else
                 def = String.valueOf(mSeekBarValue);
 
-            mDialog = new NewMiuiAlertDialog(getContext())
+            mDialog = new MiuiAlertDialog(getContext())
                     .setTitle(getTitle())
                     .setMessage(getSummary())
                     .setHapticFeedbackEnabled(true)

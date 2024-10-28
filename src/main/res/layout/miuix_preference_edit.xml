@@ -1,65 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/edit_layout"
+<com.hchen.himiuix.miuixhelperview.MiuiEditTextLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="30dp"
     android:layout_marginTop="10dp"
     android:layout_marginEnd="30dp"
-    android:layout_marginBottom="10dp"
-    android:background="@drawable/ic_edit_bg"
-    android:focusable="false"
-    android:focusableInTouchMode="false"
-    android:orientation="horizontal">
-
-    <TextView
-        android:id="@+id/edit_tip"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginStart="15dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:textColor="@color/edit_text"
-        android:textSize="18sp"
-        android:visibility="gone"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/edit_text_id"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/edit_text_id"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:background="@null"
-        android:clickable="true"
-        android:ellipsize="none"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1"
-        android:scrollbars="none"
-        android:scrollHorizontally="true"
-        android:textAlignment="viewStart"
-        android:textColorHint="@color/edit_hint"
-        android:textCursorDrawable="@drawable/edit_cursor"
-        app:layout_constraintLeft_toRightOf="@id/edit_tip"
-        app:layout_constraintRight_toLeftOf="@id/edit_image"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/edit_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:adjustViewBounds="true"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:scaleType="fitCenter"
-        android:visibility="gone"
-        app:layout_constraintLeft_toRightOf="@id/edit_text_id"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_marginBottom="10dp">
+    
+</com.hchen.himiuix.miuixhelperview.MiuiEditTextLayout>

@@ -50,7 +50,7 @@ import com.hchen.himiuix.colorpicker.ColorPickerLightnessView;
 import com.hchen.himiuix.colorpicker.ColorPickerSaturationView;
 
 public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChanged {
-    private NewMiuiAlertDialog mAlertDialog;
+    private MiuiAlertDialog mAlertDialog;
     private int mColor;
     private boolean isInitialTime = true;
 
@@ -126,13 +126,12 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         colorPickerData = new ColorPickerData();
-        mAlertDialog = new NewMiuiAlertDialog(getContext());
+        mAlertDialog = new MiuiAlertDialog(getContext());
         mAlertDialog.setTitle(getTitle());
         mAlertDialog.setMessage(getSummary());
         mAlertDialog.setHapticFeedbackEnabled(true);
         mAlertDialog.setEnableCustomView(true);
         mAlertDialog.setCustomView(R.layout.miuix_color_picker, new DialogInterface.OnBindView() {
-            private boolean isEditFocus = false;
 
             @Override
             public void onBindView(View view) {
@@ -143,7 +142,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 alphaView = view.findViewById(R.id.color_alpha_view);
                 TextView editTipView = view.findViewById(R.id.edit_tip);
                 showColorView = view.findViewById(R.id.color_show_view);
-                editTextView = view.findViewById(R.id.edit_text_id);
+                editTextView = view.findViewById(R.id.edit_text);
 
                 hueView.setColorPickerData(colorPickerData);
                 saturationView.setColorPickerData(colorPickerData);
@@ -164,17 +163,14 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 setEditText(argbTo16(mColor));
 
                 view.setOnClickListener(v -> editTextView.clearFocus());
-
                 editTipView.setVisibility(View.VISIBLE);
                 editTipView.setText("#");
-
-                editTextView.setOnFocusChangeListener((v, hasFocus) -> isEditFocus = hasFocus);
                 editTextView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefABCDEF"));
                 editTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
                 editTextView.addTextChangedListener(new TextWatcherAdapter() {
                     @Override
                     public void afterTextChanged(Editable s) {
-                        if (!isEditFocus) return;
+                        if (!editTextView.hasFocus()) return;
                         if (s.length() == 8) {
                             long alpha = Long.parseLong(s.subSequence(0, 2).toString(), 16);
                             int argb = Color.parseColor("#" + s);

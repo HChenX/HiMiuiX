@@ -190,15 +190,7 @@ public class MiuiAlertDialogFactory {
 
             updateCustomLayoutBottomMargin();
 
-            mEditText = editLayout.findViewById(R.id.edit_text_id);
-            mEditText.clearFocus();
-            mEditText.setOnFocusChangeListener((v, hasFocus) -> {
-                if (hasFocus) {
-                    editLayout.setBackgroundResource(R.drawable.focused_border_input_box);
-                } else {
-                    editLayout.setBackgroundResource(R.drawable.nofocused_border_input_box);
-                }
-            });
+            mEditText = editLayout.findViewById(R.id.edit_text);
             mEditText.setText(mDefEditText);
             mEditText.setSelection(mDefEditText.length());
             mEditText.setHint(mEditTextHint);

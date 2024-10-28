@@ -23,8 +23,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.WindowInsets;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -123,7 +121,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         mLayout = holder.itemView.findViewById(R.id.edit_layout);
-        mEditTextView = holder.itemView.findViewById(R.id.edit_text_id);
+        mEditTextView = holder.itemView.findViewById(R.id.edit_text);
         mTipTextView = holder.itemView.findViewById(R.id.edit_tip);
         mImageView = holder.itemView.findViewById(R.id.edit_image);
 
@@ -144,10 +142,8 @@ public class MiuiEditTextPreference extends MiuiPreference {
         }
 
         mEditTextView.setEnabled(isEnabled());
-        mEditTextView.setOnFocusChangeListener(null);
         if (mWatcher != null)
             mEditTextView.removeTextChangedListener(mWatcher);
-        mEditTextView.clearFocus();
         if (isEnabled()) {
             mTipTextView.setTextColor(getContext().getColor(R.color.tittle));
             mEditTextView.setHintTextColor(getContext().getColor(R.color.summary));
@@ -155,33 +151,11 @@ public class MiuiEditTextPreference extends MiuiPreference {
                 mImageView.setOnClickListener(mImageClickListener);
             if (mWatcher != null)
                 mEditTextView.addTextChangedListener(mWatcher);
-
             if (mInputType != -1) mEditTextView.setInputType(mInputType);
             else mEditTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-
-            mEditTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        mLayout.setBackgroundResource(R.drawable.focused_border_input_box);
-                    } else {
-                        mLayout.setBackgroundResource(R.drawable.nofocused_border_input_box);
-                        hideInputIfNeed();
-                    }
-                }
-            });
         } else {
             mTipTextView.setTextColor(getContext().getColor(R.color.tittle_d));
             mEditTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
         }
-    }
-    
-    private void hideInputIfNeed() {
-        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (isInputVisible()) imm.hideSoftInputFromWindow(mEditTextView.getWindowToken(), 0);
-    }
-
-    private boolean isInputVisible() {
-        return mEditTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 }

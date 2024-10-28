@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MiuiDropDownPreference extends MiuiPreference {
-    private NewMiuiAlertDialog mDialog;
+    private MiuiAlertDialog mDialog;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
     private CharSequence mDefValue;
@@ -262,7 +262,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     private void initDropDownDialog(float x, float y) {
-        mDialog = new NewMiuiAlertDialog(getContext(), true)
+        mDialog = new MiuiAlertDialog(getContext(), true)
                 .setHapticFeedbackEnabled(true)
                 .setEnableMultiSelect(false)
                 .setItems(mEntriesList, new DialogInterface.OnItemsClickListener() {

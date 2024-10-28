@@ -19,3 +19,4 @@ settings.gradle
 .externalNativeBuild
 .cxx
 local.properties
+/src/main/res/drawable/ic_default_icon.xml
