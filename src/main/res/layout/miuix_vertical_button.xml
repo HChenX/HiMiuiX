@@ -16,7 +16,6 @@
         android:scrollbars="none"
         android:singleLine="true"
         android:stateListAnimator="@null"
-        android:text="取消"
         android:textColor="@color/dialog_button1"
         android:textSize="18sp"
         android:visibility="gone"
@@ -33,11 +32,10 @@
         android:ellipsize="marquee"
         android:maxLines="1"
         android:scrollbars="none"
+        android:singleLine="true"
         android:stateListAnimator="@null"
-        android:text="自定义"
         android:textColor="@color/dialog_button1"
         android:textSize="18sp"
-        android:visibility="gone"
         app:backgroundTint="@null" />
 
     <Button
@@ -49,8 +47,8 @@
         android:ellipsize="marquee"
         android:maxLines="1"
         android:scrollbars="vertical"
+        android:singleLine="true"
         android:stateListAnimator="@null"
-        android:text="确定"
         android:textColor="@color/dialog_button2"
         android:textSize="18sp"
         android:visibility="gone"

@@ -69,8 +69,7 @@ public class MiuiAlertDialog {
     }
 
     public MiuiAlertDialog setTitle(CharSequence title) {
-        mBaseFactory.mTitleView.setVisibility(View.VISIBLE);
-        mBaseFactory.mTitleView.setText(title);
+        mBaseFactory.mTitle = title;
         return this;
     }
 
@@ -79,8 +78,7 @@ public class MiuiAlertDialog {
     }
 
     public MiuiAlertDialog setMessage(CharSequence message) {
-        mBaseFactory.mMessageView.setVisibility(View.VISIBLE);
-        mBaseFactory.mMessageView.setText(message);
+        mBaseFactory.mMessage = message;
         return this;
     }
 
@@ -215,23 +213,28 @@ public class MiuiAlertDialog {
         return this;
     }
 
-    public MiuiAlertDialog setWindowAnimations(@StyleRes int resId) {
-        mBaseFactory.mWindow.setWindowAnimations(resId);
+    public MiuiAlertDialog setWindowAnimations(@StyleRes int windowAnimationsId) {
+        mBaseFactory.mWindowAnimations = windowAnimationsId;
+        return this;
+    }
+    
+    public MiuiAlertDialog setOnShowListener(DialogInterface.OnShowListener onShowListener){
+        mBaseFactory.mOnShowListener = onShowListener;
         return this;
     }
 
     public MiuiAlertDialog setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
-        mBaseFactory.mDialog.setOnDismissListener(dialog -> onDismissListener.onDismiss(mBaseFactory));
+        mBaseFactory.mOnDismissListener = onDismissListener;
         return this;
     }
 
     public MiuiAlertDialog setCancelable(boolean cancelable) {
-        mBaseFactory.mDialog.setCancelable(cancelable);
+        mBaseFactory.isCancelable = cancelable;
         return this;
     }
 
     public MiuiAlertDialog setCanceledOnTouchOutside(boolean cancel) {
-        mBaseFactory.mDialog.setCanceledOnTouchOutside(cancel);
+        mBaseFactory.isCanceledOnTouchOutside = cancel;
         return this;
     }
 

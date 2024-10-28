@@ -7,6 +7,7 @@
     <color name="dialog_button2">#FFFFFF</color> <!--dialog 确定 button 字体颜色-->
     <color name="dialog_na_background">#F0F0F0</color> <!--dialog 取消或自定义 button 背景颜色-->
     <color name="dialog_po_background">#3482FF</color> <!--dialog 确定 button 背景颜色-->
+    <color name="dialog_divider">#D8D8D8</color>
     <color name="edit_border">#3482FF</color> <!--edit 焦点边框颜色-->
     <color name="edit_background">#F0F0F0</color>
     <color name="edit_text">#000000</color>
@@ -30,7 +31,7 @@
     <color name="touch_up">@android:color/transparent</color> <!--抬起后恢复的颜色-->
     <color name="white_or_black">@color/white</color>
     <color name="list_text">#000000</color>
-    <color name="list_choose_text">#000000</color> <!--列表项目被选择时字体颜色-->
+    <color name="list_choose_text">#3482FF</color> <!--列表项目被选择时字体颜色-->
     <color name="list_background">#FFFFFF</color>
     <color name="list_state_background">#EAF2FF</color> <!--列表项目选中时背景-->
     <color name="selected">#0D84ff</color> <!--列表勾号颜色-->
