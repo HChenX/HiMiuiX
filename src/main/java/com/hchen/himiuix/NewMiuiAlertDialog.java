@@ -21,11 +21,17 @@ import static com.hchen.himiuix.MiuiAlertDialogFactory.MiuiAlertDialogBaseFactor
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 
+import androidx.annotation.ArrayRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.StyleRes;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.util.Pair;
 
 import java.util.ArrayList;
@@ -58,10 +64,18 @@ public class NewMiuiAlertDialog {
         return mBaseFactory;
     }
 
+    public NewMiuiAlertDialog setTitle(@StringRes int titleId) {
+        return setTitle(mBaseFactory.mContext.getText(titleId));
+    }
+
     public NewMiuiAlertDialog setTitle(CharSequence title) {
         mBaseFactory.mTitleView.setVisibility(View.VISIBLE);
         mBaseFactory.mTitleView.setText(title);
         return this;
+    }
+
+    public NewMiuiAlertDialog setMessage(@StringRes int messageId) {
+        return setMessage(mBaseFactory.mContext.getText(messageId));
     }
 
     public NewMiuiAlertDialog setMessage(CharSequence message) {
@@ -70,16 +84,28 @@ public class NewMiuiAlertDialog {
         return this;
     }
 
+    public NewMiuiAlertDialog setPositiveButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
+        return setPositiveButton(mBaseFactory.mContext.getText(textId), listener);
+    }
+
     public NewMiuiAlertDialog setPositiveButton(CharSequence text, DialogInterface.OnClickListener listener) {
         mBaseFactory.isUsePositiveButton = true;
         mBaseFactory.mButtonHashMap.put(BUTTON_POSITIVE, new Pair<>(text, listener));
         return this;
     }
 
+    public NewMiuiAlertDialog setNegativeButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
+        return setNegativeButton(mBaseFactory.mContext.getText(textId), listener);
+    }
+
     public NewMiuiAlertDialog setNegativeButton(CharSequence text, DialogInterface.OnClickListener listener) {
         mBaseFactory.isUseNegativeButton = true;
         mBaseFactory.mButtonHashMap.put(BUTTON_NEGATIVE, new Pair<>(text, listener));
         return this;
+    }
+
+    public NewMiuiAlertDialog setNeutralButton(@StringRes int textId, DialogInterface.OnClickListener listener) {
+        return setNeutralButton(mBaseFactory.mContext.getText(textId), listener);
     }
 
     public NewMiuiAlertDialog setNeutralButton(CharSequence text, DialogInterface.OnClickListener listener) {
@@ -93,14 +119,26 @@ public class NewMiuiAlertDialog {
         return this;
     }
 
+    public NewMiuiAlertDialog setEditTextHint(@StringRes int hintId) {
+        return setEditTextHint(mBaseFactory.mContext.getText(hintId));
+    }
+
     public NewMiuiAlertDialog setEditTextHint(CharSequence hint) {
         mBaseFactory.mEditTextHint = hint;
         return this;
     }
 
+    public NewMiuiAlertDialog setEditTextTip(@StringRes int tipId) {
+        return setEditTextTip(mBaseFactory.mContext.getText(tipId));
+    }
+
     public NewMiuiAlertDialog setEditTextTip(CharSequence tip) {
         mBaseFactory.mEditTextTip = tip;
         return this;
+    }
+
+    public NewMiuiAlertDialog setEditTextIcon(@DrawableRes int iconId) {
+        return setEditTextIcon(AppCompatResources.getDrawable(mBaseFactory.mContext, iconId));
     }
 
     public NewMiuiAlertDialog setEditTextIcon(Drawable icon) {
@@ -111,6 +149,15 @@ public class NewMiuiAlertDialog {
     public NewMiuiAlertDialog setEditTextAutoKeyboard(boolean autoKeyboard) {
         mBaseFactory.mEditTextAutoKeyboard = autoKeyboard;
         return this;
+    }
+    
+    public NewMiuiAlertDialog setEditTextInputType(int type){
+        mBaseFactory.mEditTextInputType = type;
+        return this;
+    }
+
+    public NewMiuiAlertDialog setEditText(@StringRes int defTextId, DialogInterface.TextWatcher textWatcher) {
+        return setEditText(mBaseFactory.mContext.getText(defTextId), textWatcher);
     }
 
     public NewMiuiAlertDialog setEditText(CharSequence defText, DialogInterface.TextWatcher textWatcher) {
@@ -128,19 +175,38 @@ public class NewMiuiAlertDialog {
         mBaseFactory.isEnableListSpringBack = enable;
         return this;
     }
-    
-    public NewMiuiAlertDialog setEnableMultiSelect(boolean enable){
+
+    public NewMiuiAlertDialog setEnableMultiSelect(boolean enable) {
         mBaseFactory.isEnableMultiSelect = enable;
         return this;
+    }
+
+    public NewMiuiAlertDialog setItems(@ArrayRes int itemsId, DialogInterface.OnItemsClickListener itemsChangeListener) {
+        return setItems(mBaseFactory.mContext.getResources().getTextArray(itemsId), itemsChangeListener);
     }
 
     public NewMiuiAlertDialog setItems(CharSequence[] items, DialogInterface.OnItemsClickListener itemsChangeListener) {
         return setItems(new ArrayList<>(Arrays.asList(items)), itemsChangeListener);
     }
-    
+
     public NewMiuiAlertDialog setItems(ArrayList<CharSequence> items, DialogInterface.OnItemsClickListener itemsChangeListener) {
         mBaseFactory.mItems = items;
         mBaseFactory.mItemsClickListener = itemsChangeListener;
+        return this;
+    }
+
+    public NewMiuiAlertDialog setEnableCustomView(boolean enable) {
+        mBaseFactory.isEnableCustomView = enable;
+        return this;
+    }
+
+    public NewMiuiAlertDialog setCustomView(@LayoutRes int viewId, DialogInterface.OnBindView onBindView) {
+        return setCustomView(LayoutInflater.from(mBaseFactory.mContext).inflate(viewId, mBaseFactory.mCustomLayout, false), onBindView);
+    }
+
+    public NewMiuiAlertDialog setCustomView(View view, DialogInterface.OnBindView onBindView) {
+        mBaseFactory.mCustomView = view;
+        mBaseFactory.mOnBindView = onBindView;
         return this;
     }
 

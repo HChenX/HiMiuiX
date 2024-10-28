@@ -41,6 +41,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.preference.PreferenceViewHolder;
 
+import com.hchen.himiuix.adapter.TextWatcherAdapter;
 import com.hchen.himiuix.colorpicker.ColorBaseSeekBar;
 import com.hchen.himiuix.colorpicker.ColorPickerAlphaView;
 import com.hchen.himiuix.colorpicker.ColorPickerData;
@@ -49,7 +50,7 @@ import com.hchen.himiuix.colorpicker.ColorPickerLightnessView;
 import com.hchen.himiuix.colorpicker.ColorPickerSaturationView;
 
 public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChanged {
-    private MiuiAlertDialog mAlertDialog;
+    private NewMiuiAlertDialog mAlertDialog;
     private int mColor;
     private boolean isInitialTime = true;
 
@@ -125,12 +126,12 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         colorPickerData = new ColorPickerData();
-        mAlertDialog = new MiuiAlertDialog(getContext());
+        mAlertDialog = new NewMiuiAlertDialog(getContext());
         mAlertDialog.setTitle(getTitle());
         mAlertDialog.setMessage(getSummary());
-        mAlertDialog.autoDismiss(false);
         mAlertDialog.setHapticFeedbackEnabled(true);
-        mAlertDialog.setCustomView(R.layout.miuix_color_picker, new MiuiAlertDialog.OnBindView() {
+        mAlertDialog.setEnableCustomView(true);
+        mAlertDialog.setCustomView(R.layout.miuix_color_picker, new DialogInterface.OnBindView() {
             private boolean isEditFocus = false;
 
             @Override

@@ -13,8 +13,12 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.springback;
+package com.hchen.himiuix.miuixhelperview.springback;
 
-public interface NestedCurrentFling {
-    boolean onNestedCurrentFling(float f2, float f3);
+import android.view.View;
+
+public interface ViewCompatOnScrollChangeListener {
+    void onScrollChange(View view, int i2, int i3, int i4, int i5);
+
+    void onStateChanged(int i2, int i3, boolean z2);
 }

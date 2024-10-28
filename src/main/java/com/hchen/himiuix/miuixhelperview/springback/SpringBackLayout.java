@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.springback;
+package com.hchen.himiuix.miuixhelperview.springback;
 
 import android.content.Context;
 import android.content.res.Configuration;

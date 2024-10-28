@@ -13,15 +13,8 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.springback;
+package com.hchen.himiuix.miuixhelperview.springback;
 
-public interface ScrollStateDispatcher {
-    public static final int STATE_DRAGGING = 1;
-    public static final int STATE_IDLE = 0;
-    public static final int STATE_SETTLING = 2;
-
-    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
-
-    void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
-
+public interface NestedCurrentFling {
+    boolean onNestedCurrentFling(float f2, float f3);
 }

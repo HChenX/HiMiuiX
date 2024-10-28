@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix;
+package com.hchen.himiuix.miuixhelperview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,6 +23,8 @@ import android.view.Gravity;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+
+import com.hchen.himiuix.R;
 
 @SuppressLint("AppCompatCustomView")
 public class MiuiTextView extends TextView {

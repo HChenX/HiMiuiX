@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.hchen.himiuix.MiuiTextView
+    <com.hchen.himiuix.miuixhelperview.MiuiTextView
         android:id="@+id/prefs_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

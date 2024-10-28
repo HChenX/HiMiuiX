@@ -16,6 +16,7 @@
 package com.hchen.himiuix;
 
 import android.text.Editable;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -55,5 +56,9 @@ public interface DialogInterface {
         }
 
         void onResult(DialogInterface dialog, CharSequence s);
+    }
+
+    interface OnBindView {
+        void onBindView(View view);
     }
 }

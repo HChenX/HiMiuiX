@@ -13,24 +13,14 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix;
+package com.hchen.himiuix.miuixhelperview.springback;
 
-import android.text.Editable;
-import android.text.TextWatcher;
+public interface ScrollStateDispatcher {
+    int STATE_DRAGGING = 1;
+    int STATE_IDLE = 0;
+    int STATE_SETTLING = 2;
 
-public abstract class TextWatcherAdapter implements TextWatcher {
-    protected TextWatcherAdapter(){
-    }
-    
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-    }
+    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
 
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-    }
+    void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
 }

@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
@@ -48,7 +49,7 @@ import androidx.core.util.Pair;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hchen.himiuix.springback.SpringBackLayout;
+import com.hchen.himiuix.miuixhelperview.springback.SpringBackLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,9 +92,8 @@ public class MiuiAlertDialogFactory {
             mWindow.setContentView(mMainDialogLayout);
             mWindow.setGravity(Gravity.BOTTOM); // 底部
             WindowManager.LayoutParams params = mWindow.getAttributes();
-            Point windowPoint = MiuiXUtils.getWindowSize(mContext);
-            params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / windowPoint.y; // 距离底部的百分比
-            params.width = (int) (windowPoint.x / 1.08); // 距离屏幕左右间隔
+            params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / mPoint.y; // 距离底部的百分比
+            params.width = (int) (mPoint.x / 1.08); // 距离屏幕左右间隔
             params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
             mWindow.setAttributes(params);
             mWindow.setWindowAnimations(R.style.Animation_Dialog); // 弹出动画
@@ -120,6 +120,10 @@ public class MiuiAlertDialogFactory {
             else {
                 loadButtonView(R.layout.miuix_horizontal_button); // 水平布局
                 updateButtonLocation();
+            }
+            if (isEnableCustomView) {
+                loadCustomView();
+                return;
             }
             if (isEnableEditText)
                 loadEditTextView();
@@ -198,6 +202,7 @@ public class MiuiAlertDialogFactory {
             mEditText.setText(mDefEditText);
             mEditText.setSelection(mDefEditText.length());
             mEditText.setHint(mEditTextHint);
+            mEditText.setInputType(mEditTextInputType);
             if (mTextWatcher != null) mEditText.addTextChangedListener(mTextWatcher);
 
             TextView editTip = editLayout.findViewById(R.id.edit_tip);
@@ -234,6 +239,13 @@ public class MiuiAlertDialogFactory {
             params.width = ViewGroup.LayoutParams.MATCH_PARENT;
             viewGroup.setLayoutParams(params);
 
+            updateCustomLayoutBottomMargin();
+        }
+
+        private void loadCustomView() {
+            addView(mCustomLayout, mCustomView);
+            if (mOnBindView != null)
+                mOnBindView.onBindView(mCustomView);
             updateCustomLayoutBottomMargin();
         }
 
@@ -316,6 +328,7 @@ public class MiuiAlertDialogFactory {
 
     protected static class MiuiAlertDialogDropDownFactory extends MiuiAlertDialogBaseFactory {
         private View mRootView;
+        private boolean isVerticalScreen;
 
         public MiuiAlertDialogDropDownFactory(Dialog dialog) {
             super(dialog);
@@ -327,6 +340,8 @@ public class MiuiAlertDialogFactory {
 
             mWindow.setContentView(mMainDialogLayout);
             mWindow.setWindowAnimations(R.style.Animation_Dialog_Center);
+
+            isVerticalScreen = MiuiXUtils.isVerticalScreen(mContext);
         }
 
         private void loadListSelectView() {
@@ -351,7 +366,7 @@ public class MiuiAlertDialogFactory {
 
         public void showDialogByTouchPosition(float x, float y) {
             int dialogHeight = calculateHeight();
-            int windowHeight = MiuiXUtils.getWindowSize(mContext).y;
+            int windowHeight = mPoint.y;
             int[] location = new int[2];
             mRootView.getLocationOnScreen(location);
             int viewX = location[0];
@@ -365,15 +380,14 @@ public class MiuiAlertDialogFactory {
 
             mWindow.setGravity(Gravity.TOP | (shouldShowRight ? Gravity.RIGHT : Gravity.LEFT));
             WindowManager.LayoutParams params = mWindow.getAttributes();
-            params.x = MiuiXUtils.dp2px(mContext, 30);
-            params.y = showBelow ?
-                    viewY + MiuiXUtils.dp2px(mContext, 15) /* 浅浅的下沉 */ :
-                    viewY - dialogHeight - MiuiXUtils.dp2px(mContext, 25)/* 浅浅的上抬 */;
+            params.x = MiuiXUtils.dp2px(mContext, 35) /* 距离屏幕边缘 */;
+            params.y = showBelow ? /* 是否显示在下方 */
+                    viewY + MiuiXUtils.dp2px(mContext, 15) :
+                    viewY - dialogHeight - MiuiXUtils.dp2px(mContext, 10);
             params.width = calculateWidth();
             params.height = dialogHeight;
             mWindow.setAttributes(params);
         }
-
 
         private int calculateWidth() {
             final int[] textWidth = {-1};
@@ -383,9 +397,8 @@ public class MiuiAlertDialogFactory {
                     textWidth[0] = width;
             });
 
-            textWidth[0] = textWidth[0] + MiuiXUtils.dp2px(mContext, 80 + 45);
-            Point point = MiuiXUtils.getWindowSize(mContext);
-            int maxWidth = MiuiXUtils.isVerticalScreen(mContext) ? (int) (point.x / 1.8) : (int) (point.x / 3.4);
+            textWidth[0] = textWidth[0] + MiuiXUtils.dp2px(mContext, 80 + (isVerticalScreen ? 45 : 80) /* 增加间隔 */);
+            int maxWidth = isVerticalScreen ? (int) (mPoint.x / 1.5) : (int) (mPoint.x / 2.8);
 
             return Math.min(textWidth[0], maxWidth);
         }
@@ -393,9 +406,9 @@ public class MiuiAlertDialogFactory {
         private int calculateHeight() {
             if (mItems != null) {
                 int height = MiuiXUtils.dp2px(mContext, 58) * mItems.size();
-                int maxHeight = MiuiXUtils.isVerticalScreen(mContext) ?
-                        (int) (MiuiXUtils.getWindowSize(mContext).y / 2.7) : // 竖屏最大高度
-                        (int) (MiuiXUtils.getWindowSize(mContext).y / 2.1); // 横屏最大高度
+                int maxHeight = isVerticalScreen ?
+                        (int) (mPoint.y / 2.7) : // 竖屏最大高度
+                        (int) (mPoint.y / 2.1); // 横屏最大高度
                 return Math.min(height, maxHeight);
             } else return ViewGroup.LayoutParams.WRAP_CONTENT;
         }
@@ -433,6 +446,7 @@ public class MiuiAlertDialogFactory {
     protected static abstract class MiuiAlertDialogBaseFactory implements DialogInterface {
         public Dialog mDialog;
         public Window mWindow;
+        protected Point mPoint;
         public Context mContext;
         public ConstraintLayout mMainDialogLayout;
         public TextView mTitleView;
@@ -455,6 +469,7 @@ public class MiuiAlertDialogFactory {
         public CharSequence mEditTextTip = "";
         public Drawable mEditTextImage;
         public boolean mEditTextAutoKeyboard;
+        public int mEditTextInputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
         public DialogInterface.TextWatcher mTextWatcher;
         public boolean isEnableListSelect;
         public ArrayList<CharSequence> mItems;
@@ -464,6 +479,9 @@ public class MiuiAlertDialogFactory {
         public DialogInterface.OnItemsClickListener mItemsClickListener;
         public boolean isEnableListSpringBack;
         public boolean isEnableMultiSelect;
+        public boolean isEnableCustomView;
+        public View mCustomView;
+        public OnBindView mOnBindView;
         public boolean isEnableHapticFeedback;
         public boolean isCreated;
 
@@ -471,6 +489,7 @@ public class MiuiAlertDialogFactory {
             mDialog = dialog;
             mWindow = mDialog.getWindow();
             mContext = mDialog.getContext();
+            mPoint = MiuiXUtils.getWindowSize(mContext);
         }
 
         public abstract void init();

@@ -24,7 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerViewCornerRadius extends RecyclerView.ItemDecoration {
-    public static final String TAG = "RecyclerViewCornerRadius";
+    public static final String TAG = "MiuiPreference";
 
     private final RectF rectF = new RectF();
     private final Path path = new Path();

@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix;
+package com.hchen.himiuix.miuixhelperview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -21,6 +21,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
+
+import com.hchen.himiuix.MiuiXUtils;
+import com.hchen.himiuix.R;
 
 @SuppressLint("AppCompatCustomView")
 public class MiuiSeekBar extends SeekBar {

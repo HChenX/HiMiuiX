@@ -33,6 +33,8 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 
+import com.hchen.himiuix.miuixhelperview.MiuiSeekBar;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -188,7 +190,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     }
 
     private View mTouchView;
-    private MiuiAlertDialog mDialog;
+    private NewMiuiAlertDialog mDialog;
 
     @Override
     protected boolean onMainLayoutTouch(View v, MotionEvent event) {
@@ -211,11 +213,13 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             else
                 def = String.valueOf(mSeekBarValue);
 
-            mDialog = new MiuiAlertDialog(getContext())
+            mDialog = new NewMiuiAlertDialog(getContext())
                     .setTitle(getTitle())
                     .setMessage(getSummary())
                     .setHapticFeedbackEnabled(true)
-                    .setEditText(def, true, new DialogInterface.TextWatcher() {
+                    .setEnableEditTextView(true)
+                    .setEditTextAutoKeyboard(true)
+                    .setEditText(def, new DialogInterface.TextWatcher() {
                         @Override
                         public void onResult(DialogInterface dialog, CharSequence s) {
                             float f = Float.MIN_VALUE;
@@ -227,7 +231,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                             setProgressIfNeed(getStepBeforeIfNeed(result));
                         }
                     })
-                    .setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
+                    .setEditTextInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
                     .setPositiveButton("确定", null)
                     .setNegativeButton("取消", null)
                     .setOnDismissListener(dialog1 ->

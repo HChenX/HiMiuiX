@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix;
+package com.hchen.himiuix.adapter;
 
 import android.app.Activity;
 import android.app.Application;
