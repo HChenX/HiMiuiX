@@ -450,6 +450,8 @@ public class MiuiAlertDialogFactory {
                 editImage.setImageDrawable(mEditTextImage);
                 editImage.setVisibility(View.VISIBLE);
             }
+            
+            updateCustomLayoutBottomMarginIfNeed();
         }
 
         protected void loadListSelectView(int maxHeight) {
