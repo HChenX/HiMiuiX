@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -28,6 +29,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MiuiXUtils {
@@ -97,6 +99,14 @@ public class MiuiXUtils {
         return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
+    public static boolean isPad(Context context) {
+        int flag = 0;
+        if (PadDeviceCheckHelper.isPadByProp()) ++flag;
+        if (PadDeviceCheckHelper.isPadBySize(context)) ++flag;
+        if (PadDeviceCheckHelper.isPadByApi(context)) ++flag;
+        return flag >= 2;
+    }
+
     // -------------- 转换 ------------------
     public static int px2dp(Context context, float pxValue) {
         // 获取屏幕密度（每英寸多少个像素点）
@@ -131,5 +141,39 @@ public class MiuiXUtils {
         return Arrays.stream(ids).mapToObj(value -> AppCompatResources.getDrawable(context, value))
                 .collect(Collectors.toCollection(ArrayList::new))
                 .toArray(new Drawable[]{});
+    }
+
+    private static class PadDeviceCheckHelper {
+        public static boolean isPadByProp() {
+            String mDeviceType = SystemPropHelper.getProp("ro.build.characteristics", "default");
+            return mDeviceType != null && mDeviceType.toLowerCase().contains("tablet");
+        }
+
+        public static boolean isPadBySize(Context context) {
+            Display display = getDisplay(context);
+            DisplayMetrics dm = new DisplayMetrics();
+            display.getMetrics(dm);
+            double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
+            double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
+            return Math.sqrt(x + y) >= 7.0;
+        }
+
+        public static boolean isPadByApi(Context context) {
+            return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+        }
+
+        private static class SystemPropHelper {
+
+            private static final Class<?> clazz = InvokeUtils.findClass("android.os.SystemProperties");
+
+            public static String getProp(String key, String def) {
+                return (String) Optional.ofNullable(invokeMethod("get", new Class[]{String.class, String.class}, key, def))
+                        .orElse(def);
+            }
+
+            private static <T> T invokeMethod(String str, Class<?>[] clsArr, Object... objArr) {
+                return InvokeUtils.callStaticMethod(clazz, str, clsArr, objArr);
+            }
+        }
     }
 }

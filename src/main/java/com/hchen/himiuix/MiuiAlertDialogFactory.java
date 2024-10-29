@@ -74,7 +74,10 @@ public class MiuiAlertDialogFactory {
             baseFactory = new MiuiAlertDialogDropDownFactory(mDialog);
         else {
             baseFactory = MiuiXUtils.isVerticalScreen(mContext) ?
-                    new MiuiAlertDialogVerticalFactory(mDialog) : new MiuiAlertDialogHorizontalFactory(mDialog);
+                    new MiuiAlertDialogVerticalFactory(mDialog) :
+                    (MiuiXUtils.isPad(mContext) ? 
+                            new MiuiAlertDialogVerticalFactory(mDialog) :
+                            new MiuiAlertDialogHorizontalFactory(mDialog));
         }
         baseFactory.init();
         return baseFactory;
@@ -91,12 +94,20 @@ public class MiuiAlertDialogFactory {
             mMainDialogLayout = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.miuix_vertical_dialog, null);
 
             mWindow.setContentView(mMainDialogLayout);
-            mWindow.setGravity(Gravity.BOTTOM); // 底部
-            WindowManager.LayoutParams params = mWindow.getAttributes();
-            params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / mPoint.y; // 距离底部的百分比
-            params.width = (int) (mPoint.x / 1.08); // 距离屏幕左右间隔
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
-            mWindow.setAttributes(params);
+            if (MiuiXUtils.isPad(mContext)) {
+                mWindow.setGravity(Gravity.CENTER); // 底部
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.width = (int) (mPoint.x / 2.5); // 距离屏幕左右间隔
+                params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
+                mWindow.setAttributes(params);
+            } else {
+                mWindow.setGravity(Gravity.BOTTOM); // 底部
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / mPoint.y; // 距离底部的百分比
+                params.width = (int) (mPoint.x / 1.08); // 距离屏幕左右间隔
+                params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
+                mWindow.setAttributes(params);
+            }
             mWindow.setWindowAnimations(R.style.Animation_Dialog); // 弹出动画
 
             loadView();
@@ -164,7 +175,7 @@ public class MiuiAlertDialogFactory {
             mWindow.setGravity(Gravity.BOTTOM); // 底部
             WindowManager.LayoutParams params = mWindow.getAttributes();
             params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / mPoint.y; // 距离底部的百分比
-            params.width = (int) (mPoint.x / 1.3); // 距离屏幕左右间隔
+            params.width = (int) (mPoint.x / 1.5); // 距离屏幕左右间隔
             params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
             mWindow.setAttributes(params);
             mWindow.setWindowAnimations(R.style.Animation_Dialog); // 弹出动画
@@ -366,6 +377,7 @@ public class MiuiAlertDialogFactory {
 
         public abstract void init();
 
+
         @CallSuper
         protected void updateView() {
             updateText();
@@ -450,7 +462,7 @@ public class MiuiAlertDialogFactory {
                 editImage.setImageDrawable(mEditTextImage);
                 editImage.setVisibility(View.VISIBLE);
             }
-            
+
             updateCustomLayoutBottomMarginIfNeed();
         }
 
