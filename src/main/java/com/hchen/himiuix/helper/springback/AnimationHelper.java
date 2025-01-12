@@ -13,12 +13,18 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.miuixhelperview.springback;
+package com.hchen.himiuix.helper.springback;
 
 import android.view.View;
 
-public interface ViewCompatOnScrollChangeListener {
-    void onScrollChange(View view, int l, int t, int oldl, int oldt);
+public class AnimationHelper {
+    public static void postInvalidateOnAnimation(View view) {
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postInvalidateOnAnimation();
+    }
 
-    void onStateChanged(int lastState, int state, boolean isFinished);
+    public static void postOnAnimation(View view, Runnable action) {
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postOnAnimation(action);
+    }
 }

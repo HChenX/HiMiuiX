@@ -13,18 +13,8 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.miuixhelperview.springback;
+package com.hchen.himiuix.helper.springback;
 
-import android.view.View;
-
-public class AnimationHelper {
-    public static void postInvalidateOnAnimation(View view) {
-        AnimationHandler.getInstance().postVsyncCallback();
-        view.postInvalidateOnAnimation();
-    }
-
-    public static void postOnAnimation(View view, Runnable action) {
-        AnimationHandler.getInstance().postVsyncCallback();
-        view.postOnAnimation(action);
-    }
+public interface NestedCurrentFling {
+    boolean onNestedCurrentFling(float velocityX, float velocityY);
 }

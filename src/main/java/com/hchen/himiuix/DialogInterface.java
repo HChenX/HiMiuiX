@@ -49,6 +49,10 @@ public interface DialogInterface {
         void onShow(DialogInterface dialog);
     }
 
+    interface OnCancelListener {
+        void onCancel(DialogInterface dialog);
+    }
+
     interface TextWatcher extends android.text.TextWatcher {
         default void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }

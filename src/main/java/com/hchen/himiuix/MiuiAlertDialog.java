@@ -223,6 +223,11 @@ public class MiuiAlertDialog {
         return this;
     }
 
+    public MiuiAlertDialog setOnCancelListener(DialogInterface.OnCancelListener onCancelListener){
+        mBaseFactory.mOnCancelListener = onCancelListener;
+        return this;
+    }
+
     public MiuiAlertDialog setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
         mBaseFactory.mOnDismissListener = onDismissListener;
         return this;

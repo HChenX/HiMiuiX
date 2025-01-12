@@ -13,18 +13,23 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.miuixhelperview.springback;
+package com.hchen.himiuix.helper.springback;
 
-public class SpringOperator {
-    private final double mDamping;
-    private final double mTension;
+public class AnimationUtils extends android.view.animation.AnimationUtils {
+    private static final ThreadLocal<AnimationNanoState> sAnimationNanoState = ThreadLocal.withInitial(AnimationNanoState::new);
 
-    public SpringOperator(float tension, float damping) {
-        mTension = Math.pow(6.283185307179586d / (double) damping, 2.0d);
-        mDamping = (tension * 12.566370614359172d) / (double) damping;
+    public static class AnimationNanoState {
+        long lastReportedTimeNanos;
+
+        private AnimationNanoState() {
+        }
     }
 
-    public double updateVelocity(double velocity, double min, double end, double start) {
-        return (velocity * (1.0d - (mDamping * min))) + ((float) (mTension * (end - start) * min));
+    public static long currentAnimationTimeNanos() {
+        AnimationNanoState animationNanoState = sAnimationNanoState.get();
+        long nanoTime = System.nanoTime();
+        assert animationNanoState != null;
+        animationNanoState.lastReportedTimeNanos = nanoTime;
+        return nanoTime;
     }
 }

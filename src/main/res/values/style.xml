@@ -40,6 +40,11 @@
         <item name="android:windowExitAnimation">@anim/dialog_anim_pop_out_center</item>
     </style>
 
+    <style name="Animation.Dialog.ExistIme" parent="@style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/dialog_anim_slide_in_bottom_exist_ime</item>
+        <item name="android:windowExitAnimation">@anim/dialog_anim_slide_out_bottom_exist_ime</item>
+    </style>
+
     <style name="Animation.Dialog.NoAnimation" parent="@style/Animation.Dialog">
         <item name="android:windowEnterAnimation">@anim/dialog_anim_noanim</item>
         <item name="android:windowExitAnimation">@anim/dialog_anim_noanim</item>

@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.miuixhelperview;
+package com.hchen.himiuix.helper;
 
 import android.content.Context;
 import android.text.InputType;

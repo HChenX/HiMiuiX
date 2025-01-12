@@ -50,7 +50,7 @@ import androidx.core.util.Pair;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hchen.himiuix.miuixhelperview.springback.SpringBackLayout;
+import com.hchen.himiuix.helper.springback.SpringBackLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +75,7 @@ public class MiuiAlertDialogFactory {
         else {
             baseFactory = MiuiXUtils.isVerticalScreen(mContext) ?
                     new MiuiAlertDialogVerticalFactory(mDialog) :
-                    (MiuiXUtils.isPad(mContext) ? 
+                    (MiuiXUtils.isPad(mContext) ?
                             new MiuiAlertDialogVerticalFactory(mDialog) :
                             new MiuiAlertDialogHorizontalFactory(mDialog));
         }
@@ -95,7 +95,7 @@ public class MiuiAlertDialogFactory {
 
             mWindow.setContentView(mMainDialogLayout);
             if (MiuiXUtils.isPad(mContext)) {
-                mWindow.setGravity(Gravity.CENTER); // 底部
+                mWindow.setGravity(Gravity.CENTER); // 中心
                 WindowManager.LayoutParams params = mWindow.getAttributes();
                 params.width = (int) (mPoint.x / 2.5); // 距离屏幕左右间隔
                 params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
@@ -138,15 +138,15 @@ public class MiuiAlertDialogFactory {
         @Override
         protected void updateButtonLocation() {
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mNeutralButton.getLayoutParams();
-            if (isUseNeutralButton && isUseNegativeButton && !isUsePositiveButton) {
+            if (!isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
                 params.weight = 1;
                 params.setMarginEnd(0);
                 params.setMarginStart(MiuiXUtils.dp2px(mContext, 10));
-            } else if (isUseNeutralButton && isUsePositiveButton && !isUseNegativeButton) {
+            } else if (isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
                 params.weight = 1;
                 params.setMarginStart(0);
                 params.setMarginEnd(MiuiXUtils.dp2px(mContext, 10));
-            } else if (!isUseNegativeButton && !isUsePositiveButton && isUseNeutralButton) {
+            } else if (!isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
                 params.weight = 1;
                 params.setMarginStart(0);
                 params.setMarginEnd(0);
@@ -209,11 +209,11 @@ public class MiuiAlertDialogFactory {
             if (isUsePositiveButton && isUseNegativeButton && !isUseNeutralButton) {
                 params.weight = 0;
                 params.topMargin = 0;
-            } else if (isUseNeutralButton && isUseNegativeButton && !isUsePositiveButton) {
+            } else if (!isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
                 params.topMargin = 0;
-            } else if (isUseNeutralButton && isUsePositiveButton && !isUseNegativeButton) {
+            } else if (isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
                 params.bottomMargin = 0;
-            } else if (!isUseNegativeButton && !isUsePositiveButton && isUseNeutralButton) {
+            } else if (!isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
                 params.topMargin = 0;
                 params.bottomMargin = 0;
             }
@@ -363,9 +363,11 @@ public class MiuiAlertDialogFactory {
         public int mWindowAnimations = -1;
         public boolean isEnableHapticFeedback;
         public boolean isCreated;
+        public boolean isCanceled;
         public boolean isCancelable = true;
         public boolean isCanceledOnTouchOutside = true;
         public OnShowListener mOnShowListener;
+        public OnCancelListener mOnCancelListener;
         public OnDismissListener mOnDismissListener;
 
         public MiuiAlertDialogBaseFactory(Dialog dialog) {
@@ -376,7 +378,6 @@ public class MiuiAlertDialogFactory {
         }
 
         public abstract void init();
-
 
         @CallSuper
         protected void updateView() {
@@ -437,6 +438,8 @@ public class MiuiAlertDialogFactory {
         }
 
         protected void loadEditTextView() {
+            mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme); // 存在键盘
+
             addView(mCustomLayout, R.layout.miuix_preference_edit);
             ConstraintLayout editLayout = mCustomLayout.findViewById(R.id.edit_layout);
             // 设置输入框的边距
@@ -452,13 +455,13 @@ public class MiuiAlertDialogFactory {
             mEditText.setInputType(mEditTextInputType);
             if (mTextWatcher != null) mEditText.addTextChangedListener(mTextWatcher);
 
-            TextView editTip = editLayout.findViewById(R.id.edit_tip);
             if (mEditTextTip != "") {
+                TextView editTip = editLayout.findViewById(R.id.edit_tip);
                 editTip.setText(mEditTextTip);
                 editTip.setVisibility(View.VISIBLE);
             }
-            ImageView editImage = editLayout.findViewById(R.id.edit_image);
             if (mEditTextImage != null) {
+                ImageView editImage = editLayout.findViewById(R.id.edit_image);
                 editImage.setImageDrawable(mEditTextImage);
                 editImage.setVisibility(View.VISIBLE);
             }
@@ -491,25 +494,41 @@ public class MiuiAlertDialogFactory {
         }
 
         protected void loadCustomView() {
+            if (isExistEditTextView(mCustomLayout))
+                mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme);
+
             addView(mCustomLayout, mCustomView);
             if (mOnBindView != null)
                 mOnBindView.onBindView(mCustomView);
             updateCustomLayoutBottomMarginIfNeed();
         }
 
+        private boolean isExistEditTextView(ViewGroup customLayout) {
+            for (int i = 0; i < customLayout.getChildCount(); i++) {
+                View v = customLayout.getChildAt(i);
+                if (v instanceof ViewGroup viewGroup) {
+                    isExistEditTextView(viewGroup);
+                }
+                if (v instanceof EditText) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         protected void updateCustomLayoutBottomMarginIfNeed() {
         }
 
-        protected void addView(ViewGroup upperView, @LayoutRes int id) {
-            addView(upperView, LayoutInflater.from(mContext).inflate(id, upperView, false));
+        protected void addView(ViewGroup supperView, @LayoutRes int id) {
+            addView(supperView, LayoutInflater.from(mContext).inflate(id, supperView, false));
         }
 
-        protected void addView(ViewGroup upperView, View view) {
+        protected void addView(ViewGroup supperView, View view) {
             ViewGroup viewGroup = (ViewGroup) view.getParent();
-            if (viewGroup != upperView) {
+            if (viewGroup != supperView) {
                 if (viewGroup != null)
                     viewGroup.removeView(view);
-                upperView.addView(view);
+                supperView.addView(view);
             }
         }
 
@@ -566,6 +585,7 @@ public class MiuiAlertDialogFactory {
         public void create() {
             if (isCreated) return;
             updateView();
+
             if (mWindowAnimations != -1)
                 mWindow.setWindowAnimations(mWindowAnimations);
             mDialog.setOnShowListener(dialog -> {
@@ -578,6 +598,7 @@ public class MiuiAlertDialogFactory {
                 if (mOnDismissListener != null)
                     mOnDismissListener.onDismiss(this);
             });
+
             mDialog.setCancelable(isCancelable);
             mDialog.setCanceledOnTouchOutside(isCanceledOnTouchOutside);
             mDialog.create();
@@ -586,17 +607,26 @@ public class MiuiAlertDialogFactory {
 
         public void show() {
             if (!isCreated) create();
-
             mDialog.show();
         }
 
         public void cancel() {
-            mDialog.cancel();
+            if (!isCanceled) {
+                if (mOnCancelListener != null)
+                    mOnCancelListener.onCancel(this);
+                isCanceled = true;
+            }
+
+            mDialog.dismiss();
         }
 
         public void dismiss() {
-            if (mEditText != null && mTextWatcher != null)
-                mEditText.removeTextChangedListener(mTextWatcher);
+            if (isEnableEditText && mEditText != null) {
+                if (mTextWatcher != null) {
+                    mEditText.removeTextChangedListener(mTextWatcher);
+                    mTextWatcher = null;
+                }
+            }
             mDialog.dismiss();
         }
     }
