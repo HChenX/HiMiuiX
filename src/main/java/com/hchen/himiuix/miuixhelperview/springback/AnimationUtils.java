@@ -15,10 +15,21 @@
  */
 package com.hchen.himiuix.miuixhelperview.springback;
 
-import android.view.View;
+public class AnimationUtils extends android.view.animation.AnimationUtils {
+    private static final ThreadLocal<AnimationNanoState> sAnimationNanoState = ThreadLocal.withInitial(AnimationNanoState::new);
 
-public interface ViewCompatOnScrollChangeListener {
-    void onScrollChange(View view, int l, int t, int oldl, int oldt);
+    public static class AnimationNanoState {
+        long lastReportedTimeNanos;
 
-    void onStateChanged(int lastState, int state, boolean isFinished);
+        private AnimationNanoState() {
+        }
+    }
+
+    public static long currentAnimationTimeNanos() {
+        AnimationNanoState animationNanoState = sAnimationNanoState.get();
+        long nanoTime = System.nanoTime();
+        assert animationNanoState != null;
+        animationNanoState.lastReportedTimeNanos = nanoTime;
+        return nanoTime;
+    }
 }

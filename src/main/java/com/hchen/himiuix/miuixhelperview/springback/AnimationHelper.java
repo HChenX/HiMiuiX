@@ -15,12 +15,16 @@
  */
 package com.hchen.himiuix.miuixhelperview.springback;
 
-public interface ScrollStateDispatcher {
-    int STATE_DRAGGING = 1;
-    int STATE_IDLE = 0;
-    int STATE_SETTLING = 2;
+import android.view.View;
 
-    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
+public class AnimationHelper {
+    public static void postInvalidateOnAnimation(View view) {
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postInvalidateOnAnimation();
+    }
 
-    void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
+    public static void postOnAnimation(View view, Runnable action) {
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postOnAnimation(action);
+    }
 }

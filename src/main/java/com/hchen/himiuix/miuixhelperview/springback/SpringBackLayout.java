@@ -15,11 +15,13 @@
  */
 package com.hchen.himiuix.miuixhelperview.springback;
 
+import static com.hchen.himiuix.MiuiXUtils.getScreenSize;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -29,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.NestedScrollingChild3;
 import androidx.core.view.NestedScrollingChildHelper;
 import androidx.core.view.NestedScrollingParent3;
@@ -36,28 +39,27 @@ import androidx.core.view.NestedScrollingParentHelper;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 
-import com.hchen.himiuix.MiuiXUtils;
 import com.hchen.himiuix.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** @noinspection NullableProblems */
-public class SpringBackLayout extends ViewGroup implements NestedScrollingParent3, NestedScrollingChild3, NestedCurrentFling, ScrollStateDispatcher {
-    private static final String TAG = "SpringBackLayout";
-    public static final int ANGLE = 4;
-    public static final int HORIZONTAL = 1;
-    private static final int INVALID_ID = -1;
-    private static final int INVALID_POINTER = -1;
-    private static final int MAX_FLING_CONSUME_COUNTER = 4;
-    public static final int SPRING_BACK_BOTTOM = 2;
-    public static final int SPRING_BACK_TOP = 1;
-    public static final int UNCHECK_ORIENTATION = 0;
-    private static final int VELOCITY_THRADHOLD = 2000;
-    public static final int VERTICAL = 2;
-    private int consumeNestFlingCounter;
-    private int mActivePointerId;
+/**
+ * @noinspection NullableProblems
+ */
+public class SpringBackLayout extends ViewGroup implements NestedScrollingParent3, NestedCurrentFling {
+    private final NestedScrollingChildHelper mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
+    private final NestedScrollingParentHelper mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
+    private final List<ViewCompatOnScrollChangeListener> mOnScrollChangeListeners = new ArrayList<>();
+    private final SpringScroller mSpringScroller = new SpringScroller();
+    private final int[] mNestedScrollingV2ConsumedCompat = new int[2];
+    private final int[] mParentOffsetInWindow = new int[2];
+    private final int[] mParentScrollConsumed = new int[2];
     private final SpringBackLayoutHelper mHelper;
+    private int consumeNestFlingCounter = 0;
+    private int mActivePointerId = -1;
+    private int mFakeScrollX;
+    private int mFakeScrollY;
     private int mInitPaddingTop;
     private float mInitialDownX;
     private float mInitialDownY;
@@ -67,22 +69,15 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     private boolean mNestedFlingInProgress;
     private int mNestedScrollAxes;
     private boolean mNestedScrollInProgress;
-    private final NestedScrollingChildHelper mNestedScrollingChildHelper;
-    private final NestedScrollingParentHelper mNestedScrollingParentHelper;
-    private final int[] mNestedScrollingV2ConsumedCompat;
-    private final List<ViewCompatOnScrollChangeListener> mOnScrollChangeListeners;
     private OnSpringListener mOnSpringListener;
     private int mOriginScrollOrientation;
-    private final int[] mParentOffsetInWindow;
-    private final int[] mParentScrollConsumed;
-    public int mScreenHeight;
-    public int mScreenWidth;
+    protected int mScreenHeight;
+    protected int mScreenWidth;
     private boolean mScrollByFling;
     private int mScrollOrientation;
-    private int mScrollState;
+    private int mScrollState = 0;
     private boolean mSpringBackEnable;
     private int mSpringBackMode;
-    private final SpringScroller mSpringScroller;
     private View mTarget;
     private final int mTargetId;
     private float mTotalFlingUnconsumed;
@@ -98,106 +93,602 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
 
     public SpringBackLayout(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        mActivePointerId = -1;
-        consumeNestFlingCounter = 0;
-        mParentScrollConsumed = new int[2];
-        mParentOffsetInWindow = new int[2];
-        mNestedScrollingV2ConsumedCompat = new int[2];
-        mSpringBackEnable = true;
-        mOnScrollChangeListeners = new ArrayList<>();
-        mScrollState = 0;
-        mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
-        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
+        try (TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.SpringBackLayout)) {
+            mTargetId = obtainStyledAttributes.getResourceId(R.styleable.SpringBackLayout_scrollableView, -1);
+            mOriginScrollOrientation = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_scrollOrientation, 2);
+            mSpringBackMode = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_springBackMode, 3);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.SpringBackLayout);
-        mTargetId = obtainStyledAttributes.getResourceId(R.styleable.SpringBackLayout_scrollableView, -1);
-        mOriginScrollOrientation = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_scrollOrientation, 2);
-        mSpringBackMode = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_springBackMode, 3);
-        obtainStyledAttributes.recycle();
-        mSpringScroller = new SpringScroller();
         mHelper = new SpringBackLayoutHelper(this, mOriginScrollOrientation);
         setNestedScrollingEnabled(true);
-        Point screenSize = MiuiXUtils.getScreenSize(context);
+        Point screenSize = getScreenSize(context);
         mScreenWidth = screenSize.x;
         mScreenHeight = screenSize.y;
+        mSpringBackEnable = true;
     }
 
-    private void checkHorizontalScrollStart(int i2) {
-        if (getScrollX() != 0) {
-            mIsBeingDragged = true;
-            float obtainTouchDistance = obtainTouchDistance(Math.abs(getScrollX()), Math.abs(obtainMaxSpringBackDistance(i2)), 2);
-            if (getScrollX() < 0) {
-                mInitialDownX -= obtainTouchDistance;
-            } else {
-                mInitialDownX += obtainTouchDistance;
-            }
-            mInitialMotionX = mInitialDownX;
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mInitPaddingTop = getPaddingTop();
+    }
+
+    public void setSpringBackEnable(boolean enable) {
+        mSpringBackEnable = enable;
+    }
+
+    public void setSpringBackEnableOnTriggerAttached(boolean enable) {
+        mSpringBackEnable = enable;
+    }
+
+    public void setScrollOrientation(int orientation) {
+        mOriginScrollOrientation = orientation;
+        mHelper.mTargetScrollOrientation = orientation;
+    }
+
+    public void setOnScrollChangeListeners(ViewCompatOnScrollChangeListener listener) {
+        if (listener == null) return;
+        if (mOnScrollChangeListeners.contains(listener))
+            return;
+
+        mOnScrollChangeListeners.add(listener);
+    }
+
+    public void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener listener) {
+        if (listener == null) {
+            mOnScrollChangeListeners.clear();
             return;
         }
-        mIsBeingDragged = false;
+        mOnScrollChangeListeners.remove(listener);
+    }
+
+    public void setSpringBackMode(int mode) {
+        mSpringBackMode = mode;
+    }
+
+    public int getSpringBackMode() {
+        return mSpringBackMode;
+    }
+
+    private int getFakeScrollX() {
+        return mFakeScrollX;
+    }
+
+    private int getFakeScrollY() {
+        return mFakeScrollY;
+    }
+
+    public int getSpringScrollX() {
+        if (mSpringBackEnable) {
+            return getScrollX();
+        }
+        return getFakeScrollX();
+    }
+
+    public int getSpringScrollY() {
+        if (mSpringBackEnable) {
+            return getScrollY();
+        }
+        return getFakeScrollY();
+    }
+
+    @Override
+    public void setEnabled(boolean enable) {
+        super.setEnabled(enable);
+        if (!(mTarget instanceof NestedScrollingChild3) || enable == mTarget.isNestedScrollingEnabled())
+            return;
+        mTarget.setNestedScrollingEnabled(enable);
+    }
+
+    private boolean supportTopSpringBackMode() {
+        return (mSpringBackMode & 1) != 0;
+    }
+
+    private boolean supportBottomSpringBackMode() {
+        return (mSpringBackMode & 2) != 0;
+    }
+
+    public void setTarget(View view) {
+        mTarget = view;
+        if ((mTarget instanceof NestedScrollingChild3) && !mTarget.isNestedScrollingEnabled())
+            mTarget.setNestedScrollingEnabled(true);
+        if (mTarget.getOverScrollMode() == View.OVER_SCROLL_NEVER || !mSpringBackEnable)
+            return;
+
+        mTarget.setOverScrollMode(View.OVER_SCROLL_NEVER);
+    }
+
+    private void ensureTarget() {
+        if (mTarget == null) {
+            if (mTargetId == -1)
+                throw new IllegalArgumentException("invalid target Id");
+            mTarget = findViewById(mTargetId);
+
+            if (mTarget == null)
+                throw new IllegalArgumentException("fail to get target");
+        }
+
+        if (isEnabled())
+            if ((mTarget instanceof NestedScrollingChild3) && !mTarget.isNestedScrollingEnabled())
+                mTarget.setNestedScrollingEnabled(true);
+        if (mTarget.getOverScrollMode() == View.OVER_SCROLL_NEVER || !mSpringBackEnable)
+            return;
+
+        mTarget.setOverScrollMode(View.OVER_SCROLL_NEVER);
+    }
+
+    public View getTarget() {
+        return mTarget;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        if (mTarget.getVisibility() != View.GONE) {
+            int measuredWidth = mTarget.getMeasuredWidth();
+            int measuredHeight = mTarget.getMeasuredHeight();
+            int paddingLeft = getPaddingLeft();
+            int paddingTop = getPaddingTop();
+            mTarget.layout(paddingLeft, paddingTop, measuredWidth + paddingLeft, measuredHeight + paddingTop);
+        }
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        ensureTarget();
+
+        int min;
+        int mode = View.MeasureSpec.getMode(widthMeasureSpec);
+        measureChild(mTarget, widthMeasureSpec, heightMeasureSpec);
+        if (mode == MeasureSpec.UNSPECIFIED) {
+            min = mTarget.getMeasuredWidth() + getPaddingLeft() + getPaddingRight();
+        } else if (mode == MeasureSpec.EXACTLY) {
+            min = View.MeasureSpec.getSize(widthMeasureSpec);
+        } else {
+            min = Math.min(View.MeasureSpec.getSize(widthMeasureSpec), mTarget.getMeasuredWidth() + getPaddingLeft() + getPaddingRight());
+        }
+
+        int min2;
+        int mode2 = View.MeasureSpec.getMode(heightMeasureSpec);
+        if (mode2 == MeasureSpec.UNSPECIFIED) {
+            min2 = mTarget.getMeasuredHeight() + getPaddingTop() + getPaddingBottom();
+        } else if (mode2 == MeasureSpec.EXACTLY) {
+            min2 = View.MeasureSpec.getSize(heightMeasureSpec);
+        } else {
+            min2 = Math.min(View.MeasureSpec.getSize(heightMeasureSpec), mTarget.getMeasuredHeight() + getPaddingTop() + getPaddingBottom());
+        }
+
+        setMeasuredDimension(min, min2);
+    }
+
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (mSpringScroller.computeScrollOffset()) {
+            scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
+            if (!mSpringScroller.isFinished()) {
+                AnimationHelper.postInvalidateOnAnimation(this);
+                return;
+            }
+            if (getSpringScrollX() != 0 || getSpringScrollY() != 0) {
+                if (mScrollState != 2) {
+                    Log.d("SpringBackLayout", "Scroll stop but state is not correct.");
+                    springBack(mNestedScrollAxes == 2 ? 2 : 1);
+                    return;
+                }
+            }
+            dispatchScrollState(0);
+        }
+    }
+
+    @Override
+    public void scrollTo(int x, int y) {
+        if (mSpringBackEnable) {
+            super.scrollTo(x, y);
+            return;
+        }
+        if (mFakeScrollX == x && mFakeScrollY == y)
+            return;
+
+        mFakeScrollX = x;
+        mFakeScrollY = y;
+        onScrollChanged(x, y, mFakeScrollX, mFakeScrollY);
+        if (!awakenScrollBars())
+            postInvalidateOnAnimation();
+        requestLayout();
+    }
+
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        for (ViewCompatOnScrollChangeListener mOnScrollChangeListener : mOnScrollChangeListeners) {
+            mOnScrollChangeListener.onScrollChange(this, l, t, oldl, oldt);
+        }
+    }
+
+    private boolean isTargetScrollOrientation(int ori) {
+        return mScrollOrientation == ori;
+    }
+
+    private boolean isTargetScrollToTop(int state) {
+        if (state == 2) {
+            if (mTarget instanceof ListView listView)
+                return !listView.canScrollList(-1);
+            return !mTarget.canScrollVertically(-1);
+        }
+        return !mTarget.canScrollHorizontally(-1);
+    }
+
+    private boolean isTargetScrollToBottom(int state) {
+        if (state == 2) {
+            if (mTarget instanceof ListView listView)
+                return !listView.canScrollList(1);
+            return !mTarget.canScrollVertically(1);
+        }
+        return !mTarget.canScrollHorizontally(1);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN && mScrollState == 2 && mHelper.isTouchInTarget(motionEvent)) {
+            dispatchScrollState(1);
+        }
+        boolean dispatchTouchEvent = super.dispatchTouchEvent(motionEvent);
+        if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP && mScrollState != 2) {
+            dispatchScrollState(0);
+        }
+        return dispatchTouchEvent;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+        if (!mSpringBackEnable || !isEnabled() || mNestedFlingInProgress || mNestedScrollInProgress || mTarget.isNestedScrollingEnabled())
+            return false;
+        if (!mSpringScroller.isFinished() && motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN)
+            mSpringScroller.forceStop();
+        if (!supportTopSpringBackMode() && !supportBottomSpringBackMode())
+            return false;
+
+        if ((mOriginScrollOrientation & 4) != 0) {
+            checkOrientation(motionEvent);
+            if (isTargetScrollOrientation(2) && (mOriginScrollOrientation & 1) != 0 && getScrollX() == 0.0f)
+                return false;
+            if (isTargetScrollOrientation(1) && (mOriginScrollOrientation & 2) != 0 && getScrollY() == 0.0f)
+                return false;
+            if (isTargetScrollOrientation(2) || isTargetScrollOrientation(1))
+                disallowParentInterceptTouchEvent(true);
+        } else {
+            mScrollOrientation = mOriginScrollOrientation;
+        }
+        if (isTargetScrollOrientation(2)) {
+            return onVerticalInterceptTouchEvent(motionEvent);
+        }
+        if (isTargetScrollOrientation(1)) {
+            return onHorizontalInterceptTouchEvent(motionEvent);
+        }
+        return false;
+    }
+
+    private void disallowParentInterceptTouchEvent(boolean disallowIntercept) {
+        ViewParent parent = getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
     }
 
     private void checkOrientation(MotionEvent motionEvent) {
-        int i2;
         mHelper.checkOrientation(motionEvent);
         int actionMasked = motionEvent.getActionMasked();
-        if (actionMasked != 0) {
-            if (actionMasked != 1) {
-                if (actionMasked == 2) {
-                    if (mScrollOrientation != 0 || (i2 = mHelper.mScrollOrientation) == 0) {
-                        return;
-                    }
-                    mScrollOrientation = i2;
-                    return;
-                }
-                if (actionMasked != 3) {
-                    if (actionMasked != 6) {
-                        return;
-                    }
-                    onSecondaryPointerUp(motionEvent);
-                    return;
-                }
-            }
-            disallowParentInterceptTouchEvent(false);
-            if ((mOriginScrollOrientation & 2) != 0) {
-                springBack(2);
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            SpringBackLayoutHelper springBackLayoutHelper = mHelper;
+            mInitialDownY = springBackLayoutHelper.mInitialDownY;
+            mInitialDownX = springBackLayoutHelper.mInitialDownX;
+            mActivePointerId = springBackLayoutHelper.mActivePointerId;
+            if (getScrollY() != 0) {
+                mScrollOrientation = 2;
+                requestDisallowParentInterceptTouchEvent(true);
+            } else if (getScrollX() != 0) {
+                mScrollOrientation = 1;
+                requestDisallowParentInterceptTouchEvent(true);
             } else {
-                springBack(1);
+                mScrollOrientation = 0;
+            }
+            if ((mOriginScrollOrientation & 2) != 0) {
+                checkScrollStart(2);
+            } else {
+                checkScrollStart(1);
             }
             return;
         }
-        SpringBackLayoutHelper springBackLayoutHelper = mHelper;
-        mInitialDownY = springBackLayoutHelper.mInitialDownY;
-        mInitialDownX = springBackLayoutHelper.mInitialDownX;
-        mActivePointerId = springBackLayoutHelper.mActivePointerId;
-        if (getScrollY() != 0) {
-            mScrollOrientation = 2;
-            requestDisallowParentInterceptTouchEvent(true);
-        } else if (getScrollX() != 0) {
-            mScrollOrientation = 1;
-            requestDisallowParentInterceptTouchEvent(true);
-        } else {
-            mScrollOrientation = 0;
+
+        int ori;
+        if (actionMasked != MotionEvent.ACTION_UP) {
+            if (actionMasked == MotionEvent.ACTION_MOVE) {
+                if (mScrollOrientation != 0 || (ori = mHelper.mScrollOrientation) == 0) {
+                    return;
+                }
+                mScrollOrientation = ori;
+                return;
+            }
+            if (actionMasked != MotionEvent.ACTION_CANCEL) {
+                if (actionMasked != MotionEvent.ACTION_POINTER_UP) {
+                    return;
+                }
+                onSecondaryPointerUp(motionEvent);
+                return;
+            }
         }
+        disallowParentInterceptTouchEvent(false);
         if ((mOriginScrollOrientation & 2) != 0) {
-            checkScrollStart(2);
+            springBack(2);
         } else {
-            checkScrollStart(1);
+            springBack(1);
         }
     }
 
-    private void checkScrollStart(int i2) {
-        if (i2 == 2) {
-            checkVerticalScrollStart(i2);
+    private boolean onVerticalInterceptTouchEvent(MotionEvent motionEvent) {
+        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2))
+            return false;
+        if (isTargetScrollToTop(2) && !supportTopSpringBackMode())
+            return false;
+        if (isTargetScrollToBottom(2) && !supportBottomSpringBackMode())
+            return false;
+
+        int actionMasked = motionEvent.getActionMasked();
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            int pointerId = motionEvent.getPointerId(0);
+            mActivePointerId = pointerId;
+            int findPointerIndex = motionEvent.findPointerIndex(pointerId);
+            if (findPointerIndex < 0) {
+                return false;
+            }
+            mInitialDownY = motionEvent.getY(findPointerIndex);
+            if (getScrollY() != 0) {
+                mIsBeingDragged = true;
+                mInitialMotionY = mInitialDownY;
+            } else {
+                mIsBeingDragged = false;
+            }
         } else {
-            checkHorizontalScrollStart(i2);
+            if (actionMasked != MotionEvent.ACTION_UP) {
+                if (actionMasked == MotionEvent.ACTION_MOVE) {
+                    if (mActivePointerId == -1) {
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but don't have an active pointer id.");
+                        return false;
+                    }
+                    int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
+                    if (findPointerIndex2 < 0) {
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but have an invalid active pointer id.");
+                        return false;
+                    }
+                    float y = motionEvent.getY(findPointerIndex2);
+                    boolean z = isTargetScrollToBottom(2) && isTargetScrollToTop(2);
+                    if ((z || !isTargetScrollToTop(2)) && (!z || y <= mInitialDownY)) {
+                        if (mInitialDownY - y > mTouchSlop && !mIsBeingDragged) {
+                            mIsBeingDragged = true;
+                            dispatchScrollState(1);
+                            mInitialMotionY = y;
+                        }
+                    } else if (y - mInitialDownY > mTouchSlop && !mIsBeingDragged) {
+                        mIsBeingDragged = true;
+                        dispatchScrollState(1);
+                        mInitialMotionY = y;
+                    }
+                } else if (actionMasked != MotionEvent.ACTION_CANCEL) {
+                    if (actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                        onSecondaryPointerUp(motionEvent);
+                    }
+                }
+            }
+            mIsBeingDragged = false;
+            mActivePointerId = -1;
+        }
+        return mIsBeingDragged;
+    }
+
+    private boolean onHorizontalInterceptTouchEvent(MotionEvent motionEvent) {
+        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1))
+            return false;
+        if (isTargetScrollToTop(1) && !supportTopSpringBackMode())
+            return false;
+        if (isTargetScrollToBottom(1) && !supportBottomSpringBackMode())
+            return false;
+
+        int actionMasked = motionEvent.getActionMasked();
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            int pointerId = motionEvent.getPointerId(0);
+            mActivePointerId = pointerId;
+            int findPointerIndex = motionEvent.findPointerIndex(pointerId);
+            if (findPointerIndex < 0) {
+                return false;
+            }
+            mInitialDownX = motionEvent.getX(findPointerIndex);
+            if (getScrollX() != 0) {
+                mIsBeingDragged = true;
+                mInitialMotionX = mInitialDownX;
+            } else {
+                mIsBeingDragged = false;
+            }
+        } else {
+            if (actionMasked != MotionEvent.ACTION_UP) {
+                if (actionMasked == MotionEvent.ACTION_MOVE) {
+                    if (mActivePointerId == -1) {
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but don't have an active pointer id.");
+                        return false;
+                    }
+                    int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
+                    if (findPointerIndex2 < 0) {
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but have an invalid active pointer id.");
+                        return false;
+                    }
+                    float x = motionEvent.getX(findPointerIndex2);
+                    boolean z = isTargetScrollToBottom(1) && isTargetScrollToTop(1);
+                    if ((z || !isTargetScrollToTop(1)) && (!z || x <= mInitialDownX)) {
+                        if (mInitialDownX - x > mTouchSlop && !mIsBeingDragged) {
+                            mIsBeingDragged = true;
+                            dispatchScrollState(1);
+                            mInitialMotionX = x;
+                        }
+                    } else if (x - mInitialDownX > mTouchSlop && !mIsBeingDragged) {
+                        mIsBeingDragged = true;
+                        dispatchScrollState(1);
+                        mInitialMotionX = x;
+                    }
+                } else if (actionMasked != MotionEvent.ACTION_CANCEL) {
+                    if (actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                        onSecondaryPointerUp(motionEvent);
+                    }
+                }
+            }
+            mIsBeingDragged = false;
+            mActivePointerId = -1;
+        }
+        return mIsBeingDragged;
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        if (isEnabled() && mSpringBackEnable)
+            return;
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
+    public void internalRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
+    public void requestDisallowParentInterceptTouchEvent(boolean disallowIntercept) {
+        ViewParent parent = getParent();
+        parent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        while (parent != null) {
+            if (parent instanceof SpringBackLayout) {
+                ((SpringBackLayout) parent).internalRequestDisallowInterceptTouchEvent(disallowIntercept);
+            }
+            parent = parent.getParent();
         }
     }
 
-    private void checkVerticalScrollStart(int i2) {
+    @Override
+    @SuppressLint("ClickableViewAccessibility")
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        if (!isEnabled() || mNestedFlingInProgress || mNestedScrollInProgress || mTarget.isNestedScrollingEnabled())
+            return false;
+
+        if (!mSpringScroller.isFinished() && motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN)
+            mSpringScroller.forceStop();
+        if (isTargetScrollOrientation(2))
+            return onVerticalTouchEvent(motionEvent);
+        if (isTargetScrollOrientation(1))
+            return onHorizontalTouchEvent(motionEvent);
+
+        return false;
+    }
+
+    private boolean onHorizontalTouchEvent(MotionEvent motionEvent) {
+        int actionMasked = motionEvent.getActionMasked();
+        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1))
+            return onScrollEvent(motionEvent, actionMasked, 1);
+        if (isTargetScrollToBottom(1))
+            return onScrollUpEvent(motionEvent, actionMasked, 1);
+
+        return onScrollDownEvent(motionEvent, actionMasked, 1);
+    }
+
+    private boolean onVerticalTouchEvent(MotionEvent motionEvent) {
+        int actionMasked = motionEvent.getActionMasked();
+        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2))
+            return onScrollEvent(motionEvent, actionMasked, 2);
+        if (isTargetScrollToBottom(2))
+            return onScrollUpEvent(motionEvent, actionMasked, 2);
+
+        return onScrollDownEvent(motionEvent, actionMasked, 2);
+    }
+
+    private boolean onScrollEvent(MotionEvent motionEvent, int actionMasked, int mode) {
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            mActivePointerId = motionEvent.getPointerId(0);
+            checkScrollStart(mode);
+        } else {
+            if (actionMasked == MotionEvent.ACTION_UP) {
+                if (motionEvent.findPointerIndex(mActivePointerId) < 0) {
+                    Log.e("SpringBackLayout", "Got ACTION_UP event but don't have an active pointer id.");
+                    return false;
+                }
+                if (mIsBeingDragged) {
+                    mIsBeingDragged = false;
+                    springBack(mode);
+                }
+                mActivePointerId = -1;
+                return false;
+            }
+            if (actionMasked == MotionEvent.ACTION_MOVE) {
+                int findPointerIndex = motionEvent.findPointerIndex(mActivePointerId);
+                if (findPointerIndex < 0) {
+                    Log.e("SpringBackLayout", "Got ACTION_MOVE event but have an invalid active pointer id.");
+                    return false;
+                }
+                if (mIsBeingDragged) {
+                    float signum;
+                    float obtainSpringBackDistance;
+                    if (mode == 2) {
+                        float y = motionEvent.getY(findPointerIndex);
+                        signum = Math.signum(y - mInitialMotionY);
+                        obtainSpringBackDistance = obtainSpringBackDistance(y - mInitialMotionY, mode);
+                    } else {
+                        float x = motionEvent.getX(findPointerIndex);
+                        signum = Math.signum(x - mInitialMotionX);
+                        obtainSpringBackDistance = obtainSpringBackDistance(x - mInitialMotionX, mode);
+                    }
+                    requestDisallowParentInterceptTouchEvent(true);
+                    moveTarget(signum * obtainSpringBackDistance, mode);
+                }
+            } else {
+                if (actionMasked == MotionEvent.ACTION_CANCEL) {
+                    return false;
+                }
+                if (actionMasked == MotionEvent.ACTION_POINTER_DOWN) {
+                    int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
+                    if (findPointerIndex2 < 0) {
+                        Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
+                        return false;
+                    }
+                    int actionIndex;
+                    if (mode == 2) {
+                        float y2 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
+                        actionIndex = motionEvent.getActionIndex();
+                        if (actionIndex < 0) {
+                            Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                            return false;
+                        }
+                        float y3 = motionEvent.getY(actionIndex) - y2;
+                        mInitialDownY = y3;
+                        mInitialMotionY = y3;
+                    } else {
+                        float x2 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
+                        actionIndex = motionEvent.getActionIndex();
+                        if (actionIndex < 0) {
+                            Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                            return false;
+                        }
+                        float x3 = motionEvent.getX(actionIndex) - x2;
+                        mInitialDownX = x3;
+                        mInitialMotionX = x3;
+                    }
+                    mActivePointerId = motionEvent.getPointerId(actionIndex);
+                } else if (actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                    onSecondaryPointerUp(motionEvent);
+                }
+            }
+        }
+        return true;
+    }
+
+    private void checkVerticalScrollStart(int mode) {
         if (getScrollY() != 0) {
             mIsBeingDragged = true;
-            float obtainTouchDistance = obtainTouchDistance(Math.abs(getScrollY()), Math.abs(obtainMaxSpringBackDistance(i2)), 2);
+            float obtainTouchDistance = obtainTouchDistance(Math.abs(getScrollY()), Math.abs(obtainMaxSpringBackDistance(mode)), 2);
             if (getScrollY() < 0) {
                 mInitialDownY -= obtainTouchDistance;
             } else {
@@ -209,414 +700,221 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         mIsBeingDragged = false;
     }
 
-    private void consumeDelta(int i2, int[] iArr, int i3) {
-        if (i3 == 2) {
-            iArr[1] = i2;
+    private void checkScrollStart(int mode) {
+        if (mode == 2) {
+            checkVerticalScrollStart(mode);
         } else {
-            iArr[0] = i2;
+            checkHorizontalScrollStart(mode);
         }
     }
 
-    private void disallowParentInterceptTouchEvent(boolean z2) {
-        ViewParent parent = getParent();
-        if (parent != null) {
-            parent.requestDisallowInterceptTouchEvent(z2);
-        }
-    }
-
-    private void dispatchScrollState(int i2) {
-        int i3 = mScrollState;
-        if (i3 != i2) {
-            mScrollState = i2;
-            for (ViewCompatOnScrollChangeListener mOnScrollChangeListener : mOnScrollChangeListeners) {
-                mOnScrollChangeListener.onStateChanged(i3, i2, mSpringScroller.isFinished());
-            }
-        }
-    }
-
-    private void ensureTarget() {
-        if (mTarget == null) {
-            int i2 = mTargetId;
-            if (i2 != -1) {
-                mTarget = findViewById(i2);
+    private void checkHorizontalScrollStart(int mode) {
+        if (getScrollX() != 0) {
+            mIsBeingDragged = true;
+            float obtainTouchDistance = obtainTouchDistance(Math.abs(getScrollX()), Math.abs(obtainMaxSpringBackDistance(mode)), 2);
+            if (getScrollX() < 0) {
+                mInitialDownX -= obtainTouchDistance;
             } else {
-                throw new IllegalArgumentException("invalid target Id");
+                mInitialDownX += obtainTouchDistance;
             }
-        }
-        if (mTarget != null) {
-            if (Build.VERSION.SDK_INT >= 21 && isEnabled()) {
-                View view = mTarget;
-                if ((view instanceof NestedScrollingChild3) && !view.isNestedScrollingEnabled()) {
-                    mTarget.setNestedScrollingEnabled(true);
-                }
-            }
-            if (mTarget.getOverScrollMode() != 2) {
-                mTarget.setOverScrollMode(2);
-                return;
-            }
+            mInitialMotionX = mInitialDownX;
             return;
         }
-        throw new IllegalArgumentException("fail to get target");
+        mIsBeingDragged = false;
     }
 
-    private boolean isHorizontalTargetScrollToTop() {
-        return !mTarget.canScrollHorizontally(-1);
-    }
-
-    private boolean isTargetScrollOrientation(int i2) {
-        return mScrollOrientation == i2;
-    }
-
-    private boolean isTargetScrollToBottom(int i2) {
-        if (i2 == 2) {
-            if (mTarget instanceof ListView) {
-                return !((ListView) mTarget).canScrollList(1);
-            }
-            return !mTarget.canScrollVertically(1);
-        }
-        return !mTarget.canScrollHorizontally(1);
-    }
-
-    private boolean isTargetScrollToTop(int i2) {
-        if (i2 == 2) {
-            if (mTarget instanceof ListView) {
-                return !((ListView) mTarget).canScrollList(-1);
-            }
-            return !mTarget.canScrollVertically(-1);
-        }
-        return !mTarget.canScrollHorizontally(-1);
-    }
-
-    private boolean isVerticalTargetScrollToTop() {
-        if (mTarget instanceof ListView) {
-            return !((ListView) mTarget).canScrollList(-1);
-        }
-        return !mTarget.canScrollVertically(-1);
-    }
-
-    private void moveTarget(float f2, int i2) {
-        if (i2 == 2) {
-            scrollTo(0, (int) (-f2));
-        } else {
-            scrollTo((int) (-f2), 0);
-        }
-    }
-
-    private boolean onHorizontalInterceptTouchEvent(MotionEvent motionEvent) {
-        boolean z2 = false;
-        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1)) {
-            return false;
-        }
-        if (isTargetScrollToTop(1) && !supportTopSpringBackMode()) {
-            return false;
-        }
-        if (isTargetScrollToBottom(1) && !supportBottomSpringBackMode()) {
-            return false;
-        }
-        int actionMasked = motionEvent.getActionMasked();
-        if (actionMasked != 0) {
-            if (actionMasked != 1) {
-                if (actionMasked == 2) {
-                    int i2 = mActivePointerId;
-                    if (i2 == -1) {
-                        Log.e(TAG, "Got ACTION_MOVE event but don't have an active pointer id.");
-                        return false;
-                    }
-                    int findPointerIndex = motionEvent.findPointerIndex(i2);
-                    if (findPointerIndex < 0) {
-                        Log.e(TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
-                        return false;
-                    }
-                    float x2 = motionEvent.getX(findPointerIndex);
-                    if (isTargetScrollToBottom(1) && isTargetScrollToTop(1)) {
-                        z2 = true;
-                    }
-                    if ((z2 || !isTargetScrollToTop(1)) && (!z2 || x2 <= mInitialDownX)) {
-                        if (mInitialDownX - x2 > mTouchSlop && !mIsBeingDragged) {
-                            mIsBeingDragged = true;
-                            dispatchScrollState(1);
-                            mInitialMotionX = x2;
-                        }
-                    } else if (x2 - mInitialDownX > mTouchSlop && !mIsBeingDragged) {
-                        mIsBeingDragged = true;
-                        dispatchScrollState(1);
-                        mInitialMotionX = x2;
-                    }
-                } else if (actionMasked != 3) {
-                    if (actionMasked == 6) {
-                        onSecondaryPointerUp(motionEvent);
-                    }
-                }
-            }
-            mIsBeingDragged = false;
-            mActivePointerId = -1;
-        } else {
-            int pointerId = motionEvent.getPointerId(0);
-            mActivePointerId = pointerId;
-            int findPointerIndex2 = motionEvent.findPointerIndex(pointerId);
-            if (findPointerIndex2 < 0) {
-                return false;
-            }
-            mInitialDownX = motionEvent.getX(findPointerIndex2);
-            if (getScrollX() != 0) {
-                mIsBeingDragged = true;
-                mInitialMotionX = mInitialDownX;
-            } else {
-                mIsBeingDragged = false;
-            }
-        }
-        return mIsBeingDragged;
-    }
-
-    private boolean onHorizontalTouchEvent(MotionEvent motionEvent) {
-        int actionMasked = motionEvent.getActionMasked();
-        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1)) {
-            return onScrollEvent(motionEvent, actionMasked, 1);
-        }
-        if (isTargetScrollToBottom(1)) {
-            return onScrollUpEvent(motionEvent, actionMasked, 1);
-        }
-        return onScrollDownEvent(motionEvent, actionMasked, 1);
-    }
-
-    private boolean onScrollDownEvent(MotionEvent motionEvent, int i2, int i3) {
-        float signum;
-        float obtainSpringBackDistance;
-        int actionIndex;
-        if (i2 != 0) {
-            if (i2 != 1) {
-                if (i2 == 2) {
-                    int findPointerIndex = motionEvent.findPointerIndex(mActivePointerId);
-                    if (findPointerIndex < 0) {
-                        Log.e(TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
-                        return false;
-                    }
-                    if (mIsBeingDragged) {
-                        if (i3 == 2) {
-                            float y2 = motionEvent.getY(findPointerIndex);
-                            signum = Math.signum(y2 - mInitialMotionY);
-                            obtainSpringBackDistance = obtainSpringBackDistance(y2 - mInitialMotionY, i3);
-                        } else {
-                            float x2 = motionEvent.getX(findPointerIndex);
-                            signum = Math.signum(x2 - mInitialMotionX);
-                            obtainSpringBackDistance = obtainSpringBackDistance(x2 - mInitialMotionX, i3);
-                        }
-                        float f2 = signum * obtainSpringBackDistance;
-                        if (f2 > 0.0f) {
-                            requestDisallowParentInterceptTouchEvent(true);
-                            moveTarget(f2, i3);
-                        } else {
-                            moveTarget(0.0f, i3);
-                            return false;
-                        }
-                    }
-                } else if (i2 != 3) {
-                    if (i2 == 5) {
-                        int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
-                        if (findPointerIndex2 < 0) {
-                            Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
-                            return false;
-                        }
-                        if (i3 == 2) {
-                            float y3 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
-                            actionIndex = motionEvent.getActionIndex();
-                            if (actionIndex < 0) {
-                                Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
-                                return false;
-                            }
-                            float y4 = motionEvent.getY(actionIndex) - y3;
-                            mInitialDownY = y4;
-                            mInitialMotionY = y4;
-                        } else {
-                            float x3 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
-                            actionIndex = motionEvent.getActionIndex();
-                            if (actionIndex < 0) {
-                                Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
-                                return false;
-                            }
-                            float x4 = motionEvent.getX(actionIndex) - x3;
-                            mInitialDownX = x4;
-                            mInitialMotionX = x4;
-                        }
-                        mActivePointerId = motionEvent.getPointerId(actionIndex);
-                    } else if (i2 == 6) {
-                        onSecondaryPointerUp(motionEvent);
-                    }
-                }
-            }
-            if (motionEvent.findPointerIndex(mActivePointerId) < 0) {
-                Log.e(TAG, "Got ACTION_UP event but don't have an active pointer id.");
-                return false;
-            }
-            if (mIsBeingDragged) {
-                mIsBeingDragged = false;
-                springBack(i3);
-            }
-            mActivePointerId = -1;
-            return false;
-        }
-        mActivePointerId = motionEvent.getPointerId(0);
-        checkScrollStart(i3);
-        return true;
-    }
-
-    private boolean onScrollEvent(MotionEvent motionEvent, int i2, int i3) {
-        float signum;
-        float obtainSpringBackDistance;
-        int actionIndex;
-        if (i2 == 0) {
+    private boolean onScrollDownEvent(MotionEvent motionEvent, int actionMasked, int mode) {
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
             mActivePointerId = motionEvent.getPointerId(0);
-            checkScrollStart(i3);
+            checkScrollStart(mode);
         } else {
-            if (i2 == 1) {
-                if (motionEvent.findPointerIndex(mActivePointerId) < 0) {
-                    Log.e(TAG, "Got ACTION_UP event but don't have an active pointer id.");
-                    return false;
-                }
-                if (mIsBeingDragged) {
-                    mIsBeingDragged = false;
-                    springBack(i3);
-                }
-                mActivePointerId = -1;
-                return false;
-            }
-            if (i2 == 2) {
-                int findPointerIndex = motionEvent.findPointerIndex(mActivePointerId);
-                if (findPointerIndex < 0) {
-                    Log.e(TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
-                    return false;
-                }
-                if (mIsBeingDragged) {
-                    if (i3 == 2) {
-                        float y2 = motionEvent.getY(findPointerIndex);
-                        signum = Math.signum(y2 - mInitialMotionY);
-                        obtainSpringBackDistance = obtainSpringBackDistance(y2 - mInitialMotionY, i3);
-                    } else {
-                        float x2 = motionEvent.getX(findPointerIndex);
-                        signum = Math.signum(x2 - mInitialMotionX);
-                        obtainSpringBackDistance = obtainSpringBackDistance(x2 - mInitialMotionX, i3);
-                    }
-                    requestDisallowParentInterceptTouchEvent(true);
-                    moveTarget(signum * obtainSpringBackDistance, i3);
-                }
-            } else {
-                if (i2 == 3) {
-                    return false;
-                }
-                if (i2 == 5) {
-                    int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
-                    if (findPointerIndex2 < 0) {
-                        Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
-                        return false;
-                    }
-                    if (i3 == 2) {
-                        float y3 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
-                        actionIndex = motionEvent.getActionIndex();
-                        if (actionIndex < 0) {
-                            Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
-                            return false;
-                        }
-                        float y4 = motionEvent.getY(actionIndex) - y3;
-                        mInitialDownY = y4;
-                        mInitialMotionY = y4;
-                    } else {
-                        float x3 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
-                        actionIndex = motionEvent.getActionIndex();
-                        if (actionIndex < 0) {
-                            Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
-                            return false;
-                        }
-                        float x4 = motionEvent.getX(actionIndex) - x3;
-                        mInitialDownX = x4;
-                        mInitialMotionX = x4;
-                    }
-                    mActivePointerId = motionEvent.getPointerId(actionIndex);
-                } else if (i2 == 6) {
-                    onSecondaryPointerUp(motionEvent);
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean onScrollUpEvent(MotionEvent motionEvent, int i2, int i3) {
-        float signum;
-        float obtainSpringBackDistance;
-        int actionIndex;
-        if (i2 != 0) {
-            if (i2 != 1) {
-                if (i2 == 2) {
+            if (actionMasked != MotionEvent.ACTION_UP) {
+                if (actionMasked == MotionEvent.ACTION_MOVE) {
                     int findPointerIndex = motionEvent.findPointerIndex(mActivePointerId);
                     if (findPointerIndex < 0) {
-                        Log.e(TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but have an invalid active pointer id.");
                         return false;
                     }
                     if (mIsBeingDragged) {
-                        if (i3 == 2) {
-                            float y2 = motionEvent.getY(findPointerIndex);
-                            signum = Math.signum(mInitialMotionY - y2);
-                            obtainSpringBackDistance = obtainSpringBackDistance(mInitialMotionY - y2, i3);
+                        float signum;
+                        float obtainSpringBackDistance;
+                        if (mode == 2) {
+                            float y = motionEvent.getY(findPointerIndex);
+                            signum = Math.signum(y - mInitialMotionY);
+                            obtainSpringBackDistance = obtainSpringBackDistance(y - mInitialMotionY, mode);
                         } else {
-                            float x2 = motionEvent.getX(findPointerIndex);
-                            signum = Math.signum(mInitialMotionX - x2);
-                            obtainSpringBackDistance = obtainSpringBackDistance(mInitialMotionX - x2, i3);
+                            float x = motionEvent.getX(findPointerIndex);
+                            signum = Math.signum(x - mInitialMotionX);
+                            obtainSpringBackDistance = obtainSpringBackDistance(x - mInitialMotionX, mode);
                         }
-                        float f2 = signum * obtainSpringBackDistance;
-                        if (f2 > 0.0f) {
+                        float f = signum * obtainSpringBackDistance;
+                        if (f > 0.0f) {
                             requestDisallowParentInterceptTouchEvent(true);
-                            moveTarget(-f2, i3);
+                            moveTarget(f, mode);
                         } else {
-                            moveTarget(0.0f, i3);
+                            moveTarget(0.0f, mode);
                             return false;
                         }
                     }
-                } else if (i2 != 3) {
-                    if (i2 == 5) {
+                } else if (actionMasked != MotionEvent.ACTION_CANCEL) {
+                    if (actionMasked == MotionEvent.ACTION_POINTER_DOWN) {
                         int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
                         if (findPointerIndex2 < 0) {
-                            Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
+                            Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
                             return false;
                         }
-                        if (i3 == 2) {
-                            float y3 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
+
+                        int actionIndex;
+                        if (mode == 2) {
+                            float y2 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
                             actionIndex = motionEvent.getActionIndex();
                             if (actionIndex < 0) {
-                                Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                                Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
                                 return false;
                             }
-                            float y4 = motionEvent.getY(actionIndex) - y3;
-                            mInitialDownY = y4;
-                            mInitialMotionY = y4;
+                            float y3 = motionEvent.getY(actionIndex) - y2;
+                            mInitialDownY = y3;
+                            mInitialMotionY = y3;
                         } else {
-                            float x3 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
+                            float x2 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
                             actionIndex = motionEvent.getActionIndex();
                             if (actionIndex < 0) {
-                                Log.e(TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                                Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
                                 return false;
                             }
-                            float x4 = motionEvent.getX(actionIndex) - x3;
-                            mInitialDownX = x4;
-                            mInitialMotionX = x4;
+                            float x3 = motionEvent.getX(actionIndex) - x2;
+                            mInitialDownX = x3;
+                            mInitialMotionX = x3;
                         }
                         mActivePointerId = motionEvent.getPointerId(actionIndex);
-                    } else if (i2 == 6) {
+                    } else if (actionMasked == MotionEvent.ACTION_POINTER_UP) {
                         onSecondaryPointerUp(motionEvent);
                     }
                 }
             }
             if (motionEvent.findPointerIndex(mActivePointerId) < 0) {
-                Log.e(TAG, "Got ACTION_UP event but don't have an active pointer id.");
+                Log.e("SpringBackLayout", "Got ACTION_UP event but don't have an active pointer id.");
                 return false;
             }
             if (mIsBeingDragged) {
                 mIsBeingDragged = false;
-                springBack(i3);
+                springBack(mode);
             }
             mActivePointerId = -1;
             return false;
         }
-        mActivePointerId = motionEvent.getPointerId(0);
-        checkScrollStart(i3);
+        return true;
+    }
+
+    private void moveTarget(float xory, int mode) {
+        if (mode == 2) {
+            scrollTo(0, (int) (-xory));
+        } else {
+            scrollTo((int) (-xory), 0);
+        }
+    }
+
+    private void springBack(int mode) {
+        springBack(0.0f, mode, true);
+    }
+
+    private void springBack(float xory, int mode, boolean invalidateAnimation) {
+        if (mOnSpringListener == null || !mOnSpringListener.onSpringBack()) {
+            mSpringScroller.forceStop();
+            int scrollX = getScrollX();
+            int scrollY = getScrollY();
+            mSpringScroller.scrollByFling(scrollX, 0.0f, scrollY, 0.0f, xory, mode);
+            if (scrollX == 0 && scrollY == 0 && xory == 0.0f) {
+                dispatchScrollState(0);
+            } else {
+                dispatchScrollState(2);
+            }
+            if (invalidateAnimation) {
+                AnimationHelper.postInvalidateOnAnimation(this);
+            }
+        }
+    }
+
+    private boolean onScrollUpEvent(MotionEvent motionEvent, int actionMasked, int mode) {
+        if (actionMasked == 0) {
+            mActivePointerId = motionEvent.getPointerId(0);
+            checkScrollStart(mode);
+        } else {
+            if (actionMasked != MotionEvent.ACTION_UP) {
+                if (actionMasked == MotionEvent.ACTION_MOVE) {
+                    int findPointerIndex = motionEvent.findPointerIndex(mActivePointerId);
+                    if (findPointerIndex < 0) {
+                        Log.e("SpringBackLayout", "Got ACTION_MOVE event but have an invalid active pointer id.");
+                        return false;
+                    }
+                    if (mIsBeingDragged) {
+                        float signum;
+                        float obtainSpringBackDistance;
+                        if (mode == 2) {
+                            float y = motionEvent.getY(findPointerIndex);
+                            signum = Math.signum(mInitialMotionY - y);
+                            obtainSpringBackDistance = obtainSpringBackDistance(mInitialMotionY - y, mode);
+                        } else {
+                            float x = motionEvent.getX(findPointerIndex);
+                            signum = Math.signum(mInitialMotionX - x);
+                            obtainSpringBackDistance = obtainSpringBackDistance(mInitialMotionX - x, mode);
+                        }
+                        float f = signum * obtainSpringBackDistance;
+                        if (f > 0.0f) {
+                            requestDisallowParentInterceptTouchEvent(true);
+                            moveTarget(-f, mode);
+                        } else {
+                            moveTarget(0.0f, mode);
+                            return false;
+                        }
+                    }
+                } else if (actionMasked != MotionEvent.ACTION_CANCEL) {
+                    if (actionMasked == MotionEvent.ACTION_POINTER_DOWN) {
+                        int findPointerIndex2 = motionEvent.findPointerIndex(mActivePointerId);
+                        if (findPointerIndex2 < 0) {
+                            Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid active pointer id.");
+                            return false;
+                        }
+
+                        int actionIndex;
+                        if (mode == 2) {
+                            float y2 = motionEvent.getY(findPointerIndex2) - mInitialDownY;
+                            actionIndex = motionEvent.getActionIndex();
+                            if (actionIndex < 0) {
+                                Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                                return false;
+                            }
+                            float y3 = motionEvent.getY(actionIndex) - y2;
+                            mInitialDownY = y3;
+                            mInitialMotionY = y3;
+                        } else {
+                            float x2 = motionEvent.getX(findPointerIndex2) - mInitialDownX;
+                            actionIndex = motionEvent.getActionIndex();
+                            if (actionIndex < 0) {
+                                Log.e("SpringBackLayout", "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                                return false;
+                            }
+                            float x3 = motionEvent.getX(actionIndex) - x2;
+                            mInitialDownX = x3;
+                            mInitialMotionX = x3;
+                        }
+                        mActivePointerId = motionEvent.getPointerId(actionIndex);
+                    } else if (actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                        onSecondaryPointerUp(motionEvent);
+                    }
+                }
+            }
+            if (motionEvent.findPointerIndex(mActivePointerId) < 0) {
+                Log.e("SpringBackLayout", "Got ACTION_UP event but don't have an active pointer id.");
+                return false;
+            }
+            if (mIsBeingDragged) {
+                mIsBeingDragged = false;
+                springBack(mode);
+            }
+            mActivePointerId = -1;
+            return false;
+        }
         return true;
     }
 
@@ -627,354 +925,47 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         }
     }
 
-    private boolean onVerticalInterceptTouchEvent(MotionEvent motionEvent) {
-        boolean z2 = false;
-        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2)) {
-            return false;
-        }
-        if (isTargetScrollToTop(2) && !supportTopSpringBackMode()) {
-            return false;
-        }
-        if (isTargetScrollToBottom(2) && !supportBottomSpringBackMode()) {
-            return false;
-        }
-        int actionMasked = motionEvent.getActionMasked();
-        if (actionMasked != 0) {
-            if (actionMasked != 1) {
-                if (actionMasked == 2) {
-                    int i2 = mActivePointerId;
-                    if (i2 == -1) {
-                        Log.e(TAG, "Got ACTION_MOVE event but don't have an active pointer id.");
-                        return false;
-                    }
-                    int findPointerIndex = motionEvent.findPointerIndex(i2);
-                    if (findPointerIndex < 0) {
-                        Log.e(TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
-                        return false;
-                    }
-                    float y2 = motionEvent.getY(findPointerIndex);
-                    if (isTargetScrollToBottom(2) && isTargetScrollToTop(2)) {
-                        z2 = true;
-                    }
-                    if ((z2 || !isTargetScrollToTop(2)) && (!z2 || y2 <= mInitialDownY)) {
-                        if (mInitialDownY - y2 > mTouchSlop && !mIsBeingDragged) {
-                            mIsBeingDragged = true;
-                            dispatchScrollState(1);
-                            mInitialMotionY = y2;
-                        }
-                    } else if (y2 - mInitialDownY > mTouchSlop && !mIsBeingDragged) {
-                        mIsBeingDragged = true;
-                        dispatchScrollState(1);
-                        mInitialMotionY = y2;
-                    }
-                } else if (actionMasked != 3) {
-                    if (actionMasked == 6) {
-                        onSecondaryPointerUp(motionEvent);
-                    }
-                }
-            }
-            mIsBeingDragged = false;
-            mActivePointerId = -1;
-        } else {
-            int pointerId = motionEvent.getPointerId(0);
-            mActivePointerId = pointerId;
-            int findPointerIndex2 = motionEvent.findPointerIndex(pointerId);
-            if (findPointerIndex2 < 0) {
-                return false;
-            }
-            mInitialDownY = motionEvent.getY(findPointerIndex2);
-            if (getScrollY() != 0) {
-                mIsBeingDragged = true;
-                mInitialMotionY = mInitialDownY;
-            } else {
-                mIsBeingDragged = false;
-            }
-        }
-        return mIsBeingDragged;
+    protected int getSpringBackRange(int range) {
+        return range == 2 ? mScreenHeight : mScreenWidth;
     }
 
-    private boolean onVerticalTouchEvent(MotionEvent motionEvent) {
-        int actionMasked = motionEvent.getActionMasked();
-        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2)) {
-            return onScrollEvent(motionEvent, actionMasked, 2);
-        }
-        if (isTargetScrollToBottom(2)) {
-            return onScrollUpEvent(motionEvent, actionMasked, 2);
-        }
-        return onScrollDownEvent(motionEvent, actionMasked, 2);
+    protected float obtainSpringBackDistance(float distance, int mode) {
+        int springBackRange = getSpringBackRange(mode);
+        return obtainDampingDistance(Math.min(Math.abs(distance) / springBackRange, 1.0f), springBackRange);
     }
 
-    private void springBack(int i2) {
-        springBack(0.0f, i2, true);
+    protected float obtainMaxSpringBackDistance(int mode) {
+        return obtainDampingDistance(1.0f, getSpringBackRange(mode));
     }
 
-    private void stopNestedFlingScroll(int i2) {
-        mNestedFlingInProgress = false;
-        if (mScrollByFling) {
-            if (mSpringScroller.isFinished()) {
-                springBack(i2 == 2 ? mVelocityY : mVelocityX, i2, false);
-            }
-            postInvalidateOnAnimation();
-            return;
-        }
-        springBack(i2);
+    protected float obtainDampingDistance(float distance, int range) {
+        double min = Math.min(distance, 1.0f);
+        return ((float) (((Math.pow(min, 3.0d) / 3.0d) - Math.pow(min, 2.0d)) + min)) * range;
     }
 
-    private boolean supportBottomSpringBackMode() {
-        return (mSpringBackMode & 2) != 0;
-    }
+    protected float obtainTouchDistance(float distance, float max, int mode) {
+        int springBackRange = getSpringBackRange(mode);
+        if (Math.abs(distance) >= Math.abs(max))
+            distance = max;
 
-    private boolean supportTopSpringBackMode() {
-        return (mSpringBackMode & 1) != 0;
-    }
-
-    @Override // miuix.core.view.ScrollStateDispatcher
-    public void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener) {
-        mOnScrollChangeListeners.add(viewCompatOnScrollChangeListener);
-    }
-
-    @Override // android.view.View
-    public void computeScroll() {
-        super.computeScroll();
-        if (mSpringScroller.computeScrollOffset()) {
-            scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
-            if (!mSpringScroller.isFinished()) {
-                postInvalidateOnAnimation();
-                return;
-            }
-            if (getScrollX() != 0 || getScrollY() != 0) {
-                if (mScrollState != 2) {
-                    Log.d(TAG, "Scroll stop but state is not correct.");
-                    springBack(mNestedScrollAxes == 2 ? 2 : 1);
-                    return;
-                }
-            }
-            dispatchScrollState(0);
-        }
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public boolean dispatchNestedFling(float f2, float f3, boolean z2) {
-        return mNestedScrollingChildHelper.dispatchNestedFling(f2, f3, z2);
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public boolean dispatchNestedPreFling(float f2, float f3) {
-        return mNestedScrollingChildHelper.dispatchNestedPreFling(f2, f3);
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild2
-    public boolean dispatchNestedPreScroll(int i2, int i3, int[] iArr, int[] iArr2, int i4) {
-        return mNestedScrollingChildHelper.dispatchNestedPreScroll(i2, i3, iArr, iArr2, i4);
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild3
-    public void dispatchNestedScroll(int i2, int i3, int i4, int i5, int[] iArr, int i6, int[] iArr2) {
-        mNestedScrollingChildHelper.dispatchNestedScroll(i2, i3, i4, i5, iArr, i6, iArr2);
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
-        if (motionEvent.getActionMasked() == 0 && mScrollState == 2 && mHelper.isTouchInTarget(motionEvent)) {
-            dispatchScrollState(1);
-        }
-        boolean dispatchTouchEvent = super.dispatchTouchEvent(motionEvent);
-        if (motionEvent.getActionMasked() == 1 && mScrollState != 2) {
-            dispatchScrollState(0);
-        }
-        return dispatchTouchEvent;
-    }
-
-    public int getSpringBackMode() {
-        return mSpringBackMode;
-    }
-
-    public int getSpringBackRange(int i2) {
-        return i2 == 2 ? mScreenHeight : mScreenWidth;
-    }
-
-    public View getTarget() {
-        return mTarget;
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild2
-    public boolean hasNestedScrollingParent(int i2) {
-        return mNestedScrollingChildHelper.hasNestedScrollingParent(i2);
-    }
-
-    public boolean hasSpringListener() {
-        return mOnSpringListener != null;
-    }
-
-    public void internalRequestDisallowInterceptTouchEvent(boolean z2) {
-        super.requestDisallowInterceptTouchEvent(z2);
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public boolean isNestedScrollingEnabled() {
-        return mNestedScrollingChildHelper.isNestedScrollingEnabled();
-    }
-
-    public float obtainDampingDistance(float f2, int i2) {
-        double min = Math.min(f2, 1.0f);
-        return ((float) (((Math.pow(min, 3.0d) / 3.0d) - Math.pow(min, 2.0d)) + min)) * i2;
-    }
-
-    public float obtainMaxSpringBackDistance(int i2) {
-        return obtainDampingDistance(1.0f, getSpringBackRange(i2));
-    }
-
-    public float obtainSpringBackDistance(float f2, int i2) {
-        int springBackRange = getSpringBackRange(i2);
-        return obtainDampingDistance(Math.min(Math.abs(f2) / springBackRange, 1.0f), springBackRange);
-    }
-
-    public float obtainTouchDistance(float f2, float f3, int i2) {
-        int springBackRange = getSpringBackRange(i2);
-        if (Math.abs(f2) >= Math.abs(f3)) {
-            f2 = f3;
-        }
-        return (float) ((double) springBackRange - (Math.pow(springBackRange, 0.6666666666666666d) * Math.pow(springBackRange - (f2 * 3.0f), 0.3333333333333333d)));
-    }
-
-    @Override // android.view.View
-    public void onConfigurationChanged(Configuration configuration) {
-        super.onConfigurationChanged(configuration);
-        Point screenSize = MiuiXUtils.getScreenSize(getContext());
-        mScreenWidth = screenSize.x;
-        mScreenHeight = screenSize.y;
-    }
-
-    @Override // android.view.View
-    public void onFinishInflate() {
-        super.onFinishInflate();
-        mInitPaddingTop = getPaddingTop();
-    }
-
-    @Override // android.view.ViewGroup
-    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-        if (!mSpringBackEnable || !isEnabled() || mNestedFlingInProgress || mNestedScrollInProgress || (Build.VERSION.SDK_INT >= 21 && mTarget.isNestedScrollingEnabled())) {
-            return false;
-        }
-        int actionMasked = motionEvent.getActionMasked();
-        if (!mSpringScroller.isFinished() && actionMasked == 0) {
-            mSpringScroller.forceStop();
-        }
-        if (!supportTopSpringBackMode() && !supportBottomSpringBackMode()) {
-            return false;
-        }
-        int i2 = mOriginScrollOrientation;
-        if ((i2 & 4) != 0) {
-            checkOrientation(motionEvent);
-            if (isTargetScrollOrientation(2) && (mOriginScrollOrientation & 1) != 0 && getScrollX() == 0.0f) {
-                return false;
-            }
-            if (isTargetScrollOrientation(1) && (mOriginScrollOrientation & 2) != 0 && getScrollY() == 0.0f) {
-                return false;
-            }
-            if (isTargetScrollOrientation(2) || isTargetScrollOrientation(1)) {
-                disallowParentInterceptTouchEvent(true);
-            }
-        } else {
-            mScrollOrientation = i2;
-        }
-        if (isTargetScrollOrientation(2)) {
-            return onVerticalInterceptTouchEvent(motionEvent);
-        }
-        if (isTargetScrollOrientation(1)) {
-            return onHorizontalInterceptTouchEvent(motionEvent);
-        }
-        return false;
-    }
-
-    @Override // android.view.ViewGroup, android.view.View
-    public void onLayout(boolean z2, int i2, int i3, int i4, int i5) {
-        if (mTarget.getVisibility() != View.GONE) {
-            int measuredWidth = mTarget.getMeasuredWidth();
-            int measuredHeight = mTarget.getMeasuredHeight();
-            int paddingLeft = getPaddingLeft();
-            int paddingTop = getPaddingTop();
-            mTarget.layout(paddingLeft, paddingTop, measuredWidth + paddingLeft, measuredHeight + paddingTop);
-        }
-    }
-
-    @Override // android.view.View
-    public void onMeasure(int i2, int i3) {
-        int min;
-        int min2;
-        ensureTarget();
-        int mode = View.MeasureSpec.getMode(i2);
-        int mode2 = View.MeasureSpec.getMode(i3);
-        measureChild(mTarget, i2, i3);
-        if (mode == 0) {
-            min = mTarget.getMeasuredWidth() + getPaddingLeft() + getPaddingRight();
-        } else if (mode == 1073741824) {
-            min = View.MeasureSpec.getSize(i2);
-        } else {
-            min = Math.min(View.MeasureSpec.getSize(i2), mTarget.getMeasuredWidth() + getPaddingLeft() + getPaddingRight());
-        }
-        if (mode2 == 0) {
-            min2 = mTarget.getMeasuredHeight() + getPaddingTop() + getPaddingBottom();
-        } else if (mode2 == 1073741824) {
-            min2 = View.MeasureSpec.getSize(i3);
-        } else {
-            min2 = Math.min(View.MeasureSpec.getSize(i3), mTarget.getMeasuredHeight() + getPaddingTop() + getPaddingBottom());
-        }
-        setMeasuredDimension(min, min2);
-    }
-
-    @Override // miuix.core.view.NestedCurrentFling
-    public boolean onNestedCurrentFling(float f2, float f3) {
-        mVelocityX = f2;
-        mVelocityY = f3;
-        return true;
+        return (float) ((double) springBackRange - (Math.pow(springBackRange, 0.6666666666666666d) * Math.pow(springBackRange - (distance * 3.0f), 0.3333333333333333d)));
     }
 
     @Override
-    // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onNestedFling(View view, float f2, float f3, boolean z2) {
-        return dispatchNestedFling(f2, f3, z2);
-    }
-
-    @Override
-    // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onNestedPreFling(View view, float f2, float f3) {
-        return dispatchNestedPreFling(f2, f3);
-    }
-
-    @Override // androidx.core.view.NestedScrollingParent2
-    public void onNestedPreScroll(View view, int i2, int i3, int[] iArr, int i4) {
+    public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type, @NonNull int[] consumed) {
+        boolean isVertical = mNestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
+        int dxordyconsumed = isVertical ? dyConsumed : dxConsumed;
+        dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, mParentOffsetInWindow, type, consumed);
         if (mSpringBackEnable) {
-            if (mNestedScrollAxes == 2) {
-                onNestedPreScroll(i3, iArr, i4);
-            } else {
-                onNestedPreScroll(i2, iArr, i4);
-            }
-        }
-        int[] iArr2 = mParentScrollConsumed;
-        if (dispatchNestedPreScroll(i2 - iArr[0], i3 - iArr[1], iArr2, null, i4)) {
-            iArr[0] = iArr[0] + iArr2[0];
-            iArr[1] = iArr[1] + iArr2[1];
-        }
-    }
-
-    @Override // androidx.core.view.NestedScrollingParent3
-    public void onNestedScroll(View view, int i2, int i3, int i4, int i5, int i6, int[] iArr) {
-        boolean z2 = mNestedScrollAxes == 2;
-        int i7 = z2 ? i3 : i2;
-        int i8 = z2 ? iArr[1] : iArr[0];
-        dispatchNestedScroll(i2, i3, i4, i5, mParentOffsetInWindow, i6, iArr);
-        if (mSpringBackEnable) {
-            int i9 = (z2 ? iArr[1] : iArr[0]) - i8;
-            int i10 = z2 ? i5 - i9 : i4 - i9;
-            int i12 = z2 ? 2 : 1;
-            if (i10 < 0 && isTargetScrollToTop(i12) && supportTopSpringBackMode()) {
-                if (i6 != 0) {
-                    float obtainMaxSpringBackDistance = obtainMaxSpringBackDistance(i12);
+            int unConsumed = isVertical ? dyUnconsumed : dxUnconsumed;
+            int state = isVertical ? 2 : 1;
+            if (unConsumed < 0 && isTargetScrollToTop(state) && supportTopSpringBackMode()) {
+                if (type != 0) {
+                    float maxSpringBackDistance = obtainMaxSpringBackDistance(state);
                     if (mVelocityY != 0.0f || mVelocityX != 0.0f) {
                         mScrollByFling = true;
-                        if (i7 != 0 && (-i10) <= obtainMaxSpringBackDistance) {
-                            mSpringScroller.setFirstStep(i10);
+                        if (dxordyconsumed != 0 && (-unConsumed) <= maxSpringBackDistance) {
+                            mSpringScroller.setFirstStep(unConsumed);
                         }
                         dispatchScrollState(2);
                         return;
@@ -982,38 +973,38 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                     if (mTotalScrollTopUnconsumed != 0.0f) {
                         return;
                     }
-                    float f2 = obtainMaxSpringBackDistance - mTotalFlingUnconsumed;
+                    float f = maxSpringBackDistance - mTotalFlingUnconsumed;
                     if (consumeNestFlingCounter < 4) {
-                        if (f2 <= Math.abs(i10)) {
-                            mTotalFlingUnconsumed += f2;
-                            iArr[1] = (int) (iArr[1] + f2);
+                        if (f <= Math.abs(unConsumed)) {
+                            mTotalFlingUnconsumed += f;
+                            consumed[1] = (int) (consumed[1] + f);
                         } else {
-                            mTotalFlingUnconsumed += Math.abs(i10);
-                            iArr[1] = iArr[1] + i10;
+                            mTotalFlingUnconsumed += Math.abs(unConsumed);
+                            consumed[1] = consumed[1] + unConsumed;
                         }
                         dispatchScrollState(2);
-                        moveTarget(obtainSpringBackDistance(mTotalFlingUnconsumed, i12), i12);
+                        moveTarget(obtainSpringBackDistance(mTotalFlingUnconsumed, state), state);
                         consumeNestFlingCounter++;
                         return;
                     }
                     return;
                 }
                 if (mSpringScroller.isFinished()) {
-                    mTotalScrollTopUnconsumed += Math.abs(i10);
+                    mTotalScrollTopUnconsumed += Math.abs(unConsumed);
                     dispatchScrollState(1);
-                    moveTarget(obtainSpringBackDistance(mTotalScrollTopUnconsumed, i12), i12);
-                    iArr[1] = iArr[1] + i10;
+                    moveTarget(obtainSpringBackDistance(mTotalScrollTopUnconsumed, state), state);
+                    consumed[1] = consumed[1] + unConsumed;
                     return;
                 }
                 return;
             }
-            if (i10 > 0 && isTargetScrollToBottom(i12) && supportBottomSpringBackMode()) {
-                if (i6 != 0) {
-                    float obtainMaxSpringBackDistance2 = obtainMaxSpringBackDistance(i12);
+            if (unConsumed > 0 && isTargetScrollToBottom(state) && supportBottomSpringBackMode()) {
+                if (type != 0) {
+                    float maxSpringBackDistance = obtainMaxSpringBackDistance(state);
                     if (mVelocityY != 0.0f || mVelocityX != 0.0f) {
                         mScrollByFling = true;
-                        if (i7 != 0 && i10 <= obtainMaxSpringBackDistance2) {
-                            mSpringScroller.setFirstStep(i10);
+                        if (dxordyconsumed != 0 && unConsumed <= maxSpringBackDistance) {
+                            mSpringScroller.setFirstStep(unConsumed);
                         }
                         dispatchScrollState(2);
                         return;
@@ -1021,43 +1012,78 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                     if (mTotalScrollBottomUnconsumed != 0.0f) {
                         return;
                     }
-                    float f3 = obtainMaxSpringBackDistance2 - mTotalFlingUnconsumed;
+                    float f2 = maxSpringBackDistance - mTotalFlingUnconsumed;
                     if (consumeNestFlingCounter < 4) {
-                        if (f3 <= Math.abs(i10)) {
-                            mTotalFlingUnconsumed += f3;
-                            iArr[1] = (int) (iArr[1] + f3);
+                        if (f2 <= Math.abs(unConsumed)) {
+                            mTotalFlingUnconsumed += f2;
+                            consumed[1] = (int) (consumed[1] + f2);
                         } else {
-                            mTotalFlingUnconsumed += Math.abs(i10);
-                            iArr[1] = iArr[1] + i10;
+                            mTotalFlingUnconsumed += Math.abs(unConsumed);
+                            consumed[1] = consumed[1] + unConsumed;
                         }
                         dispatchScrollState(2);
-                        moveTarget(-obtainSpringBackDistance(mTotalFlingUnconsumed, i12), i12);
+                        moveTarget(-obtainSpringBackDistance(mTotalFlingUnconsumed, state), state);
                         consumeNestFlingCounter++;
                         return;
                     }
                     return;
                 }
                 if (mSpringScroller.isFinished()) {
-                    mTotalScrollBottomUnconsumed += Math.abs(i10);
+                    mTotalScrollBottomUnconsumed += Math.abs(unConsumed);
                     dispatchScrollState(1);
-                    moveTarget(-obtainSpringBackDistance(mTotalScrollBottomUnconsumed, i12), i12);
-                    iArr[1] = iArr[1] + i10;
+                    moveTarget(-obtainSpringBackDistance(mTotalScrollBottomUnconsumed, state), state);
+                    consumed[1] = consumed[1] + unConsumed;
                 }
             }
         }
     }
 
-    @Override // androidx.core.view.NestedScrollingParent2
-    public void onNestedScrollAccepted(View view, View view2, int i2, int i3) {
+    @Override
+    public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type) {
+        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type, mNestedScrollingV2ConsumedCompat);
+    }
+
+    @Override
+    public void onNestedScroll(@NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+        onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, ViewCompat.TYPE_TOUCH, mNestedScrollingV2ConsumedCompat);
+    }
+
+    @Override
+    public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, int axes, int type) {
+        mNestedScrollAxes = axes;
+        boolean isVertical = axes == ViewCompat.SCROLL_AXIS_VERTICAL;
+        if (((isVertical ? 2 : 1) & mOriginScrollOrientation) == 0) {
+            return false;
+        }
         if (mSpringBackEnable) {
-            boolean z2 = mNestedScrollAxes == 2;
-            int i4 = z2 ? 2 : 1;
-            float scrollY = z2 ? getScrollY() : getScrollX();
-            if (i3 != 0) {
+            if (!onStartNestedScroll(child, child, axes)) {
+                return false;
+            }
+            float scrollY = isVertical ? getScrollY() : getScrollX();
+            if (type != 0 && scrollY != 0.0f && (mTarget instanceof NestedScrollView)) {
+                return false;
+            }
+        }
+        mNestedScrollingChildHelper.startNestedScroll(axes, type);
+        return true;
+    }
+
+    @Override
+    public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, int nestedScrollAxes) {
+        return isEnabled();
+    }
+
+    @Override
+    public void onNestedScrollAccepted(@NonNull View child, @NonNull View target, int axes, int type) {
+        if (mSpringBackEnable) {
+            boolean isVertical = mNestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
+            int state = isVertical ? 2 : 1;
+            float scrollY = isVertical ? getScrollY() : getScrollX();
+            if (type != 0) {
                 if (scrollY == 0.0f) {
                     mTotalFlingUnconsumed = 0.0f;
                 } else {
-                    mTotalFlingUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(i4)), i4);
+                    mTotalFlingUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(state)), state);
                 }
                 mNestedFlingInProgress = true;
                 consumeNestFlingCounter = 0;
@@ -1066,11 +1092,11 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                     mTotalScrollTopUnconsumed = 0.0f;
                     mTotalScrollBottomUnconsumed = 0.0f;
                 } else if (scrollY < 0.0f) {
-                    mTotalScrollTopUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(i4)), i4);
+                    mTotalScrollTopUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(state)), state);
                     mTotalScrollBottomUnconsumed = 0.0f;
                 } else {
                     mTotalScrollTopUnconsumed = 0.0f;
-                    mTotalScrollBottomUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(i4)), i4);
+                    mTotalScrollBottomUnconsumed = obtainTouchDistance(Math.abs(scrollY), Math.abs(obtainMaxSpringBackDistance(state)), state);
                 }
                 mNestedScrollInProgress = true;
             }
@@ -1079,338 +1105,265 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             mScrollByFling = false;
             mSpringScroller.forceStop();
         }
-        onNestedScrollAccepted(view, view2, i2);
+        onNestedScrollAccepted(child, target, axes);
     }
 
-    @Override // android.view.View
-    public void onScrollChanged(int i2, int i3, int i4, int i5) {
-        super.onScrollChanged(i2, i3, i4, i5);
-        for (ViewCompatOnScrollChangeListener mOnScrollChangeListener : mOnScrollChangeListeners) {
-            mOnScrollChangeListener.onScrollChange(this, i2, i3, i4, i5);
-        }
+    @Override
+    public void onNestedScrollAccepted(@NonNull View child, @NonNull View target, int axes) {
+        mNestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes);
+        startNestedScroll(axes & ViewCompat.SCROLL_AXIS_VERTICAL);
     }
 
-    @Override // androidx.core.view.NestedScrollingParent2
-    public boolean onStartNestedScroll(View view, View view2, int i2, int i3) {
-        mNestedScrollAxes = i2;
-        boolean z2 = i2 == 2;
-        if (((z2 ? 2 : 1) & mOriginScrollOrientation) == 0) {
-            return false;
-        }
+    @Override
+    public void onNestedPreScroll(@NonNull View target, int dx, int dy, @NonNull int[] consumed, int type) {
         if (mSpringBackEnable) {
-            if (!onStartNestedScroll(view, view, i2)) {
-                return false;
-            }
-            float scrollY = z2 ? getScrollY() : getScrollX();
-            if (i3 != 0 && scrollY != 0.0f && (mTarget instanceof NestedScrollView)) {
-                return false;
+            if (mNestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL) {
+                onNestedPreScroll(dy, consumed, type);
+            } else {
+                onNestedPreScroll(dx, consumed, type);
             }
         }
-        mNestedScrollingChildHelper.startNestedScroll(i2, i3);
-        return true;
+        if (dispatchNestedPreScroll(dx - consumed[0], dy - consumed[1], mParentScrollConsumed, type, null)) {
+            consumed[0] = consumed[0] + mParentScrollConsumed[0];
+            consumed[1] = consumed[1] + mParentScrollConsumed[1];
+        }
     }
 
-    @Override // androidx.core.view.NestedScrollingParent2
-    public void onStopNestedScroll(View view, int i2) {
-        mNestedScrollingParentHelper.onStopNestedScroll(view, i2);
-        stopNestedScroll(i2);
+    private void onNestedPreScroll(int dy, int[] consumed, int type) {
+        boolean isVertical = mNestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
+        int state = isVertical ? 2 : 1;
+        int abs = Math.abs(isVertical ? getScrollY() : getScrollX());
+        float f = 0.0f;
+        if (type == 0) {
+            if (dy > 0) {
+                if (mTotalScrollTopUnconsumed > 0.0f) {
+                    if ((float) dy > mTotalScrollTopUnconsumed) {
+                        consumeDelta((int) mTotalScrollTopUnconsumed, consumed, state);
+                        mTotalScrollTopUnconsumed = 0.0f;
+                    } else {
+                        mTotalScrollTopUnconsumed = mTotalScrollTopUnconsumed - (float) dy;
+                        consumeDelta(dy, consumed, state);
+                    }
+                    dispatchScrollState(1);
+                    moveTarget(obtainSpringBackDistance(mTotalScrollTopUnconsumed, state), state);
+                    return;
+                }
+            }
+            if (dy < 0) {
+                if ((-mTotalScrollBottomUnconsumed) < 0.0f) {
+                    if ((float) dy < (-mTotalScrollBottomUnconsumed)) {
+                        consumeDelta((int) mTotalScrollBottomUnconsumed, consumed, state);
+                        mTotalScrollBottomUnconsumed = 0.0f;
+                    } else {
+                        mTotalScrollBottomUnconsumed = mTotalScrollBottomUnconsumed + (float) dy;
+                        consumeDelta(dy, consumed, state);
+                    }
+                    dispatchScrollState(1);
+                    moveTarget(-obtainSpringBackDistance(mTotalScrollBottomUnconsumed, state), state);
+                    return;
+                }
+                return;
+            }
+            return;
+        }
+        float xory = state == 2 ? mVelocityY : mVelocityX;
+        if (dy > 0) {
+            if (mTotalScrollTopUnconsumed > 0.0f) {
+                if (xory > 2000.0f) {
+                    float springBackDistance = obtainSpringBackDistance(mTotalScrollTopUnconsumed, state);
+                    if ((float) dy > springBackDistance) {
+                        consumeDelta((int) springBackDistance, consumed, state);
+                        mTotalScrollTopUnconsumed = 0.0f;
+                    } else {
+                        consumeDelta(dy, consumed, state);
+                        f = springBackDistance - (float) dy;
+                        mTotalScrollTopUnconsumed = obtainTouchDistance(f, Math.signum(f) * Math.abs(obtainMaxSpringBackDistance(state)), state);
+                    }
+                    moveTarget(f, state);
+                    dispatchScrollState(1);
+                    return;
+                }
+                if (!mScrollByFling) {
+                    mScrollByFling = true;
+                    springBack(xory, state, false);
+                }
+                if (mSpringScroller.computeScrollOffset()) {
+                    scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
+                    mTotalScrollTopUnconsumed = obtainTouchDistance(abs, Math.abs(obtainMaxSpringBackDistance(state)), state);
+                } else {
+                    mTotalScrollTopUnconsumed = 0.0f;
+                }
+                consumeDelta(dy, consumed, state);
+                return;
+            }
+        }
+        if (dy < 0) {
+            if ((-mTotalScrollBottomUnconsumed) < 0.0f) {
+                if (xory < -2000.0f) {
+                    float springBackDistance = obtainSpringBackDistance(mTotalScrollBottomUnconsumed, state);
+                    if ((float) dy < (-springBackDistance)) {
+                        consumeDelta((int) springBackDistance, consumed, state);
+                        mTotalScrollBottomUnconsumed = 0.0f;
+                    } else {
+                        consumeDelta(dy, consumed, state);
+                        f = springBackDistance + (float) dy;
+                        mTotalScrollBottomUnconsumed = obtainTouchDistance(f, Math.signum(f) * Math.abs(obtainMaxSpringBackDistance(state)), state);
+                    }
+                    dispatchScrollState(1);
+                    moveTarget(-f, state);
+                    return;
+                }
+                if (!mScrollByFling) {
+                    mScrollByFling = true;
+                    springBack(xory, state, false);
+                }
+                if (mSpringScroller.computeScrollOffset()) {
+                    scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
+                    mTotalScrollBottomUnconsumed = obtainTouchDistance(abs, Math.abs(obtainMaxSpringBackDistance(state)), state);
+                } else {
+                    mTotalScrollBottomUnconsumed = 0.0f;
+                }
+                consumeDelta(dy, consumed, state);
+                return;
+            }
+        }
+        if (dy != 0) {
+            if ((mTotalScrollBottomUnconsumed == 0.0f || mTotalScrollTopUnconsumed == 0.0f) && mScrollByFling && getScrollY() == 0) {
+                consumeDelta(dy, consumed, state);
+            }
+        }
+    }
+
+    private void consumeDelta(int dy, int[] consumed, int state) {
+        if (state == 2) {
+            consumed[1] = dy;
+        } else {
+            consumed[0] = dy;
+        }
+    }
+
+    @Override
+    public void setNestedScrollingEnabled(boolean enabled) {
+        mNestedScrollingChildHelper.setNestedScrollingEnabled(enabled);
+    }
+
+    @Override
+    public boolean isNestedScrollingEnabled() {
+        return mNestedScrollingChildHelper.isNestedScrollingEnabled();
+    }
+
+    @Override
+    public void onStopNestedScroll(@NonNull View target, int type) {
+        mNestedScrollingParentHelper.onStopNestedScroll(target, type);
+        stopNestedScroll(type);
         if (mSpringBackEnable) {
-            boolean z2 = mNestedScrollAxes == 2;
-            int i3 = z2 ? 2 : 1;
+            boolean isVertical = mNestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL;
+            int state = isVertical ? 2 : 1;
             if (mNestedScrollInProgress) {
                 mNestedScrollInProgress = false;
-                float scrollY = z2 ? getScrollY() : getScrollX();
+                float scrollY = isVertical ? getScrollY() : getScrollX();
                 if (!mNestedFlingInProgress && scrollY != 0.0f) {
-                    springBack(i3);
+                    springBack(state);
                 } else {
                     if (scrollY != 0.0f) {
-                        stopNestedFlingScroll(i3);
+                        stopNestedFlingScroll(state);
                         return;
                     }
                 }
                 return;
             }
             if (mNestedFlingInProgress) {
-                stopNestedFlingScroll(i3);
+                stopNestedFlingScroll(state);
             }
         }
     }
 
-    @Override // android.view.View
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        int actionMasked = motionEvent.getActionMasked();
-        if (!isEnabled() || mNestedFlingInProgress || mNestedScrollInProgress || (Build.VERSION.SDK_INT >= 21 && mTarget.isNestedScrollingEnabled())) {
-            return false;
-        }
-        if (!mSpringScroller.isFinished() && actionMasked == 0) {
-            mSpringScroller.forceStop();
-        }
-        if (isTargetScrollOrientation(2)) {
-            return onVerticalTouchEvent(motionEvent);
-        }
-        if (isTargetScrollOrientation(1)) {
-            return onHorizontalTouchEvent(motionEvent);
-        }
-        return false;
-    }
-
-    @Override // miuix.core.view.ScrollStateDispatcher
-    public void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener) {
-        mOnScrollChangeListeners.remove(viewCompatOnScrollChangeListener);
-    }
-
-    @Override // android.view.ViewGroup, android.view.ViewParent
-    public void requestDisallowInterceptTouchEvent(boolean z2) {
-        if (isEnabled() && mSpringBackEnable) {
-            return;
-        }
-        super.requestDisallowInterceptTouchEvent(z2);
-    }
-
-    public void requestDisallowParentInterceptTouchEvent(boolean z2) {
-        ViewParent parent = getParent();
-        parent.requestDisallowInterceptTouchEvent(z2);
-        while (parent != null) {
-            if (parent instanceof SpringBackLayout) {
-                ((SpringBackLayout) parent).internalRequestDisallowInterceptTouchEvent(z2);
+    private void stopNestedFlingScroll(int state) {
+        mNestedFlingInProgress = false;
+        if (mScrollByFling) {
+            if (mSpringScroller.isFinished()) {
+                springBack(state == 2 ? mVelocityY : mVelocityX, state, false);
             }
-            parent = parent.getParent();
-        }
-    }
-
-    @Override // android.view.View
-    public void setEnabled(boolean z2) {
-        super.setEnabled(z2);
-        View view = mTarget;
-        if (!(view instanceof NestedScrollingChild3) || Build.VERSION.SDK_INT < 21 || z2 == view.isNestedScrollingEnabled()) {
+            AnimationHelper.postInvalidateOnAnimation(this);
             return;
         }
-        mTarget.setNestedScrollingEnabled(z2);
+        springBack(state);
     }
 
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public void setNestedScrollingEnabled(boolean z2) {
-        mNestedScrollingChildHelper.setNestedScrollingEnabled(z2);
+    @Override
+    public void stopNestedScroll() {
+        mNestedScrollingChildHelper.stopNestedScroll();
+    }
+
+    @Override
+    public boolean onNestedFling(@NonNull View target, float velocityX, float velocityY, boolean consumed) {
+        return dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean onNestedPreFling(@NonNull View target, float velocityX, float velocityY) {
+        return dispatchNestedPreFling(velocityX, velocityY);
+    }
+
+    public void dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int[] parentOffsetInWindow, int type, int[] consumed) {
+        mNestedScrollingChildHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, parentOffsetInWindow, type, consumed);
+    }
+
+    @Override
+    public boolean startNestedScroll(int axes) {
+        return mNestedScrollingChildHelper.startNestedScroll(axes);
+    }
+
+    public void stopNestedScroll(int type) {
+        mNestedScrollingChildHelper.stopNestedScroll(type);
+    }
+
+    public boolean dispatchNestedPreScroll(int dxUnconsumed, int dyUnconsumed, int[] parentOffsetInWindow, int type, int[] consumed) {
+        return mNestedScrollingChildHelper.dispatchNestedPreScroll(dxUnconsumed, dyUnconsumed, parentOffsetInWindow, consumed, type);
+    }
+
+    @Override
+    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+        return mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
+    }
+
+    @Override
+    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
+        return mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
+        return mNestedScrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        Point screenSize = getScreenSize(getContext());
+        mScreenWidth = screenSize.x;
+        mScreenHeight = screenSize.y;
+    }
+
+    private void dispatchScrollState(int state) {
+        int last = mScrollState;
+        if (last != state) {
+            mScrollState = state;
+            for (ViewCompatOnScrollChangeListener mOnScrollChangeListener : mOnScrollChangeListeners) {
+                mOnScrollChangeListener.onStateChanged(last, state, mSpringScroller.isFinished());
+            }
+        }
     }
 
     public void setOnSpringListener(OnSpringListener onSpringListener) {
         mOnSpringListener = onSpringListener;
     }
 
-    public void setScrollOrientation(int i2) {
-        mOriginScrollOrientation = i2;
-        mHelper.mTargetScrollOrientation = i2;
-    }
-
-    public void setSpringBackEnable(boolean z2) {
-        mSpringBackEnable = z2;
-    }
-
-    public void setSpringBackMode(int i2) {
-        mSpringBackMode = i2;
-    }
-
-    public void setTarget(View view) {
-        mTarget = view;
-        if (Build.VERSION.SDK_INT < 21 || !(view instanceof NestedScrollingChild3) || view.isNestedScrollingEnabled()) {
-            return;
-        }
-        mTarget.setNestedScrollingEnabled(true);
-    }
-
-    public void smoothScrollTo(int i2, int i3) {
-        if (i2 - getScrollX() == 0 && i3 - getScrollY() == 0) {
-            return;
-        }
-        mSpringScroller.forceStop();
-        mSpringScroller.scrollByFling(getScrollX(), i2, getScrollY(), i3, 0.0f, 2, true);
-        dispatchScrollState(2);
-        postInvalidateOnAnimation();
-    }
-
-    public boolean springBackEnable() {
-        return mSpringBackEnable;
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild2
-    public boolean startNestedScroll(int i2, int i3) {
-        return mNestedScrollingChildHelper.startNestedScroll(i2, i3);
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public void stopNestedScroll() {
-        mNestedScrollingChildHelper.stopNestedScroll();
-    }
-
-    private void springBack(float f2, int i2, boolean z2) {
-        OnSpringListener onSpringListener = mOnSpringListener;
-        if (onSpringListener == null || !onSpringListener.onSpringBack()) {
-            mSpringScroller.forceStop();
-            int scrollX = getScrollX();
-            int scrollY = getScrollY();
-            mSpringScroller.scrollByFling(scrollX, 0.0f, scrollY, 0.0f, f2, i2, false);
-            if (scrollX == 0 && scrollY == 0 && f2 == 0.0f) {
-                dispatchScrollState(0);
-            } else {
-                dispatchScrollState(2);
-            }
-            if (z2) {
-                postInvalidateOnAnimation();
-            }
-        }
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public boolean dispatchNestedPreScroll(int i2, int i3, int[] iArr, int[] iArr2) {
-        return mNestedScrollingChildHelper.dispatchNestedPreScroll(i2, i3, iArr, iArr2);
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild2
-    public boolean dispatchNestedScroll(int i2, int i3, int i4, int i5, int[] iArr, int i6) {
-        return mNestedScrollingChildHelper.dispatchNestedScroll(i2, i3, i4, i5, iArr, i6);
-    }
-
-    @Override // android.view.View, androidx.core.view.NestedScrollingChild
-    public boolean startNestedScroll(int i2) {
-        return mNestedScrollingChildHelper.startNestedScroll(i2);
-    }
-
-    @Override // androidx.core.view.NestedScrollingChild2
-    public void stopNestedScroll(int i2) {
-        mNestedScrollingChildHelper.stopNestedScroll(i2);
-    }
-
     @Override
-    // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public boolean onStartNestedScroll(View view, View view2, int i2) {
-        return isEnabled();
-    }
-
-    private void onNestedPreScroll(int i2, int[] iArr, int i3) {
-        boolean z2 = mNestedScrollAxes == 2;
-        int i4 = z2 ? 2 : 1;
-        int abs = Math.abs(z2 ? getScrollY() : getScrollX());
-        float f2 = 0.0f;
-        if (i3 == 0) {
-            if (i2 > 0) {
-                float f3 = mTotalScrollTopUnconsumed;
-                if (f3 > 0.0f) {
-                    if ((float) i2 > f3) {
-                        consumeDelta((int) f3, iArr, i4);
-                        mTotalScrollTopUnconsumed = 0.0f;
-                    } else {
-                        mTotalScrollTopUnconsumed = f3 - (float) i2;
-                        consumeDelta(i2, iArr, i4);
-                    }
-                    dispatchScrollState(1);
-                    moveTarget(obtainSpringBackDistance(mTotalScrollTopUnconsumed, i4), i4);
-                    return;
-                }
-            }
-            if (i2 < 0) {
-                float f5 = mTotalScrollBottomUnconsumed;
-                if ((-f5) < 0.0f) {
-                    if ((float) i2 < (-f5)) {
-                        consumeDelta((int) f5, iArr, i4);
-                        mTotalScrollBottomUnconsumed = 0.0f;
-                    } else {
-                        mTotalScrollBottomUnconsumed = f5 + (float) i2;
-                        consumeDelta(i2, iArr, i4);
-                    }
-                    dispatchScrollState(1);
-                    moveTarget(-obtainSpringBackDistance(mTotalScrollBottomUnconsumed, i4), i4);
-                    return;
-                }
-                return;
-            }
-            return;
-        }
-        float f7 = i4 == 2 ? mVelocityY : mVelocityX;
-        if (i2 > 0) {
-            float f8 = mTotalScrollTopUnconsumed;
-            if (f8 > 0.0f) {
-                if (f7 > 2000.0f) {
-                    float obtainSpringBackDistance = obtainSpringBackDistance(f8, i4);
-                    if ((float) i2 > obtainSpringBackDistance) {
-                        consumeDelta((int) obtainSpringBackDistance, iArr, i4);
-                        mTotalScrollTopUnconsumed = 0.0f;
-                    } else {
-                        consumeDelta(i2, iArr, i4);
-                        f2 = obtainSpringBackDistance - (float) i2;
-                        mTotalScrollTopUnconsumed = obtainTouchDistance(f2, Math.signum(f2) * Math.abs(obtainMaxSpringBackDistance(i4)), i4);
-                    }
-                    moveTarget(f2, i4);
-                    dispatchScrollState(1);
-                    return;
-                }
-                if (!mScrollByFling) {
-                    mScrollByFling = true;
-                    springBack(f7, i4, false);
-                }
-                if (mSpringScroller.computeScrollOffset()) {
-                    scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
-                    mTotalScrollTopUnconsumed = obtainTouchDistance(abs, Math.abs(obtainMaxSpringBackDistance(i4)), i4);
-                } else {
-                    mTotalScrollTopUnconsumed = 0.0f;
-                }
-                consumeDelta(i2, iArr, i4);
-                return;
-            }
-        }
-        if (i2 < 0) {
-            float f10 = mTotalScrollBottomUnconsumed;
-            if ((-f10) < 0.0f) {
-                if (f7 < -2000.0f) {
-                    float obtainSpringBackDistance2 = obtainSpringBackDistance(f10, i4);
-                    if ((float) i2 < (-obtainSpringBackDistance2)) {
-                        consumeDelta((int) obtainSpringBackDistance2, iArr, i4);
-                        mTotalScrollBottomUnconsumed = 0.0f;
-                    } else {
-                        consumeDelta(i2, iArr, i4);
-                        f2 = obtainSpringBackDistance2 + (float) i2;
-                        mTotalScrollBottomUnconsumed = obtainTouchDistance(f2, Math.signum(f2) * Math.abs(obtainMaxSpringBackDistance(i4)), i4);
-                    }
-                    dispatchScrollState(1);
-                    moveTarget(-f2, i4);
-                    return;
-                }
-                if (!mScrollByFling) {
-                    mScrollByFling = true;
-                    springBack(f7, i4, false);
-                }
-                if (mSpringScroller.computeScrollOffset()) {
-                    scrollTo(mSpringScroller.getCurrX(), mSpringScroller.getCurrY());
-                    mTotalScrollBottomUnconsumed = obtainTouchDistance(abs, Math.abs(obtainMaxSpringBackDistance(i4)), i4);
-                } else {
-                    mTotalScrollBottomUnconsumed = 0.0f;
-                }
-                consumeDelta(i2, iArr, i4);
-                return;
-            }
-        }
-        if (i2 != 0) {
-            if ((mTotalScrollBottomUnconsumed == 0.0f || mTotalScrollTopUnconsumed == 0.0f) && mScrollByFling && getScrollY() == 0) {
-                consumeDelta(i2, iArr, i4);
-            }
-        }
-    }
-
-    @Override
-    // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onNestedScrollAccepted(View view, View view2, int i2) {
-        mNestedScrollingParentHelper.onNestedScrollAccepted(view, view2, i2);
-        startNestedScroll(i2 & ViewCompat.SCROLL_AXIS_VERTICAL);
-    }
-
-    @Override // androidx.core.view.NestedScrollingParent2
-    public void onNestedScroll(View view, int i2, int i3, int i4, int i5, int i6) {
-        onNestedScroll(view, i2, i3, i4, i5, i6, mNestedScrollingV2ConsumedCompat);
-    }
-
-    @Override
-    // android.view.ViewGroup, android.view.ViewParent, androidx.core.view.NestedScrollingParent
-    public void onNestedScroll(View view, int i2, int i3, int i4, int i5) {
-        onNestedScroll(view, i2, i3, i4, i5, ViewCompat.TYPE_TOUCH, mNestedScrollingV2ConsumedCompat);
+    public boolean onNestedCurrentFling(float velocityX, float velocityY) {
+        mVelocityX = velocityX;
+        mVelocityY = velocityY;
+        return true;
     }
 
     public interface OnSpringListener {
