@@ -1,5 +1,5 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.HiMiuiX" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.HiMiuiX" parent="Theme.AppCompat.DayNight.NoActionBar">
     </style>
 </resources>

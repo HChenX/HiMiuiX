@@ -17,7 +17,7 @@
         android:singleLine="true"
         android:stateListAnimator="@null"
         android:textColor="@color/dialog_button1"
-        android:textSize="18sp"
+        android:textSize="17sp"
         android:visibility="gone"
         app:backgroundTint="@null" />
 
@@ -35,7 +35,7 @@
         android:singleLine="true"
         android:stateListAnimator="@null"
         android:textColor="@color/dialog_button1"
-        android:textSize="18sp"
+        android:textSize="17sp"
         app:backgroundTint="@null" />
 
     <Button
@@ -50,7 +50,7 @@
         android:singleLine="true"
         android:stateListAnimator="@null"
         android:textColor="@color/dialog_button2"
-        android:textSize="18sp"
+        android:textSize="17sp"
         android:visibility="gone"
         app:backgroundTint="@null" />
 </LinearLayout>

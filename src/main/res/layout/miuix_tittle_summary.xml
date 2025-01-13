@@ -15,7 +15,7 @@
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:textColor="@color/tittle"
-        android:textSize="20sp"
+        android:textSize="18sp"
         app:focusable="true"
         app:layout_constraintBottom_toTopOf="@id/prefs_summary"
         app:layout_constraintLeft_toLeftOf="parent"
