@@ -15,6 +15,7 @@
  */
 package com.hchen.himiuix;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -28,6 +29,7 @@ import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -199,14 +201,11 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                             oldHeight = nestedScrollView.getHeight();
                         }
 
-                        ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
-                        layoutParams.height = oldHeight - (Math.max(surplus, 0));
-                        nestedScrollView.setLayoutParams(layoutParams);
+                        int targetHeight = oldHeight - Math.max(surplus, 0);
+                        animateHeightChange(nestedScrollView, nestedScrollView.getHeight(), targetHeight);
                     }
                 } else if (oldHeight != -1) {
-                    ViewGroup.LayoutParams layoutParams = nestedScrollView.getLayoutParams();
-                    layoutParams.height = oldHeight;
-                    nestedScrollView.setLayoutParams(layoutParams);
+                    animateHeightChange(nestedScrollView, nestedScrollView.getHeight(), oldHeight);
                     oldHeight = -1;
                 }
                 return insets;
@@ -225,6 +224,18 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         });
         mAlertDialog.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
         mAlertDialog.show();
+    }
+
+    private void animateHeightChange(View view, int startHeight, int endHeight) {
+        ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
+        animator.setDuration(250);
+        animator.setInterpolator(new AccelerateInterpolator());
+        animator.addUpdateListener(animation -> {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            layoutParams.height = (int) animation.getAnimatedValue();
+            view.setLayoutParams(layoutParams);
+        });
+        animator.start();
     }
 
     @Override
