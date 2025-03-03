@@ -62,15 +62,12 @@ public class MiuiEditTextPreference extends MiuiPreference {
     @SuppressLint("RestrictedApi")
     public MiuiEditTextPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        setLayoutResource(R.layout.miuix_preference_edit);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiEditTextPreference, defStyleAttr, defStyleRes)) {
             mHint = TypedArrayUtils.getString(array, R.styleable.MiuiEditTextPreference_hint, R.styleable.MiuiEditTextPreference_android_hint);
             mInputType = array.getInt(R.styleable.MiuiEditTextPreference_android_inputType, -1);
         }
-    }
-
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        setLayoutResource(R.layout.miuix_preference_edit);
     }
 
     public void setHint(@StringRes int hintRes) {
@@ -145,7 +142,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
         if (mWatcher != null)
             mEditTextView.removeTextChangedListener(mWatcher);
         if (isEnabled()) {
-            mTipTextView.setTextColor(getContext().getColor(R.color.tittle));
+            mTipTextView.setTextColor(getContext().getColor(R.color.title));
             mEditTextView.setHintTextColor(getContext().getColor(R.color.summary));
             if (mImageView.getVisibility() != View.GONE)
                 mImageView.setOnClickListener(mImageClickListener);
@@ -154,7 +151,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
             if (mInputType != -1) mEditTextView.setInputType(mInputType);
             else mEditTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         } else {
-            mTipTextView.setTextColor(getContext().getColor(R.color.tittle_d));
+            mTipTextView.setTextColor(getContext().getColor(R.color.title_d));
             mEditTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
         }
     }

@@ -24,35 +24,58 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class InvokeUtils {
+    private static final String TAG = "InvokeUtils";
     private static final HashMap<String, Method> methodCache = new HashMap<>();
     private static final HashMap<String, Field> fieldCache = new HashMap<>();
 
-    private final static String TAG = "InvokeUtils";
-
     // ----------------------------反射调用方法--------------------------------
-    protected static <T> T callMethod(Object instance, String method, Class<?>[] param, Object... value) {
+    public static <T> T callMethod(Object instance, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(null, instance, method, param, value);
     }
 
-    protected static <T> T callStaticMethod(Class<?> clz, String method, Class<?>[] param, Object... value) {
+    public static <T> T callStaticMethod(Class<?> clz, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(clz, null, method, param, value);
     }
 
+    public static <T> T callStaticMethod(String clz, String method, Class<?>[] param, Object... value) {
+        return baseInvokeMethod(findClass(clz), null, method, param, value);
+    }
+
+    public static <T> T callStaticMethod(String clz, ClassLoader classLoader, String method, Class<?>[] param, Object... value) {
+        return baseInvokeMethod(findClass(clz, classLoader), null, method, param, value);
+    }
+
     // ----------------------------设置字段--------------------------------
-    protected static <T> T setField(Object instance, String field, Object value) {
+    public static <T> T setField(Object instance, String field, Object value) {
         return baseInvokeField(null, instance, field, true, value);
     }
 
-    protected static <T> T setStaticField(Class<?> clz, String field, Object value) {
+    public static <T> T setStaticField(Class<?> clz, String field, Object value) {
         return baseInvokeField(clz, null, field, true, value);
     }
 
-    protected static <T> T getField(Object instance, String field) {
+    public static <T> T setStaticField(String clz, String field, Object value) {
+        return baseInvokeField(findClass(clz), null, field, true, value);
+    }
+
+    public static <T> T setStaticField(String clz, ClassLoader classLoader, String field, Object value) {
+        return baseInvokeField(findClass(clz, classLoader), null, field, true, value);
+    }
+
+    public static <T> T getField(Object instance, String field) {
         return baseInvokeField(null, instance, field, false, null);
     }
 
-    protected static <T> T getStaticField(Class<?> clz, String field) {
+    public static <T> T getStaticField(Class<?> clz, String field) {
         return baseInvokeField(clz, null, field, false, null);
+    }
+
+    public static <T> T getStaticField(String clz, String field) {
+        return baseInvokeField(findClass(clz), null, field, false, null);
+    }
+
+    public static <T> T getStaticField(String clz, ClassLoader classLoader, String field) {
+        return baseInvokeField(findClass(clz, classLoader), null, field, false, null);
     }
 
     /**
@@ -77,7 +100,7 @@ public class InvokeUtils {
             declaredMethod.setAccessible(true);
             return (T) declaredMethod.invoke(instance, value);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, "BaseInvokeMethod Failed: ", e);
             return null;
         }
     }
@@ -89,7 +112,7 @@ public class InvokeUtils {
                                          boolean set /* 是否为 set 模式 */, Object value /* 指定值 */) {
         Field declaredField = null;
         if (clz == null && instance == null) {
-            Log.w(TAG, "Class and instance is null, can't invoke method: " + field);
+            Log.w(TAG, "Class and instance is null, can't invoke field: " + field);
             return null;
         } else if (clz == null) {
             clz = instance.getClass();
@@ -123,23 +146,23 @@ public class InvokeUtils {
             } else
                 return (T) declaredField.get(instance);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, "BaseInvokeField Failed: ", e);
             return null;
         }
     }
 
-    protected static Class<?> findClass(String className) {
+    public static Class<?> findClass(String className) {
         return findClass(className, null);
     }
 
-    protected static Class<?> findClass(String className, ClassLoader classLoader) {
+    public static Class<?> findClass(String className, ClassLoader classLoader) {
         try {
-            if (classLoader == null) {
+            if (classLoader == null)
                 classLoader = ClassLoader.getSystemClassLoader();
-            }
+
             return classLoader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, "FindClass Failed: ", e);
         }
         return null;
     }

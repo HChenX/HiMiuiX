@@ -22,9 +22,4 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
     public MiuiCheckBoxPreference(@NonNull Context context) {
         super(context);
     }
-
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super.init(context, attrs, defStyleAttr, defStyleRes);
-    }
 }

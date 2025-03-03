@@ -65,7 +65,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                 int stepAfterValue = getStepAfterValueIfNeed(progress);
                 ((MiuiSeekBar) seekBar).setShowDefaultPoint((stepAfterValue != mDefValue) && shouldShowDefTip);
                 if (stepAfterValue == mMaxValue || stepAfterValue == mMinValue
-                        || stepAfterValue == mDefValue) {
+                    || stepAfterValue == mDefValue) {
                     mMainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
                 }
                 updateLabelValue(stepAfterValue);
@@ -87,26 +87,23 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     };
 
     public MiuiSeekBarPreference(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public MiuiSeekBarPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiSeekBarPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MiuiSeekBarPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_seekbar);
         try (TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MiuiSeekBarPreference,
-                defStyleAttr, defStyleRes)) {
+            defStyleAttr, defStyleRes)) {
             mMinValue = a.getInt(R.styleable.MiuiSeekBarPreference_minValue, 0);
             mMaxValue = a.getInt(R.styleable.MiuiSeekBarPreference_maxValue, 100);
             mStepValue = a.getInt(R.styleable.MiuiSeekBarPreference_stepValue, 1);
@@ -182,60 +179,60 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         updateLabelValue(mSeekBarValue);
         if (isEnabled()) {
             seekBarDrawable.setAlpha(255);
-            mNumberView.setTextColor(getContext().getColor(R.color.tittle));
+            mNumberView.setTextColor(getContext().getColor(R.color.title));
         } else {
             seekBarDrawable.setAlpha(125);
-            mNumberView.setTextColor(getContext().getColor(R.color.tittle_d));
+            mNumberView.setTextColor(getContext().getColor(R.color.title_d));
         }
     }
 
-    private View mTouchView;
     private MiuiAlertDialog mDialog;
 
     @Override
-    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
+    boolean onMainLayoutTouch(View v, MotionEvent event) {
         if (!isDialogEnabled) {
             return super.onMainLayoutTouch(v, event);
         }
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundResource(R.color.touch_down);
+            updateBackground(R.color.touch_down);
         } else if (action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundResource(R.color.touch_up);
+            updateBackground(R.color.touch_up);
         } else if (action == MotionEvent.ACTION_UP) {
             if (mDialog != null && mDialog.isShowing())
                 return false;
-            v.setBackgroundResource(R.color.touch_down);
-            mTouchView = v;
-            CharSequence def;
-            if (mDisplayDividerValue != -1)
-                def = String.valueOf((float) mSeekBarValue / (float) mDisplayDividerValue);
-            else
-                def = String.valueOf(mSeekBarValue);
+
+            updateBackground(R.color.touch_down);
+
+            CharSequence def =
+                mDisplayDividerValue != -1 ?
+                    String.valueOf((float) mSeekBarValue / (float) mDisplayDividerValue) :
+                    String.valueOf(mSeekBarValue);
 
             mDialog = new MiuiAlertDialog(getContext())
-                    .setTitle(getTitle())
-                    .setMessage(getSummary())
-                    .setHapticFeedbackEnabled(true)
-                    .setEnableEditTextView(true)
-                    .setEditTextAutoKeyboard(true)
-                    .setEditText(def, new DialogInterface.TextWatcher() {
-                        @Override
-                        public void onResult(DialogInterface dialog, CharSequence s) {
-                            float f = Float.MIN_VALUE;
-                            if (mDisplayDividerValue != -1)
-                                f = Float.parseFloat((String) s) * mDisplayDividerValue;
-                            int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
-                            setValue(result);
-                            mSeekBarView.setShowDefaultPoint((result != mDefValue) && shouldShowDefTip);
-                            setProgressIfNeed(getStepBeforeIfNeed(result));
-                        }
-                    })
-                    .setEditTextInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
-                    .setPositiveButton("确定", null)
-                    .setNegativeButton("取消", null)
-                    .setOnDismissListener(dialog1 ->
-                            mTouchView.setBackgroundResource(R.color.touch_up));
+                .setTitle(getTitle())
+                .setMessage(getSummary())
+                .setHapticFeedbackEnabled(true)
+                .setEnableEditTextView(true)
+                .setEditTextAutoKeyboard(true)
+                .setEditText(def, new DialogInterface.TextWatcher() {
+                    @Override
+                    public void onResult(DialogInterface dialog, CharSequence s) {
+                        float f = Float.MIN_VALUE;
+                        if (mDisplayDividerValue != -1)
+                            f = Float.parseFloat((String) s) * mDisplayDividerValue;
+
+                        int result = Integer.parseInt(f != Float.MIN_VALUE ? String.valueOf((int) f) : (String) s);
+                        setValue(result);
+                        mSeekBarView.setShowDefaultPoint((result != mDefValue) && shouldShowDefTip);
+                        setProgressIfNeed(getStepBeforeIfNeed(result));
+                    }
+                })
+                .setEditTextInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
+                .setPositiveButton("确定", null)
+                .setNegativeButton("取消", null)
+                .setOnDismissListener(dialog ->
+                    updateBackground(R.color.touch_up));
             mDialog.show();
         }
         return false;
@@ -261,11 +258,11 @@ public class MiuiSeekBarPreference extends MiuiPreference {
             }
             if (steps.contains(value)) return;
             throw new RuntimeException("Default value incorrect!" +
-                    " It is not one of the available step values!" +
-                    " Available step values: " + (mDisplayDividerValue == -1 ?
-                    steps.toString() :
-                    Arrays.toString(steps.stream().map(integer ->
-                            ((float) integer / (float) mDisplayDividerValue)).toArray())
+                " It is not one of the available step values!" +
+                " Available step values: " + (mDisplayDividerValue == -1 ?
+                steps.toString() :
+                Arrays.toString(steps.stream().map(integer ->
+                    ((float) integer / (float) mDisplayDividerValue)).toArray())
             ));
         }
     }
@@ -352,17 +349,17 @@ public class MiuiSeekBarPreference extends MiuiPreference {
 
     private static class SavedState extends BaseSavedState {
         public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            new Parcelable.Creator<SavedState>() {
+                @Override
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
 
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+                @Override
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
 
         int mSeekbarValue;
         int mMin;

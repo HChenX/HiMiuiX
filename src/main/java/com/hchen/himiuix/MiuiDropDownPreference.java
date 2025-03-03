@@ -62,26 +62,23 @@ public class MiuiDropDownPreference extends MiuiPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressLint({"RestrictedApi", "PrivateResource"})
     public MiuiDropDownPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
+            mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
+                R.styleable.MiuiDropDownPreference_android_entries);
+            mEntryValues = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entryValues,
+                R.styleable.MiuiDropDownPreference_android_entryValues);
+            mDefValue = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_defaultValue,
+                R.styleable.MiuiDropDownPreference_android_defaultValue);
+            shouldShowOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
+        }
+
         safeCheck();
         mEntriesList.addAll(Arrays.asList(mEntries));
         setDefaultValue(mDefValue);
-    }
-
-    @Override
-    @SuppressLint({"RestrictedApi", "PrivateResource"})
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super.init(context, attrs, defStyleAttr, defStyleRes);
-        try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiDropDownPreference, defStyleAttr, defStyleRes)) {
-            mEntries = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entries,
-                    R.styleable.MiuiDropDownPreference_android_entries);
-            mEntryValues = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entryValues,
-                    R.styleable.MiuiDropDownPreference_android_entryValues);
-            mDefValue = TypedArrayUtils.getString(array, R.styleable.MiuiDropDownPreference_defaultValue,
-                    R.styleable.MiuiDropDownPreference_android_defaultValue);
-            shouldShowOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
-        }
     }
 
     public void setEntries(CharSequence[] entries) {
@@ -204,28 +201,38 @@ public class MiuiDropDownPreference extends MiuiPreference {
             }
         }
         throw new RuntimeException("MiuiDropDownPreference: The input value is not an existing set of available values! " +
-                "Input: " + value + " Available values: " + Arrays.toString(mEntryValues));
+            "Input: " + value + " Available values: " + Arrays.toString(mEntryValues));
     }
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+
         getArrowRightView().setVisibility(View.VISIBLE);
-        if (isEnabled())
+        if (isEnabled()) {
             getArrowRightView().setImageDrawable(
-                    AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_arrow_up_down));
-        else
+                AppCompatResources.getDrawable(
+                    getContext(),
+                    R.drawable.ic_preference_arrow_up_down
+                )
+            );
+        } else {
             getArrowRightView().setImageDrawable(
-                    AppCompatResources.getDrawable(getContext(), R.drawable.ic_preference_disable_arrow_up_down));
+                AppCompatResources.getDrawable(
+                    getContext(),
+                    R.drawable.ic_preference_disable_arrow_up_down
+                )
+            );
+        }
     }
 
     @Override
-    protected boolean shouldDisableArrowRightView() {
+    boolean shouldDisableArrowRightView() {
         return true;
     }
 
     @Override
-    protected boolean shouldShowSummary() {
+    boolean shouldShowSummary() {
         return getSummary() != null || shouldShowOnSummary;
     }
 
@@ -242,18 +249,18 @@ public class MiuiDropDownPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
+    boolean onMainLayoutTouch(View v, MotionEvent event) {
         if (!isEnabled()) return false;
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
-            v.setBackgroundResource(R.color.touch_down);
+            updateBackground(R.color.touch_down);
         } else if (action == MotionEvent.ACTION_CANCEL) {
-            v.setBackgroundResource(R.color.touch_up);
+            updateBackground(R.color.touch_up);
         }
         if (event.getAction() == MotionEvent.ACTION_UP) {
             safeCheck();
             if (mDialog != null && mDialog.isShowing()) return false;
-            v.setBackgroundResource(R.color.touch_down);
+            updateBackground(R.color.touch_down);
             v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
             mTouchView = v;
             initDropDownDialog(event.getRawX(), event.getRawY());
@@ -263,22 +270,22 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     private void initDropDownDialog(float x, float y) {
         mDialog = new MiuiAlertDialog(getContext(), true)
-                .setHapticFeedbackEnabled(true)
-                .setEnableMultiSelect(false)
-                .setItems(mEntriesList, new DialogInterface.OnItemsClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, CharSequence item, int which) {
-                        if (mDialogDropDownFactory.mBooleanArray.get(which)) {
-                            return;
-                        }
-                        setValue(String.valueOf(which));
+            .setHapticFeedbackEnabled(true)
+            .setEnableMultiSelect(false)
+            .setItems(mEntriesList, new DialogInterface.OnItemsClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, CharSequence item, int which) {
+                    if (mDialogDropDownFactory.mBooleanArray.get(which)) {
+                        return;
                     }
-                })
-                .setOnDismissListener(dialog -> mTouchView.setBackgroundResource(R.color.touch_up));
-        
+                    setValue(String.valueOf(which));
+                }
+            })
+            .setOnDismissListener(dialog -> updateBackground(R.color.touch_up));
+
         mDialogDropDownFactory = (MiuiAlertDialogFactory.MiuiAlertDialogDropDownFactory) mDialog.getBaseFactory();
         mDialogDropDownFactory.mBooleanArray = mBooleanArray;
-        mDialogDropDownFactory.setRootPreferenceView(getMiuiPrefMainLayout());
+        mDialogDropDownFactory.setRootPreferenceView(getMainLayout());
         mDialogDropDownFactory.showDialogByTouchPosition(x, y);
         mDialog.show();
     }
@@ -310,17 +317,17 @@ public class MiuiDropDownPreference extends MiuiPreference {
 
     private static class SavedState extends BaseSavedState {
         public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            new Parcelable.Creator<SavedState>() {
+                @Override
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
 
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+                @Override
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
 
         String mValue;
 

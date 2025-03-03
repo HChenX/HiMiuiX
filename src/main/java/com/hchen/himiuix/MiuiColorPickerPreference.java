@@ -55,26 +55,22 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private boolean isInitialTime = true;
 
     public MiuiColorPickerPreference(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public MiuiColorPickerPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiColorPickerPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MiuiColorPickerPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super.init(context, attrs, defStyleAttr, defStyleRes);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiColorPickerPreference,
-                defStyleAttr, defStyleRes)) {
+            defStyleAttr, defStyleRes)) {
             int defColor = array.getColor(R.styleable.MiuiColorPickerPreference_defaultColor, -1);
             setDefaultValue(defColor);
         }
@@ -106,7 +102,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        getColorSelectView().setVisibility(View.VISIBLE);
+
         getColorSelectView().setGrayedOut(!isEnabled());
         getColorSelectView().setColor(mColor);
         isInitialTime = false;
@@ -122,7 +118,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private View showColorView;
 
     @Override
-    protected void onMainLayoutClick(View view) {
+    protected void onClick(View view) {
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         colorPickerData = new ColorPickerData();
@@ -155,7 +151,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 alphaView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
 
                 hueView.registerHueChangeListener(new ColorPickerHueView.OnColorHueChanged[]{
-                        saturationView, lightnessView, alphaView
+                    saturationView, lightnessView, alphaView
                 });
 
                 colorToHsv(mColor, Color.alpha(mColor));
@@ -276,7 +272,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
     private void colorToHsv(int rgb, int alpha) {
         if (hueView == null || saturationView == null
-                || lightnessView == null || alphaView == null) return;
+            || lightnessView == null || alphaView == null) return;
 
         float[] hsv = new float[3];
         Color.colorToHSV(rgb, hsv);
@@ -284,6 +280,11 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         saturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 10000));
         lightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 10000));
         alphaView.updateColorPickerAlphaState(alpha);
+    }
+
+    @Override
+    boolean shouldShowColorSelectView() {
+        return true;
     }
 
     @Nullable
@@ -315,17 +316,17 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
     private static class SavedState extends BaseSavedState {
         public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            new Parcelable.Creator<SavedState>() {
+                @Override
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
 
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+                @Override
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
 
         int mColor;
 

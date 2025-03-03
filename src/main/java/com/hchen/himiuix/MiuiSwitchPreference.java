@@ -53,7 +53,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     private final int ANIMATOR_DURATION = 320;
     private final float ANIMATOR_TENSION = 1.2f;
     private final float ANIMATION_START_END_OFFSET = 4.2f;
-    private final float THUMB_END_X = 22.8f;
+    private final float THUMB_END_X = 20.5f;
     private TransitionDrawable offToOnTransition;
     private TransitionDrawable onToOffTransition;
     private static final int HANDLER_ANIMATION_READY = 0;
@@ -175,8 +175,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
                             newCheckedState = true;
                         }
                         mThumbViewAnimator.x(finalX)
-                                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
-                                .setDuration(ANIMATOR_DURATION);
+                            .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
+                            .setDuration(ANIMATOR_DURATION);
                         if (newCheckedState != isChecked()) {
                             mClickListener.onClick(null);
                         } else mThumbViewAnimator.start();
@@ -218,13 +218,10 @@ public class MiuiSwitchPreference extends MiuiPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressLint("RestrictedApi")
     public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    @Override
-    @SuppressLint("RestrictedApi")
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_switch);
         Drawable[] switchOffToOnDrawables = MiuiXUtils.getDrawables(getContext(), R.drawable.switch_background_off, R.drawable.switch_background_on);
         Drawable[] switchOnToOffDrawables = MiuiXUtils.getDrawables(getContext(), R.drawable.switch_background_on, R.drawable.switch_background_off);
@@ -234,7 +231,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOn, R.styleable.MiuiSwitchPreference_android_summaryOn);
             mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOff, R.styleable.MiuiSwitchPreference_android_summaryOff);
             mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiSwitchPreference_disableDependentsState,
-                    R.styleable.MiuiSwitchPreference_android_disableDependentsState, false);
+                R.styleable.MiuiSwitchPreference_android_disableDependentsState, false);
         }
     }
 
@@ -280,9 +277,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
             notifyDependencyChange(shouldDisableDependents());
             if (!isInitialTime) {
                 if (!fromUser && (animationHandler.hasMessages(HANDLED_ANIMATION_DOING)
-                        || animationHandler.hasMessages(HANDLER_ANIMATION_READY))) {
+                    || animationHandler.hasMessages(HANDLER_ANIMATION_READY))) {
                     animationHandler.sendMessage(
-                            SwitchStateMessage.create(HANDLED_ANIMATION_NEXT, new Object[]{true, checked}));
+                        SwitchStateMessage.create(HANDLED_ANIMATION_NEXT, new Object[]{true, checked}));
                 }
                 notifyChanged();
             }
@@ -340,23 +337,13 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    protected boolean shouldShowSummary() {
+    boolean shouldShowSummary() {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
     }
 
     @Override
-    protected void onMainLayoutClick(View view) {
+    protected void onClick(View view) {
         mClickListener.onClick(view);
-    }
-
-    @Override
-    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
-        return false;
-    }
-
-    @Override
-    protected boolean onMainLayoutHover(View v, MotionEvent event) {
-        return super.onMainLayoutHover(v, event);
     }
 
     private void updateSummaryIfNeed() {
@@ -388,10 +375,10 @@ public class MiuiSwitchPreference extends MiuiPreference {
         int thumbPosition = toRight ? translationX : 0;
 
         mThumbViewAnimator
-                .translationX(thumbPosition)
-                .setDuration(ANIMATOR_DURATION)
-                .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
-                .start();
+            .translationX(thumbPosition)
+            .setDuration(ANIMATOR_DURATION)
+            .setInterpolator(new AnticipateOvershootInterpolator(ANIMATOR_TENSION))
+            .start();
         animationHandler.sendEmptyMessageDelayed(HANDLED_ANIMATION_DOING, ANIMATOR_DURATION);
     }
 
@@ -407,8 +394,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 }
             } else {
                 mSwitchBackgroundLayout.setBackgroundResource(isChecked() ?
-                        R.drawable.switch_background_on :
-                        R.drawable.switch_background_off);
+                    R.drawable.switch_background_on :
+                    R.drawable.switch_background_off);
             }
             mThumbView.setBackgroundResource(R.drawable.thumb_background);
         } else {
@@ -448,17 +435,17 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     private static class SavedState extends BaseSavedState {
         public static final Creator<SavedState> CREATOR =
-                new Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            new Creator<SavedState>() {
+                @Override
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
 
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+                @Override
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
 
         boolean mChecked;
 

@@ -16,7 +16,7 @@
         android:scrollbars="none"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:textColor="@color/dialog_tittle"
+        android:textColor="@color/dialog_title"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@id/dialog_message"
         app:layout_constraintLeft_toLeftOf="parent"

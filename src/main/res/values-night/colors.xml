@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="pref_card">#242424</color>
     <color name="dialog_background">#242424</color>
-    <color name="dialog_tittle">#F4F4F4</color>
+    <color name="dialog_title">#F4F4F4</color>
     <color name="dialog_message">#D3D3D3</color>
     <color name="dialog_button1">#D9D9D9</color>
     <color name="dialog_button2">#EAF1FE</color>
@@ -16,8 +17,8 @@
     <color name="pref_background">#000000</color>
     <color name="summary">#808080</color>
     <color name="tip">#666666</color>
-    <color name="tittle">#E6E6E6</color>
-    <color name="tittle_d">#4D4D4D</color>
+    <color name="title">#E6E6E6</color>
+    <color name="title_d">#4D4D4D</color>
     <color name="summary_d">#4D4D4D</color>
     <color name="switch_d_off">#212121</color>
     <color name="switch_d_on">#0C264B</color>
@@ -25,8 +26,8 @@
     <color name="thumb_d_off">#595959</color>
     <color name="switch_on">#267AF7</color>
     <color name="switch_off">#333333</color>
-    <color name="touch_down">#262626</color>
-    <color name="touch_up">@android:color/transparent</color>
+    <color name="touch_down">#424242</color>
+    <color name="touch_up">#242424</color>
     <color name="white_or_black">@color/black</color>
     <color name="list_text">#EAEAEA</color>
     <color name="list_choose_text">#267AF7</color>
@@ -40,7 +41,7 @@
     <color name="arrow_up_down">#666666</color>
     <color name="arrow_up_down_d">#6B6B6B</color>
     <color name="category_background">#333333</color>
-    <color name="category_tip">#808080</color>
+    <color name="category_tip">#797E94</color>
     <color name="card_background">#222224</color>
     <color name="card_background_waring">#4D3214</color>
     <color name="cancel_background">#666666</color>

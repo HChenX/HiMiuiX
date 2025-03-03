@@ -28,8 +28,10 @@ import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
+import java.util.List;
+
 public class MiuiPreferenceCategory extends PreferenceGroup {
-    String TAG = "MiuiPreference";
+    final static String TAG = "MiuiPreference";
     private ConstraintLayout mLayout;
     private View mDividerView;
     private TextView mTextView;
@@ -49,16 +51,13 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
     public MiuiPreferenceCategory(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_category);
         setSelectable(false);
         setPersistent(false);
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreferenceCategory,
-                defStyleAttr, defStyleRes)) {
-            shouldGoneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, false);
+            defStyleAttr, defStyleRes)) {
+            shouldGoneDivider = array.getBoolean(R.styleable.MiuiPreferenceCategory_goneDivider, true);
         }
     }
 
@@ -101,5 +100,24 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
             mTextView.setVisibility(View.VISIBLE);
             mTextView.setText(getTitle());
         }
+    }
+
+    @Override
+    protected void notifyHierarchyChanged() {
+        List<MiuiPreference> mPreferences = InvokeUtils.getField(this, "mPreferences");
+
+        boolean isFirst = true;
+        for (int i = 0; i < mPreferences.size() - 1; i++) {
+            MiuiPreference miuiPreference = mPreferences.get(i);
+            if (isFirst) {
+                miuiPreference.updateBackground(-1, true, false);
+                isFirst = false;
+                continue;
+            }
+            miuiPreference.updateBackground(-1, false, false);
+        }
+
+        if (mPreferences.isEmpty()) return;
+        mPreferences.get(mPreferences.size() - 1).updateBackground(-1, false, true);
     }
 }

@@ -45,27 +45,24 @@ public class MiuiCardPreference extends MiuiPreference {
     private View.OnClickListener mIconClickListener;
 
     public MiuiCardPreference(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public MiuiCardPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.style.MiuiPreference);
     }
 
     public MiuiCardPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MiuiCardPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    @Override
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_card);
         mCustomView = null;
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiCardPreference,
-                defStyleAttr, defStyleRes)) {
+            defStyleAttr, defStyleRes)) {
             mBackgroundColor = array.getColor(R.styleable.MiuiCardPreference_backgroundColor, context.getColor(R.color.card_background));
             mIconArrowRight = array.getBoolean(R.styleable.MiuiCardPreference_iconArrowRight, false);
             mIconCancel = array.getBoolean(R.styleable.MiuiCardPreference_iconCancel, false);
@@ -170,7 +167,7 @@ public class MiuiCardPreference extends MiuiPreference {
         if (mImageView.getVisibility() == View.VISIBLE)
             mImageView.setOnClickListener(mIconClickListener);
     }
-    
+
     public interface OnBindView {
         void onBindView(View view);
     }

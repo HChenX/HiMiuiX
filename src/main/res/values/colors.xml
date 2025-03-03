@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--d 为禁用状态下颜色-->
+    <color name="pref_card">@color/white</color>
     <color name="dialog_background">#FFFFFF</color>
-    <color name="dialog_tittle">#000000</color>
+    <color name="dialog_title">#000000</color>
     <color name="dialog_message">#333333</color>
     <color name="dialog_button1">#000000</color> <!--dialog 取消或自定义 button 字体颜色-->
     <color name="dialog_button2">#FFFFFF</color> <!--dialog 确定 button 字体颜色-->
@@ -15,10 +16,10 @@
     <color name="edit_cursor">#3482FF</color> <!--edit 光标颜色-->
     <color name="edit_hint">#909090</color>
     <color name="pref_background">#FFFFFF</color>
-    <color name="tittle">#000000</color>
+    <color name="title">#000000</color>
     <color name="summary">#666666</color>
     <color name="tip">#666666</color>
-    <color name="tittle_d">#B1B1B1</color>
+    <color name="title_d">#B1B1B1</color>
     <color name="summary_d">#B2B2B2</color>
     <color name="switch_d_off">#F2F2F2</color>
     <color name="switch_d_on">#C1D9FF</color>
@@ -29,7 +30,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="touch_down">#EBEBEB</color> <!--按下时的阴影颜色-->
-    <color name="touch_up">@android:color/transparent</color> <!--抬起后恢复的颜色-->
+    <color name="touch_up">@color/white</color> <!--抬起后恢复的颜色-->
     <color name="white_or_black">@color/white</color>
     <color name="list_text">#000000</color>
     <color name="list_choose_text">#3482FF</color> <!--列表项目被选择时字体颜色-->
@@ -43,7 +44,7 @@
     <color name="arrow_up_down">#949494</color> <!--DropDownPreference 右侧上下箭头颜色-->
     <color name="arrow_up_down_d">#999999</color>
     <color name="category_background">#E5E5E5</color> <!--MiuiPreferenceCategory 分割线背景-->
-    <color name="category_tip">#8D94B1</color> <!--MiuiPreferenceCategory tittle 字体颜色-->
+    <color name="category_tip">#8D92AF</color> <!--MiuiPreferenceCategory title 字体颜色-->
     <color name="card_background">#F0F0F0</color> <!--MiuiCardPreference 背景色-->
     <color name="card_background_waring">#F7EFE4</color> <!--MiuiCardPreference 背景色-->
     <color name="cancel_background">#999999</color> <!--取消图标背景色-->

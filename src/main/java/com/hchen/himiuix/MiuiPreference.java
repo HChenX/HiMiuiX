@@ -15,10 +15,15 @@
  */
 package com.hchen.himiuix;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,9 +31,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
@@ -39,18 +46,20 @@ import com.hchen.himiuix.colorpicker.ColorSelectView;
 import java.util.ArrayList;
 
 public class MiuiPreference extends Preference {
-    protected static String TAG = "MiuiPreference";
+    static String TAG = "MiuiPreference";
     private ConstraintLayout mMainLayout;
     private ColorSelectView mColorSelectView;
     private ImageView mIconView;
-    private TextView mTittleView;
+    private TextView mTitleView;
     private TextView mSummaryView;
     private TextView mTipView;
     private ImageView mArrowRightView;
-    private String mTipText = null;
-    private int mViewId = 0;
+    private String mTipText;
+    private int mViewId = -1;
     private String mDependencyKey;
     private ArrayList<MiuiPreference> mDependents = null;
+    private boolean isFirst;
+    private boolean isLast;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         @SuppressLint("RestrictedApi")
@@ -58,7 +67,7 @@ public class MiuiPreference extends Preference {
             performClick(v);
             if (!isEnabled() || !isSelectable())
                 return;
-            MiuiPreference.this.onMainLayoutClick(v);
+            MiuiPreference.this.onClick(v);
         }
     };
 
@@ -76,26 +85,38 @@ public class MiuiPreference extends Preference {
 
     public MiuiPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
-    }
 
-    // 一些初始化操作
-    protected void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         setLayoutResource(R.layout.miuix_preference);
-        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiPreference,
-                defStyleAttr, defStyleRes)) {
+        try (
+            TypedArray typedArray = context.obtainStyledAttributes(
+                attrs,
+                R.styleable.MiuiPreference,
+                defStyleAttr,
+                defStyleRes
+            )
+        ) {
             mTipText = typedArray.getString(R.styleable.MiuiPreference_tip);
         }
     }
 
     public void setViewId(int viewId) {
+        if (mMainLayout.getId() == viewId && mViewId == viewId)
+            return;
+
         mViewId = viewId;
         notifyChanged();
     }
 
     public void setTipText(String tipText) {
+        if (TextUtils.equals(mTipText, tipText))
+            return;
+
         mTipText = tipText;
         notifyChanged();
+    }
+
+    public int getId() {
+        return mViewId;
     }
 
     public String getTipText() {
@@ -114,24 +135,26 @@ public class MiuiPreference extends Preference {
         mMainLayout = (ConstraintLayout) holder.itemView;
         mMainLayout.setOnTouchListener(null);
         mMainLayout.setOnHoverListener(null);
-        mMainLayout.setBackground(null);
+        // mMainLayout.setBackground(null);
+        updateBackground(-1, isFirst, isLast);
         mMainLayout.setOnClickListener(mClickListener);
-        mMainLayout.setId(mViewId);
+        if (mViewId != -1)
+            mMainLayout.setId(mViewId);
 
-        mIconView = (ImageView) holder.findViewById(R.id.prefs_icon);
-        mTittleView = (TextView) holder.findViewById(R.id.prefs_text);
+        mIconView = (ImageView) holder.findViewById(R.id.pref_icon);
+        mTitleView = (TextView) holder.findViewById(R.id.prefs_text);
         mSummaryView = (TextView) holder.findViewById(R.id.prefs_summary);
         mTipView = (TextView) holder.findViewById(R.id.pref_tip);
         mArrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
         mColorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
-        if (mColorSelectView != null) mColorSelectView.setVisibility(View.GONE);
-        
-        mTittleView.setText(getTitle());
+
+        mTitleView.setText(getTitle());
         updateSummaryIfNeed();
-        loadArrowRight();
-        loadIcon(getIcon());
-        loadTipView();
-        updateColor();
+        loadArrowRightIfNeed();
+        loadColorSelectViewIfNeed();
+        loadIconIfNeed(getIcon());
+        loadTipViewIfNeed();
+        updateTextColorIfNeed();
 
         if (isEnabled()) {
             mMainLayout.setOnTouchListener(MiuiPreference.this::onMainLayoutTouch);
@@ -150,63 +173,97 @@ public class MiuiPreference extends Preference {
     }
 
     private void updateSummaryIfNeed() {
-        mSummaryView.setVisibility(View.GONE);
+        mSummaryView.setVisibility(GONE);
         if (shouldShowSummary()) {
-            mSummaryView.setVisibility(View.VISIBLE);
+            mSummaryView.setVisibility(VISIBLE);
             mSummaryView.setText(getSummary());
         }
     }
 
-    private void updateColor() {
+    private void updateTextColorIfNeed() {
         int titleColor, summaryOrTipColor;
         if (isEnabled()) {
-            titleColor = getContext().getColor(R.color.tittle);
+            titleColor = getContext().getColor(R.color.title);
             summaryOrTipColor = getContext().getColor(R.color.summary);
         } else {
-            titleColor = getContext().getColor(R.color.tittle_d);
+            titleColor = getContext().getColor(R.color.title_d);
             summaryOrTipColor = getContext().getColor(R.color.summary_d);
         }
-        mTittleView.setTextColor(titleColor);
+
+        mTitleView.setTextColor(titleColor);
         mSummaryView.setTextColor(summaryOrTipColor);
         if (mTipView != null)
             mTipView.setTextColor(summaryOrTipColor);
     }
 
-    private void loadTipView() {
+    private void loadTipViewIfNeed() {
         if (mTipView != null) {
             if (mTipText == null) {
-                mTipView.setVisibility(View.GONE);
+                mTipView.setVisibility(GONE);
             } else {
-                mTipView.setVisibility(View.VISIBLE);
+                mTipView.setVisibility(VISIBLE);
                 mTipView.setText(mTipText);
             }
         }
     }
 
-    private void loadArrowRight() {
+    private void loadColorSelectViewIfNeed() {
+        if (mColorSelectView == null) return;
+        if (!shouldShowColorSelectView()) {
+            mColorSelectView.setVisibility(GONE);
+            return;
+        }
+
+        mColorSelectView.setVisibility(VISIBLE);
+    }
+
+    private void loadArrowRightIfNeed() {
         if (mArrowRightView == null) return;
-        mArrowRightView.setVisibility(View.GONE);
+        mArrowRightView.setVisibility(GONE);
         if (shouldDisableArrowRightView()) return;
-        if (getFragment() != null || getOnPreferenceChangeListener() != null ||
-                getOnPreferenceClickListener() != null || getIntent() != null) {
-            mArrowRightView.setVisibility(View.VISIBLE);
-            if (isEnabled())
-                mArrowRightView.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(),
-                        R.drawable.ic_preference_arrow_right, getContext().getTheme()));
-            else
-                mArrowRightView.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(),
-                        R.drawable.ic_preference_arrow_right_disable, getContext().getTheme()));
+
+        if (
+            getFragment() != null ||
+                getOnPreferenceChangeListener() != null ||
+                getOnPreferenceClickListener() != null ||
+                getIntent() != null
+        ) {
+            mArrowRightView.setVisibility(VISIBLE);
+            if (isEnabled()) {
+                mArrowRightView.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        getContext().getResources(),
+                        R.drawable.ic_preference_arrow_right,
+                        getContext().getTheme()
+                    )
+                );
+            } else {
+                mArrowRightView.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        getContext().getResources(),
+                        R.drawable.ic_preference_arrow_right_disable,
+                        getContext().getTheme()
+                    )
+                );
+            }
         }
     }
 
-    private void loadIcon(Drawable drawable) {
+    private void loadIconIfNeed(Drawable drawable) {
         if (mIconView != null) {
             if (drawable != null) {
                 drawable.setAlpha(isEnabled() ? 255 : 125);
-                mIconView.setVisibility(View.VISIBLE);
+                mIconView.setVisibility(VISIBLE);
                 mIconView.setImageDrawable(drawable);
+
+                mMainLayout.setPadding(
+                    MiuiXUtils.dp2px(getContext(), 10),
+                    mMainLayout.getPaddingTop(),
+                    mMainLayout.getPaddingEnd(),
+                    mMainLayout.getPaddingBottom()
+                );
             } else
-                mIconView.setVisibility(View.GONE);
+                mIconView.setVisibility(GONE);
         }
     }
 
@@ -219,29 +276,60 @@ public class MiuiPreference extends Preference {
             }
         }
     }
-    
-    protected boolean shouldShowSummary() {
-        return getSummary() != null;
-    }
 
-    protected ConstraintLayout getMiuiPrefMainLayout() {
+    ConstraintLayout getMainLayout() {
         return mMainLayout;
     }
 
-    protected TextView getSummaryView() {
+    TextView getSummaryView() {
         return mSummaryView;
     }
 
-    protected ImageView getArrowRightView() {
+    ImageView getArrowRightView() {
         return mArrowRightView;
     }
 
-    protected ColorSelectView getColorSelectView() {
+    ColorSelectView getColorSelectView() {
         return mColorSelectView;
     }
 
-    protected boolean shouldDisableArrowRightView() {
+    boolean shouldShowSummary() {
+        return getSummary() != null;
+    }
+
+    boolean shouldDisableArrowRightView() {
         return false;
+    }
+
+    boolean shouldShowColorSelectView() {
+        return false;
+    }
+
+    protected void onClick(View view) {
+    }
+
+    void updateBackground(@ColorRes int color) {
+        updateBackground(color, isFirst, isLast);
+    }
+
+    void updateBackground(@ColorRes int color, boolean isFirst, boolean isLast) {
+        this.isFirst = isFirst;
+        this.isLast = isLast;
+        if (mMainLayout == null) return;
+
+        GradientDrawable drawable = (GradientDrawable) (
+            isFirst ?
+                ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_top_r_l) :
+                isLast ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l) :
+                    ContextCompat.getDrawable(getContext(), R.drawable.not_rounded_background)
+        );
+        if (drawable == null) return;
+
+        if (color != -1) {
+            drawable.setColor(getContext().getColor(color));
+        }
+        mMainLayout.invalidate();
+        mMainLayout.setBackground(drawable);
     }
 
     @Override
@@ -252,8 +340,7 @@ public class MiuiPreference extends Preference {
     @Override
     public void onDetached() {
         unregisterDependency();
-        InvokeUtils.setField(this,
-                "mWasDetached", true);
+        InvokeUtils.setField(this, "mWasDetached", true);
     }
 
     @Override
@@ -264,8 +351,8 @@ public class MiuiPreference extends Preference {
     @Override
     public void setDependency(@Nullable String dependencyKey) {
         unregisterDependency();
-        InvokeUtils.setField(this,
-                "mDependencyKey", dependencyKey);
+
+        InvokeUtils.setField(this, "mDependencyKey", dependencyKey);
         registerDependency();
     }
 
@@ -280,7 +367,7 @@ public class MiuiPreference extends Preference {
             preference.mDependents.add(this);
         } else {
             throw new IllegalStateException("Dependency \"" + mDependencyKey
-                    + "\" not found for preference \"" + getKey() + "\" (title: \"" + getTitle() + "\"");
+                + "\" not found for preference \"" + getKey() + "\" (title: \"" + getTitle() + "\"");
         }
     }
 
@@ -306,28 +393,27 @@ public class MiuiPreference extends Preference {
             preference.mDependents.remove(this);
     }
 
-    protected void onMainLayoutClick(View view) {
-    }
-    
-    protected boolean onMainLayoutTouch(View v, MotionEvent event) {
+    boolean onMainLayoutTouch(View v, MotionEvent event) {
         int action = event.getAction();
-        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
             if (action == MotionEvent.ACTION_DOWN) {
-                v.setBackgroundResource(R.color.touch_down);
+                updateBackground(R.color.touch_down, isFirst, isLast);
             } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                v.setBackgroundResource(R.color.touch_up);
+                updateBackground(R.color.touch_up, isFirst, isLast);
             }
+        }
         return false;
     }
 
-    protected boolean onMainLayoutHover(View v, MotionEvent event) {
+    boolean onMainLayoutHover(View v, MotionEvent event) {
         int action = event.getAction();
-        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE)
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
             if (action == MotionEvent.ACTION_HOVER_MOVE) {
-                v.setBackgroundResource(R.color.touch_down);
+                updateBackground(R.color.touch_down, isFirst, isLast);
             } else if (action == MotionEvent.ACTION_HOVER_EXIT) {
-                v.setBackgroundResource(R.color.touch_up);
+                updateBackground(R.color.touch_up, isFirst, isLast);
             }
+        }
         return false;
     }
 }

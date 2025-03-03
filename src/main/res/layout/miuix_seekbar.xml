@@ -3,15 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
     android:minHeight="67dp"
-    android:paddingStart="30dp"
+    android:paddingStart="15dp"
     android:paddingTop="10dp"
-    android:paddingEnd="30dp"
+    android:paddingEnd="15dp"
     android:paddingBottom="10dp">
 
     <include
-        android:id="@+id/seekbar_tittle"
-        layout="@layout/miuix_tittle_summary"
+        android:id="@+id/seekbar_title"
+        layout="@layout/miuix_title_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/seekbar"
@@ -40,6 +42,6 @@
         android:thumb="@null"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekbar_tittle" />
+        app:layout_constraintTop_toBottomOf="@+id/seekbar_title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

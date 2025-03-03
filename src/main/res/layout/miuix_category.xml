@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="30dp"
+    android:layout_marginEnd="30dp"
     android:clickable="false"
     android:contextClickable="false"
     android:focusable="false"
     android:focusableInTouchMode="false"
     android:longClickable="false"
-    android:paddingStart="30dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="30dp"
-    android:paddingBottom="10dp">
+    android:paddingTop="14dp"
+    android:paddingBottom="8dp">
 
     <View
         android:id="@+id/category_divider"
@@ -26,10 +26,11 @@
         android:id="@+id/category_tip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
         android:maxLines="1"
+        android:paddingTop="5dp"
         android:scrollbars="none"
         android:singleLine="true"
+        android:textStyle="bold"
         android:textColor="@color/category_tip"
         android:textSize="13sp"
         app:layout_constraintLeft_toLeftOf="parent"
