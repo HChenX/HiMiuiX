@@ -11,6 +11,7 @@
     <color name="dialog_po_background">#4980F7</color> <!--dialog 确定 button 背景颜色-->
     <color name="dialog_divider">#D8D8D8</color>
     <color name="edit_border">#3482FF</color> <!--edit 焦点边框颜色-->
+    <color name="edit_border_error">#FF3434</color> <!--edit 焦点边框 error 颜色-->
     <color name="edit_background">#F0F0F0</color>
     <color name="edit_text">#000000</color>
     <color name="edit_cursor">#3482FF</color> <!--edit 光标颜色-->

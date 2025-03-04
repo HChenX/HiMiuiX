@@ -10,6 +10,7 @@
     <color name="dialog_po_background">#277AF7</color>
     <color name="dialog_divider">#2F2F2F</color>
     <color name="edit_border">#267AF7</color>
+    <color name="edit_border_error">#F72626</color>
     <color name="edit_background">#262626</color>
     <color name="edit_text">#EAEAEA</color>
     <color name="edit_cursor">#3482FF</color>

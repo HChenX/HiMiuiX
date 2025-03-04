@@ -41,6 +41,7 @@ public class MiuiEditText extends ConstraintLayout {
     private EditText mEditTextView;
     private ImageView mEditTextImageView;
     private LayoutParams params;
+    private boolean isErrorBorder = false;
 
     public MiuiEditText(@NonNull Context context) {
         this(context, null);
@@ -171,5 +172,14 @@ public class MiuiEditText extends ConstraintLayout {
                     MiuiEditText.this.setBackgroundResource(R.drawable.nofocused_border_input_box);
             }
         });
+    }
+
+    public void updateErrorBorderState(boolean error) {
+        if (isErrorBorder != error) {
+            isErrorBorder = error;
+
+            if (isErrorBorder) setBackgroundResource(R.drawable.error_border_input_box);
+            else setBackgroundResource(R.drawable.focused_border_input_box);
+        }
     }
 }

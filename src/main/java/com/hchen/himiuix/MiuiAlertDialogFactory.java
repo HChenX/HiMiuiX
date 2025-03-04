@@ -74,10 +74,10 @@ public class MiuiAlertDialogFactory {
             baseFactory = new MiuiAlertDialogDropDownFactory(mDialog);
         else {
             baseFactory = MiuiXUtils.isVerticalScreen(mContext) ?
+                new MiuiAlertDialogVerticalFactory(mDialog) :
+                (MiuiXUtils.isPad(mContext) ?
                     new MiuiAlertDialogVerticalFactory(mDialog) :
-                    (MiuiXUtils.isPad(mContext) ?
-                            new MiuiAlertDialogVerticalFactory(mDialog) :
-                            new MiuiAlertDialogHorizontalFactory(mDialog));
+                    new MiuiAlertDialogHorizontalFactory(mDialog));
         }
         baseFactory.init();
         return baseFactory;
@@ -288,8 +288,8 @@ public class MiuiAlertDialogFactory {
             WindowManager.LayoutParams params = mWindow.getAttributes();
             params.x = MiuiXUtils.dp2px(mContext, 35) /* 距离屏幕边缘 */;
             params.y = showBelow ? /* 是否显示在下方 */
-                    viewY + MiuiXUtils.dp2px(mContext, 15) :
-                    viewY - dialogHeight - MiuiXUtils.dp2px(mContext, 10);
+                viewY + MiuiXUtils.dp2px(mContext, 15) :
+                viewY - dialogHeight - MiuiXUtils.dp2px(mContext, 10);
             params.width = calculateWidth();
             params.height = dialogHeight;
             mWindow.setAttributes(params);
@@ -313,8 +313,8 @@ public class MiuiAlertDialogFactory {
             if (mItems != null) {
                 int height = MiuiXUtils.dp2px(mContext, 58) * mItems.size();
                 int maxHeight = isVerticalScreen ?
-                        (int) (mPoint.y / 2.7) : // 竖屏最大高度
-                        (int) (mPoint.y / 2.1); // 横屏最大高度
+                    (int) (mPoint.y / 2.7) : // 竖屏最大高度
+                    (int) (mPoint.y / 2.1); // 横屏最大高度
                 return Math.min(height, maxHeight);
             } else return ViewGroup.LayoutParams.WRAP_CONTENT;
         }
@@ -333,7 +333,7 @@ public class MiuiAlertDialogFactory {
         public ConstraintLayout mCustomLayout;
         public LinearLayout mButtonLayout;
         public HashMap<Integer, Pair<CharSequence,
-                OnClickListener>> mButtonHashMap = new HashMap<>();
+            OnClickListener>> mButtonHashMap = new HashMap<>();
         protected Button mNegativeButton;
         protected Button mPositiveButton;
         protected Button mNeutralButton;
@@ -366,6 +366,7 @@ public class MiuiAlertDialogFactory {
         public boolean isCanceled;
         public boolean isCancelable = true;
         public boolean isCanceledOnTouchOutside = true;
+        public boolean isAutoDismiss = true;
         public OnShowListener mOnShowListener;
         public OnCancelListener mOnCancelListener;
         public OnDismissListener mOnDismissListener;
@@ -551,7 +552,7 @@ public class MiuiAlertDialogFactory {
                 }
                 if (listener != null)
                     listener.onClick(this, id);
-                dismiss();
+                if (isAutoDismiss) dismiss();
             };
         }
 

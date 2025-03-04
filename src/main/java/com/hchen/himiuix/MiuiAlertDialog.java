@@ -148,8 +148,8 @@ public class MiuiAlertDialog {
         mBaseFactory.mEditTextAutoKeyboard = autoKeyboard;
         return this;
     }
-    
-    public MiuiAlertDialog setEditTextInputType(int type){
+
+    public MiuiAlertDialog setEditTextInputType(int type) {
         mBaseFactory.mEditTextInputType = type;
         return this;
     }
@@ -217,13 +217,13 @@ public class MiuiAlertDialog {
         mBaseFactory.mWindowAnimations = windowAnimationsId;
         return this;
     }
-    
-    public MiuiAlertDialog setOnShowListener(DialogInterface.OnShowListener onShowListener){
+
+    public MiuiAlertDialog setOnShowListener(DialogInterface.OnShowListener onShowListener) {
         mBaseFactory.mOnShowListener = onShowListener;
         return this;
     }
 
-    public MiuiAlertDialog setOnCancelListener(DialogInterface.OnCancelListener onCancelListener){
+    public MiuiAlertDialog setOnCancelListener(DialogInterface.OnCancelListener onCancelListener) {
         mBaseFactory.mOnCancelListener = onCancelListener;
         return this;
     }
@@ -240,6 +240,11 @@ public class MiuiAlertDialog {
 
     public MiuiAlertDialog setCanceledOnTouchOutside(boolean cancel) {
         mBaseFactory.isCanceledOnTouchOutside = cancel;
+        return this;
+    }
+
+    public MiuiAlertDialog setAutoDismiss(boolean autoDismiss) {
+        mBaseFactory.isAutoDismiss = autoDismiss;
         return this;
     }
 

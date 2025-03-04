@@ -50,11 +50,12 @@ import com.hchen.himiuix.colorpicker.ColorPickerData;
 import com.hchen.himiuix.colorpicker.ColorPickerHueView;
 import com.hchen.himiuix.colorpicker.ColorPickerLightnessView;
 import com.hchen.himiuix.colorpicker.ColorPickerSaturationView;
+import com.hchen.himiuix.widget.MiuiEditText;
 
 public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChanged {
     private MiuiAlertDialog mAlertDialog;
-    private int mColor;
     private boolean isInitialTime = true;
+    private int mColor;
 
     public MiuiColorPickerPreference(@NonNull Context context) {
         this(context, null);
@@ -110,20 +111,21 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         isInitialTime = false;
     }
 
-    private NestedScrollView nestedScrollView;
-    private ColorPickerHueView hueView;
-    private ColorPickerSaturationView saturationView;
-    private ColorPickerLightnessView lightnessView;
-    private ColorPickerAlphaView alphaView;
-    private EditText editTextView = null;
-    private ColorPickerData colorPickerData;
-    private View showColorView;
+    private NestedScrollView mNestedScrollView;
+    private ColorPickerHueView mHueView;
+    private ColorPickerSaturationView mSaturationView;
+    private ColorPickerLightnessView mLightnessView;
+    private ColorPickerAlphaView mAlphaView;
+    private MiuiEditText mMiuiEditText;
+    private EditText mEditTextView = null;
+    private ColorPickerData mColorPickerData;
+    private View mShowColorView;
 
     @Override
     protected void onClick(View view) {
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
-        colorPickerData = new ColorPickerData();
+        mColorPickerData = new ColorPickerData();
         mAlertDialog = new MiuiAlertDialog(getContext());
         mAlertDialog.setTitle(getTitle());
         mAlertDialog.setMessage(getSummary());
@@ -133,47 +135,51 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
             @Override
             public void onBindView(View view) {
-                nestedScrollView = view.findViewById(R.id.color_scroll_view);
-                hueView = view.findViewById(R.id.color_hue_view);
-                saturationView = view.findViewById(R.id.color_saturation_view);
-                lightnessView = view.findViewById(R.id.color_lightness_view);
-                alphaView = view.findViewById(R.id.color_alpha_view);
+                mNestedScrollView = view.findViewById(R.id.color_scroll_view);
+                mHueView = view.findViewById(R.id.color_hue_view);
+                mSaturationView = view.findViewById(R.id.color_saturation_view);
+                mLightnessView = view.findViewById(R.id.color_lightness_view);
+                mAlphaView = view.findViewById(R.id.color_alpha_view);
+                mMiuiEditText = view.findViewById(R.id.edit_layout);
                 TextView editTipView = view.findViewById(R.id.edit_tip);
-                showColorView = view.findViewById(R.id.color_show_view);
-                editTextView = view.findViewById(R.id.edit_text);
+                mShowColorView = view.findViewById(R.id.color_show_view);
+                mEditTextView = view.findViewById(R.id.edit_text);
 
-                hueView.setColorPickerData(colorPickerData);
-                saturationView.setColorPickerData(colorPickerData);
-                lightnessView.setColorPickerData(colorPickerData);
-                alphaView.setColorPickerData(colorPickerData);
+                mHueView.setColorPickerData(mColorPickerData);
+                mSaturationView.setColorPickerData(mColorPickerData);
+                mLightnessView.setColorPickerData(mColorPickerData);
+                mAlphaView.setColorPickerData(mColorPickerData);
 
-                hueView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
-                saturationView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
-                lightnessView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
-                alphaView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
+                mHueView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
+                mSaturationView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
+                mLightnessView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
+                mAlphaView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
 
-                hueView.registerHueChangeListener(new ColorPickerHueView.OnColorHueChanged[]{
-                    saturationView, lightnessView, alphaView
+                mHueView.registerHueChangeListener(new ColorPickerHueView.OnColorHueChanged[]{
+                    mSaturationView, mLightnessView, mAlphaView
                 });
 
                 colorToHsv(mColor, Color.alpha(mColor));
                 setShowColorView(mColor);
                 setEditText(argbTo16(mColor));
 
-                view.setOnClickListener(v -> editTextView.clearFocus());
+                view.setOnClickListener(v -> mEditTextView.clearFocus());
                 editTipView.setVisibility(View.VISIBLE);
                 editTipView.setText("#");
-                editTextView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefABCDEF"));
-                editTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
-                editTextView.addTextChangedListener(new TextWatcherAdapter() {
+                mEditTextView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefABCDEF"));
+                mEditTextView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(8)});
+                mEditTextView.addTextChangedListener(new TextWatcherAdapter() {
                     @Override
                     public void afterTextChanged(Editable s) {
-                        if (!editTextView.hasFocus()) return;
+                        if (!mEditTextView.hasFocus()) return;
                         if (s.length() == 8) {
+                            mMiuiEditText.updateErrorBorderState(false);
                             long alpha = Long.parseLong(s.subSequence(0, 2).toString(), 16);
                             int argb = Color.parseColor("#" + s);
                             colorToHsv(argb, (int) alpha);
                             setShowColorView(argb);
+                        } else {
+                            mMiuiEditText.updateErrorBorderState(true);
                         }
                     }
                 });
@@ -198,14 +204,14 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                     if (allHeight >= screenY) {
                         int surplus = allHeight - screenY;
                         if (oldHeight == -1) {
-                            oldHeight = nestedScrollView.getHeight();
+                            oldHeight = mNestedScrollView.getHeight();
                         }
 
                         int targetHeight = oldHeight - Math.max(surplus, 0);
-                        animateHeightChange(nestedScrollView, nestedScrollView.getHeight(), targetHeight);
+                        animateHeightChange(mNestedScrollView, mNestedScrollView.getHeight(), targetHeight);
                     }
                 } else if (oldHeight != -1) {
-                    animateHeightChange(nestedScrollView, nestedScrollView.getHeight(), oldHeight);
+                    animateHeightChange(mNestedScrollView, mNestedScrollView.getHeight(), oldHeight);
                     oldHeight = -1;
                 }
                 return insets;
@@ -214,14 +220,16 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         mAlertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (editTextView.getText().length() < 8) {
+                if (mEditTextView.getText().length() < 8) {
                     Toast.makeText(getContext(), "Color 值应是 8 位！", Toast.LENGTH_SHORT).show();
+
                 } else {
-                    innerSetValue(colorPickerData.HSVToColor(), true);
+                    innerSetValue(mColorPickerData.HSVToColor(), true);
                     dialog.dismiss();
                 }
             }
         });
+        mAlertDialog.setAutoDismiss(false);
         mAlertDialog.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
         mAlertDialog.show();
     }
@@ -244,33 +252,33 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
             case TAG_DEF:
                 return;
             case TAG_HUE:
-                colorPickerData.hue = value;
+                mColorPickerData.hue = value;
                 break;
             case TAG_SATURATION:
-                colorPickerData.saturation = value;
+                mColorPickerData.saturation = value;
                 break;
             case TAG_LIGHTNESS:
-                colorPickerData.lightness = value;
+                mColorPickerData.lightness = value;
                 break;
             case TAG_ALPHA:
-                colorPickerData.alpha = value;
+                mColorPickerData.alpha = value;
                 break;
         }
-        if (editTextView != null) editTextView.clearFocus();
-        setShowColorView(colorPickerData.HSVToColor());
-        setEditText(argbTo16(colorPickerData.HSVToColor()));
+        if (mEditTextView != null) mEditTextView.clearFocus();
+        setShowColorView(mColorPickerData.HSVToColor());
+        setEditText(argbTo16(mColorPickerData.HSVToColor()));
     }
 
     private void setShowColorView(int argb) {
-        if (showColorView == null) return;
-        Drawable drawable = showColorView.getBackground();
+        if (mShowColorView == null) return;
+        Drawable drawable = mShowColorView.getBackground();
         drawable.setTint(argb);
-        showColorView.setBackground(drawable);
+        mShowColorView.setBackground(drawable);
     }
 
     private void setEditText(String text) {
-        if (editTextView == null) return;
-        editTextView.setText(text);
+        if (mEditTextView == null) return;
+        mEditTextView.setText(text);
     }
 
     private String argbTo16(int color) {
@@ -282,15 +290,15 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     }
 
     private void colorToHsv(int rgb, int alpha) {
-        if (hueView == null || saturationView == null
-            || lightnessView == null || alphaView == null) return;
+        if (mHueView == null || mSaturationView == null
+            || mLightnessView == null || mAlphaView == null) return;
 
         float[] hsv = new float[3];
         Color.colorToHSV(rgb, hsv);
-        hueView.updateColorPickerHueState(Math.round(hsv[0] * 100));
-        saturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 10000));
-        lightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 10000));
-        alphaView.updateColorPickerAlphaState(alpha);
+        mHueView.updateColorPickerHueState(Math.round(hsv[0] * 100));
+        mSaturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 10000));
+        mLightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 10000));
+        mAlphaView.updateColorPickerAlphaState(alpha);
     }
 
     @Override
