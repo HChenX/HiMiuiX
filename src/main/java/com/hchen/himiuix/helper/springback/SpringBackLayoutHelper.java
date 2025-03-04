@@ -29,9 +29,9 @@ public class SpringBackLayoutHelper {
     int mTargetScrollOrientation;
     private final int mTouchSlop;
 
-    public SpringBackLayoutHelper(ViewGroup viewGroup, int ori) {
+    public SpringBackLayoutHelper(ViewGroup viewGroup, int i) {
         mTarget = viewGroup;
-        mTargetScrollOrientation = ori;
+        mTargetScrollOrientation = i;
         mTouchSlop = ViewConfiguration.get(viewGroup.getContext()).getScaledTouchSlop();
     }
 
@@ -42,17 +42,17 @@ public class SpringBackLayoutHelper {
         }
         float y = motionEvent.getY(findPointerIndex);
         float x = motionEvent.getX(findPointerIndex);
-        int[] outLocation = {0, 0};
-        mTarget.getLocationInWindow(outLocation);
-        int locationX = outLocation[0];
-        int locationY = outLocation[1];
-        return new Rect(locationX, locationY, mTarget.getWidth() + locationX, mTarget.getHeight() + locationY).contains((int) x, (int) y);
+        int[] iArr = {0, 0};
+        mTarget.getLocationInWindow(iArr);
+        int i = iArr[0];
+        int i2 = iArr[1];
+        return new Rect(i, i2, mTarget.getWidth() + i, mTarget.getHeight() + i2).contains((int) x, (int) y);
     }
 
-    public void checkOrientation(MotionEvent motionEvent) {
+    void checkOrientation(MotionEvent motionEvent) {
         int findPointerIndex;
         int actionMasked = motionEvent.getActionMasked();
-        if (actionMasked == MotionEvent.ACTION_DOWN) {
+        if (actionMasked == 0) {
             int pointerId = motionEvent.getPointerId(0);
             mActivePointerId = pointerId;
             int findPointerIndex2 = motionEvent.findPointerIndex(pointerId);
@@ -64,20 +64,23 @@ public class SpringBackLayoutHelper {
             mScrollOrientation = 0;
             return;
         }
-        if (actionMasked != MotionEvent.ACTION_UP) {
-            if (actionMasked == MotionEvent.ACTION_MOVE) {
-                if (mActivePointerId != -1 && (findPointerIndex = motionEvent.findPointerIndex(mActivePointerId)) >= 0) {
-                    float x = motionEvent.getX(findPointerIndex) - mInitialDownX;
-                    float y = motionEvent.getY(findPointerIndex) - mInitialDownY;
-                    if (Math.abs(x) > mTouchSlop || Math.abs(y) > mTouchSlop) {
-                        mScrollOrientation = Math.abs(x) <= Math.abs(y) ? 2 : 1;
+        if (actionMasked != 1) {
+            if (actionMasked == 2) {
+                int i = mActivePointerId;
+                if (i != -1 && (findPointerIndex = motionEvent.findPointerIndex(i)) >= 0) {
+                    float y = motionEvent.getY(findPointerIndex);
+                    float x = motionEvent.getX(findPointerIndex);
+                    float f = y - mInitialDownY;
+                    float f2 = x - mInitialDownX;
+                    if (Math.abs(f2) > mTouchSlop || Math.abs(f) > mTouchSlop) {
+                        mScrollOrientation = Math.abs(f2) <= Math.abs(f) ? 2 : 1;
                         return;
                     }
                     return;
                 }
                 return;
             }
-            if (actionMasked != MotionEvent.ACTION_CANCEL) {
+            if (actionMasked != 3) {
                 return;
             }
         }

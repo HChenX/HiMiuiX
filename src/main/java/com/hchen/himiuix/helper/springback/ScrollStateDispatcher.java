@@ -15,16 +15,6 @@
  */
 package com.hchen.himiuix.helper.springback;
 
-public class SpringOperator {
-    private final double mDamping;
-    private final double mTension;
-
-    public SpringOperator(float tension, float damping) {
-        mTension = Math.pow(6.283185307179586d / (double) damping, 2.0d);
-        mDamping = (tension * 12.566370614359172d) / (double) damping;
-    }
-
-    public double updateVelocity(double velocity, double min, double end, double start) {
-        return (velocity * (1.0d - (mDamping * min))) + ((float) (mTension * (end - start) * min));
-    }
+public interface ScrollStateDispatcher {
+    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
 }

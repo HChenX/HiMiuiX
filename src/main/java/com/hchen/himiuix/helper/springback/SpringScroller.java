@@ -15,11 +15,9 @@
  */
 package com.hchen.himiuix.helper.springback;
 
-
 public class SpringScroller {
     private double mCurrX;
     private double mCurrY;
-    private long mCurrentTimeNanos;
     private double mEndX;
     private double mEndY;
     private boolean mFinished = true;
@@ -35,24 +33,25 @@ public class SpringScroller {
     private double mStartY;
     private double mVelocity;
 
-    public void scrollByFling(float scrollX, float endX, float scrollY, float endY, float xory, int mode) {
+    public void scrollByFling(float f, float f2, float f3, float f4, float f5, int i, boolean z) {
         mFinished = false;
         mLastStep = false;
-        mStartX = scrollX;
-        mOriginStartX = scrollX;
-        mEndX = endX;
-        mStartY = scrollY;
-        mOriginStartY = scrollY;
-        mCurrY = (int) (double) scrollY;
-        mEndY = endY;
-        mOriginVelocity = xory;
-        mVelocity = xory;
-        if (Math.abs(xory) <= 5000.0d) {
+        mStartX = f;
+        mOriginStartX = f;
+        mEndX = f2;
+        mStartY = f3;
+        mOriginStartY = f3;
+        mCurrY = (int) (double) f3;
+        mEndY = f4;
+        double d3 = f5;
+        mOriginVelocity = d3;
+        mVelocity = d3;
+        if (Math.abs(d3) <= 5000.0d || z) {
             mSpringOperator = new SpringOperator(1.0f, 0.4f);
         } else {
             mSpringOperator = new SpringOperator(1.0f, 0.55f);
         }
-        mOrientation = mode;
+        mOrientation = i;
         mStartTimeNanos = AnimationUtils.currentAnimationTimeNanos();
     }
 
@@ -60,14 +59,14 @@ public class SpringScroller {
         if (mSpringOperator == null || mFinished) {
             return false;
         }
-
-        if (mFirstStep != 0) {
+        int i = mFirstStep;
+        if (i != 0) {
             if (mOrientation == 1) {
-                mCurrX = mFirstStep;
-                mStartX = mFirstStep;
+                mCurrX = i;
+                mStartX = i;
             } else {
-                mCurrY = mFirstStep;
-                mStartY = mFirstStep;
+                mCurrY = i;
+                mStartY = i;
             }
             mFirstStep = 0;
             return true;
@@ -76,25 +75,27 @@ public class SpringScroller {
             mFinished = true;
             return true;
         }
-        mCurrentTimeNanos = AnimationUtils.currentAnimationTimeNanos();
+        long mCurrentTimeNanos = AnimationUtils.currentAnimationTimeNanos();
         double min = Math.min((mCurrentTimeNanos - mStartTimeNanos) / 1.0E9d, 0.01600000075995922d);
-        min = min != 0.0d ? min : 0.01600000075995922d;
+        double d = min != 0.0d ? min : 0.01600000075995922d;
         mStartTimeNanos = mCurrentTimeNanos;
         if (mOrientation == 2) {
-            double updateVelocity = mSpringOperator.updateVelocity(mVelocity, min, mEndY, mStartY);
-            mCurrY = mStartY + (min * updateVelocity);
+            double updateVelocity = mSpringOperator.updateVelocity(mVelocity, d, mEndY, mStartY);
+            double d2 = mStartY + (d * updateVelocity);
+            mCurrY = d2;
             mVelocity = updateVelocity;
-            if (isAtEquilibrium(mCurrY, mOriginStartY, mEndY)) {
+            if (isAtEquilibrium(d2, mOriginStartY, mEndY)) {
                 mLastStep = true;
                 mCurrY = mEndY;
             } else {
                 mStartY = mCurrY;
             }
         } else {
-            double updateVelocity2 = mSpringOperator.updateVelocity(mVelocity, min, mEndX, mStartX);
-            mCurrX = mStartX + (min * updateVelocity2);
+            double updateVelocity2 = mSpringOperator.updateVelocity(mVelocity, d, mEndX, mStartX);
+            double d3 = mStartX + (d * updateVelocity2);
+            mCurrX = d3;
             mVelocity = updateVelocity2;
-            if (isAtEquilibrium(mCurrX, mOriginStartX, mEndX)) {
+            if (isAtEquilibrium(d3, mOriginStartX, mEndX)) {
                 mLastStep = true;
                 mCurrX = mEndX;
             } else {
@@ -104,12 +105,12 @@ public class SpringScroller {
         return true;
     }
 
-    public boolean isAtEquilibrium(double curr, double originStart, double end) {
-        if (originStart < end && curr > end) {
+    public boolean isAtEquilibrium(double d, double d2, double d3) {
+        if (d2 < d3 && d > d3) {
             return true;
         }
-        if (originStart <= end || curr >= end) {
-            return (originStart == end && Math.signum(mOriginVelocity) != Math.signum(curr)) || Math.abs(curr - end) < 1.0d;
+        if (d2 <= d3 || d >= d3) {
+            return (d2 == d3 && Math.signum(mOriginVelocity) != Math.signum(d)) || Math.abs(d - d3) < 1.0d;
         }
         return true;
     }
@@ -131,7 +132,41 @@ public class SpringScroller {
         mFirstStep = 0;
     }
 
-    public void setFirstStep(int firstStep) {
-        mFirstStep = firstStep;
+    public void setFirstStep(int i) {
+        mFirstStep = i;
+    }
+
+    private static class SpringOperator {
+        private final double damping;
+        private final double tension;
+
+        private SpringOperator(float f, float f2) {
+            tension = Math.pow(6.283185307179586d / (double) f2, 2.0d);
+            damping = (f * 12.566370614359172d) / (double) f2;
+        }
+
+        private double updateVelocity(double d, double d2, double d3, double d4) {
+            return (d * (1.0d - (damping * d2))) + ((float) (tension * (d3 - d4) * d2));
+        }
+    }
+
+    public static class AnimationUtils extends android.view.animation.AnimationUtils {
+        private static final ThreadLocal<AnimationNanoState> sAnimationNanoState = ThreadLocal.withInitial(AnimationNanoState::new);
+
+        private static class AnimationNanoState {
+            long lastReportedTimeNanos;
+
+            private AnimationNanoState() {
+            }
+        }
+
+        public static long currentAnimationTimeNanos() {
+            AnimationNanoState animationNanoState = sAnimationNanoState.get();
+            long nanoTime = System.nanoTime();
+            if (animationNanoState != null) {
+                animationNanoState.lastReportedTimeNanos = nanoTime;
+            }
+            return nanoTime;
+        }
     }
 }
