@@ -51,6 +51,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hchen.himiuix.springback.SpringBackLayout;
+import com.hchen.himiuix.widget.MiuiEditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -441,7 +442,7 @@ public class MiuiAlertDialogFactory {
         protected void loadEditTextView() {
             mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme); // 存在键盘
 
-            addView(mCustomLayout, R.layout.miuix_preference_edit);
+            addView(mCustomLayout, new MiuiEditText(mContext));
             ConstraintLayout editLayout = mCustomLayout.findViewById(R.id.edit_layout);
             // 设置输入框的边距
             ConstraintLayout.LayoutParams editParams = (ConstraintLayout.LayoutParams) editLayout.getLayoutParams();

@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="13dp"
     android:layout_marginEnd="13dp"
-    android:minHeight="67dp"
     android:paddingStart="15dp"
     android:paddingTop="10dp"
     android:paddingEnd="15dp"
@@ -14,7 +13,7 @@
     <com.hchen.himiuix.widget.MiuiEditText
         android:id="@id/edit_layout"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

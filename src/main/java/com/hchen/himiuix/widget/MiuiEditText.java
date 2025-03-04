@@ -85,7 +85,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextTipView.setId(R.id.edit_tip);
         params = new LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            MiuiXUtils.dp2px(mContext, 50)
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         mEditTextTipView.setLayoutParams(params);
@@ -102,7 +102,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextView.setId(R.id.edit_text);
         params = new LayoutParams(
             0,
-            0
+            MiuiXUtils.dp2px(mContext, 50)
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         params.setMarginEnd(MiuiXUtils.dp2px(mContext, 15));
@@ -122,10 +122,9 @@ public class MiuiEditText extends ConstraintLayout {
     private void loadEditTextImageView() {
         mEditTextImageView.setId(R.id.edit_image);
         params = new LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            MiuiXUtils.dp2px(mContext, 50),
+            MiuiXUtils.dp2px(mContext, 50)
         );
-        params.setMarginEnd(MiuiXUtils.dp2px(mContext, 15));
         mEditTextImageView.setLayoutParams(params);
         mEditTextImageView.setPadding(
             0,
