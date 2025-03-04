@@ -33,7 +33,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 
 public class MiuiCardPreference extends MiuiPreference {
-    private ConstraintLayout mLayout;
+    private ConstraintLayout mBackgroundLayout;
     private ConstraintLayout mCustomLayout;
     private ImageView mImageView;
     private int mBackgroundColor;
@@ -123,17 +123,18 @@ public class MiuiCardPreference extends MiuiPreference {
 
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        mLayout = (ConstraintLayout) holder.itemView;
-        mCustomLayout = mLayout.findViewById(R.id.card_custom_view);
-        mImageView = mLayout.findViewById(R.id.card_image);
+        mBackgroundLayout = holder.itemView.findViewById(R.id.pref_card_bg);
+        mCustomLayout = mBackgroundLayout.findViewById(R.id.card_custom_view);
+        mImageView = mBackgroundLayout.findViewById(R.id.card_image);
+        updateBackground(holder.itemView, -1);
 
         mImageView.setVisibility(View.GONE);
         mImageView.setOnClickListener(null);
 
         loadCustomLayout();
-        Drawable drawable = mLayout.getBackground();
+        Drawable drawable = mBackgroundLayout.getBackground();
         drawable.setTint(mBackgroundColor);
-        mLayout.setBackground(drawable);
+        mBackgroundLayout.setBackground(drawable);
         loadIcon();
     }
 

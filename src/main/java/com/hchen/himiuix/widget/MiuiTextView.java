@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.helper;
+package com.hchen.himiuix.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -32,18 +32,15 @@ public class MiuiTextView extends TextView {
     private boolean shouldSingeLineCenter;
 
     public MiuiTextView(Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public MiuiTextView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init(context, attrs);
+        this(context, attrs, 0);
     }
 
     public MiuiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MiuiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {

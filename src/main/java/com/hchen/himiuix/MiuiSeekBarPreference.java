@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 
-import com.hchen.himiuix.helper.MiuiSeekBar;
+import com.hchen.himiuix.widget.MiuiSeekBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;

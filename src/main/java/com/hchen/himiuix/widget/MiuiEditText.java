@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.helper;
+package com.hchen.himiuix.widget;
 
 import android.content.Context;
 import android.text.InputType;
@@ -35,30 +35,28 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import com.hchen.himiuix.MiuiXUtils;
 import com.hchen.himiuix.R;
 
-public class MiuiEditTextLayout extends ConstraintLayout {
+public class MiuiEditText extends ConstraintLayout {
     private Context mContext;
     private TextView mEditTextTipView;
     private EditText mEditTextView;
     private ImageView mEditTextImageView;
     private LayoutParams params;
 
-    public MiuiEditTextLayout(@NonNull Context context) {
-        super(context);
-        init(context);
+    public MiuiEditText(@NonNull Context context) {
+        this(context, null);
     }
 
-    public MiuiEditTextLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
+    public MiuiEditText(@NonNull Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public MiuiEditTextLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
+    public MiuiEditText(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
-    public MiuiEditTextLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiEditText(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
         init(context);
     }
 
@@ -66,8 +64,8 @@ public class MiuiEditTextLayout extends ConstraintLayout {
         mContext = context;
         setId(R.id.edit_layout);
         params = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
         );
         setLayoutParams(params);
         setBackground(AppCompatResources.getDrawable(context, R.drawable.ic_edit_bg));
@@ -85,8 +83,8 @@ public class MiuiEditTextLayout extends ConstraintLayout {
     private void loadEditTextTipView() {
         mEditTextTipView.setId(R.id.edit_tip);
         params = new LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                MiuiXUtils.dp2px(mContext, 50)
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         mEditTextTipView.setLayoutParams(params);
@@ -102,8 +100,8 @@ public class MiuiEditTextLayout extends ConstraintLayout {
     private void loadEditTextView() {
         mEditTextView.setId(R.id.edit_text);
         params = new LayoutParams(
-                0,
-                MiuiXUtils.dp2px(mContext, 50)
+            0,
+            0
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         params.setMarginEnd(MiuiXUtils.dp2px(mContext, 15));
@@ -122,14 +120,20 @@ public class MiuiEditTextLayout extends ConstraintLayout {
 
     private void loadEditTextImageView() {
         mEditTextImageView.setId(R.id.edit_image);
-        mEditTextImageView.setLayoutParams(new LayoutParams(
-                MiuiXUtils.dp2px(mContext, 50),
-                MiuiXUtils.dp2px(mContext, 50)
-        ));
-        mEditTextImageView.setPadding(0, MiuiXUtils.dp2px(mContext, 8),
-                0, MiuiXUtils.dp2px(mContext, 8));
+        params = new LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMarginEnd(MiuiXUtils.dp2px(mContext, 15));
+        mEditTextImageView.setLayoutParams(params);
+        mEditTextImageView.setPadding(
+            0,
+            MiuiXUtils.dp2px(mContext, 8),
+            0,
+            MiuiXUtils.dp2px(mContext, 8)
+        );
         mEditTextImageView.setAdjustViewBounds(true);
-        mEditTextImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        mEditTextImageView.setScaleType(ImageView.ScaleType.CENTER);
         mEditTextImageView.setVisibility(GONE);
         addView(mEditTextImageView);
     }
@@ -141,14 +145,17 @@ public class MiuiEditTextLayout extends ConstraintLayout {
         constraintSet.connect(mEditTextTipView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
         constraintSet.connect(mEditTextTipView.getId(), ConstraintSet.RIGHT, mEditTextView.getId(), ConstraintSet.LEFT);
         constraintSet.connect(mEditTextTipView.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+        constraintSet.connect(mEditTextTipView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
 
         constraintSet.connect(mEditTextView.getId(), ConstraintSet.LEFT, mEditTextTipView.getId(), ConstraintSet.RIGHT);
         constraintSet.connect(mEditTextView.getId(), ConstraintSet.RIGHT, mEditTextImageView.getId(), ConstraintSet.LEFT);
         constraintSet.connect(mEditTextView.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+        constraintSet.connect(mEditTextView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
 
         constraintSet.connect(mEditTextImageView.getId(), ConstraintSet.LEFT, mEditTextView.getId(), ConstraintSet.RIGHT);
         constraintSet.connect(mEditTextImageView.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
         constraintSet.connect(mEditTextImageView.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+        constraintSet.connect(mEditTextImageView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
 
         constraintSet.applyTo(this);
     }
@@ -159,9 +166,9 @@ public class MiuiEditTextLayout extends ConstraintLayout {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus)
-                    MiuiEditTextLayout.this.setBackgroundResource(R.drawable.focused_border_input_box);
+                    MiuiEditText.this.setBackgroundResource(R.drawable.focused_border_input_box);
                 else
-                    MiuiEditTextLayout.this.setBackgroundResource(R.drawable.nofocused_border_input_box);
+                    MiuiEditText.this.setBackgroundResource(R.drawable.nofocused_border_input_box);
             }
         });
     }

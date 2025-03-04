@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.helper.springback;
+package com.hchen.himiuix.springback;
 
 public class SpringScroller {
     private double mCurrX;

@@ -13,7 +13,7 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.helper;
+package com.hchen.himiuix.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

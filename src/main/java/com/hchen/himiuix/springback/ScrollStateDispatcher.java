@@ -13,8 +13,8 @@
 
  * Copyright (C) 2023-2024 HiMiuiX Contributions
  */
-package com.hchen.himiuix.helper.springback;
+package com.hchen.himiuix.springback;
 
-public interface NestedCurrentFling {
-    boolean onNestedCurrentFling(float velocityX, float velocityY);
+public interface ScrollStateDispatcher {
+    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener viewCompatOnScrollChangeListener);
 }

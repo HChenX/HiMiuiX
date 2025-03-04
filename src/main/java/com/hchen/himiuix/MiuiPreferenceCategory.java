@@ -119,5 +119,10 @@ public class MiuiPreferenceCategory extends PreferenceGroup {
 
         if (mPreferences.isEmpty()) return;
         mPreferences.get(mPreferences.size() - 1).updateBackground(-1, false, true);
+
+        mPreferences.forEach(
+            miuiPreference ->
+                miuiPreference.updateCount(mPreferences.size())
+        );
     }
 }

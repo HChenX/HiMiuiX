@@ -60,6 +60,7 @@ public class MiuiPreference extends Preference {
     private ArrayList<MiuiPreference> mDependents = null;
     private boolean isFirst;
     private boolean isLast;
+    private int mCount = 1;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         @SuppressLint("RestrictedApi")
@@ -308,28 +309,40 @@ public class MiuiPreference extends Preference {
     protected void onClick(View view) {
     }
 
+    void updateCount(int count) {
+        mCount = count;
+    }
+
     void updateBackground(@ColorRes int color) {
-        updateBackground(color, isFirst, isLast);
+        updateBackground(mMainLayout, color);
+    }
+
+    void updateBackground(View layout, @ColorRes int color) {
+        updateBackground(layout, color, isFirst, isLast);
     }
 
     void updateBackground(@ColorRes int color, boolean isFirst, boolean isLast) {
+        updateBackground(mMainLayout, color, isFirst, isLast);
+    }
+
+    void updateBackground(View layout, @ColorRes int color, boolean isFirst, boolean isLast) {
         this.isFirst = isFirst;
         this.isLast = isLast;
-        if (mMainLayout == null) return;
+        if (layout == null) return;
 
         GradientDrawable drawable = (GradientDrawable) (
-            isFirst ?
-                ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_top_r_l) :
-                isLast ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l) :
-                    ContextCompat.getDrawable(getContext(), R.drawable.not_rounded_background)
+            mCount == 1 ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_r_l) :
+                isFirst ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_top_r_l) :
+                    isLast ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l) :
+                        ContextCompat.getDrawable(getContext(), R.drawable.not_rounded_background)
         );
         if (drawable == null) return;
 
         if (color != -1) {
             drawable.setColor(getContext().getColor(color));
         }
-        mMainLayout.invalidate();
-        mMainLayout.setBackground(drawable);
+        layout.invalidate();
+        layout.setBackground(drawable);
     }
 
     @Override

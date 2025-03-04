@@ -23,7 +23,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.hchen.himiuix.helper.MiuiTextView
+    <com.hchen.himiuix.widget.MiuiTextView
         android:id="@+id/dialog_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

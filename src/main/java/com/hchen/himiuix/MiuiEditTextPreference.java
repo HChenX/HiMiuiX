@@ -121,6 +121,7 @@ public class MiuiEditTextPreference extends MiuiPreference {
         mEditTextView = holder.itemView.findViewById(R.id.edit_text);
         mTipTextView = holder.itemView.findViewById(R.id.edit_tip);
         mImageView = holder.itemView.findViewById(R.id.edit_image);
+        updateBackground(holder.itemView, -1);
 
         mTipTextView.setVisibility(View.GONE);
         if (getTitle() != null) {

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="edit_layout" type="id"/>
-    <item name="edit_tip" type="id"/>
-    <item name="edit_text" type="id"/>
-    <item name="edit_image" type="id"/>
+    <item name="switch_container" type="id" />
+    <item name="switch_thumb" type="id" />
+    <item name="edit_layout" type="id" />
+    <item name="edit_tip" type="id" />
+    <item name="edit_text" type="id" />
+    <item name="edit_image" type="id" />
 </resources>

@@ -50,7 +50,7 @@ import androidx.core.util.Pair;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hchen.himiuix.helper.springback.SpringBackLayout;
+import com.hchen.himiuix.springback.SpringBackLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
