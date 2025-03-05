@@ -261,7 +261,7 @@ public class MiuiDropDownPreference extends MiuiPreference {
             safeCheck();
             if (mDialog != null && mDialog.isShowing()) return false;
             updateBackground(R.color.touch_down);
-            v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
             mTouchView = v;
             initDropDownDialog(event.getRawX(), event.getRawY());
         }

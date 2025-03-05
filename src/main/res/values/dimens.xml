@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="miuix_appcompat_check_widget_height">23dp</dimen>
-    <dimen name="miuix_appcompat_check_widget_width">23dp</dimen>
+    <dimen name="check_widget_height">23dp</dimen>
+    <dimen name="check_widget_width">23dp</dimen>
 </resources>

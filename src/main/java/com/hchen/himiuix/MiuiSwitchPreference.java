@@ -72,26 +72,26 @@ public class MiuiSwitchPreference extends MiuiPreference {
         }
     }
 
-    public void setSummaryOn(CharSequence mSummaryOn) {
-        this.mSummaryOn = mSummaryOn;
+    public void setSummaryOn(CharSequence summaryOn) {
+        this.mSummaryOn = summaryOn;
         notifyChanged();
     }
 
-    public void setSummaryOn(@StringRes int mSummaryOn) {
-        setSummaryOn(getContext().getString(mSummaryOn));
+    public void setSummaryOn(@StringRes int summaryOn) {
+        setSummaryOn(getContext().getString(summaryOn));
     }
 
     public CharSequence getSummaryOn() {
         return mSummaryOn;
     }
 
-    public void setSummaryOff(CharSequence mSummaryOff) {
-        this.mSummaryOff = mSummaryOff;
+    public void setSummaryOff(CharSequence summaryOff) {
+        this.mSummaryOff = summaryOff;
         notifyChanged();
     }
 
-    public void setSummaryOff(@StringRes int mSummaryOff) {
-        setSummaryOff(getContext().getString(mSummaryOff));
+    public void setSummaryOff(@StringRes int summaryOff) {
+        setSummaryOff(getContext().getString(summaryOff));
     }
 
     public CharSequence getSummaryOff() {
@@ -155,7 +155,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         isInitialState = false;
         super.onBindViewHolder(holder);
 
-        mMiuiSwitch = holder.itemView.findViewById(R.id.switch_container);
+        mMiuiSwitch = holder.itemView.findViewById(R.id.checkbox_container);
         mMiuiSwitch.setOnSwitchStateChangeListener(mOnSwitchStateChangeListener);
         mMiuiSwitch.setChecked(isChecked, false);
         updateSummaryIfNeed();
@@ -175,7 +175,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             mMiuiSwitch.setChecked(!isChecked());
             setChecked(!isChecked(), true);
 
-            view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
         }
     }
 
@@ -203,7 +203,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             return parcelable;
 
         final SavedState savedState = new SavedState(parcelable);
-        savedState.mChecked = isChecked();
+        savedState.isChecked = isChecked();
         return savedState;
     }
 
@@ -216,7 +216,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
-        setChecked(savedState.mChecked, false);
+        setChecked(savedState.isChecked, false);
     }
 
     private static class SavedState extends BaseSavedState {
@@ -233,11 +233,11 @@ public class MiuiSwitchPreference extends MiuiPreference {
                 }
             };
 
-        boolean mChecked;
+        boolean isChecked;
 
         public SavedState(Parcel source) {
             super(source);
-            mChecked = source.readInt() == 1;
+            isChecked = source.readInt() == 1;
         }
 
         public SavedState(Parcelable superState) {
@@ -247,7 +247,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
-            dest.writeInt(mChecked ? 1 : 0);
+            dest.writeInt(isChecked ? 1 : 0);
         }
     }
 }

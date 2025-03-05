@@ -182,19 +182,19 @@ public class MiuiPreference extends Preference {
     }
 
     private void updateTextColorIfNeed() {
-        int titleColor, summaryOrTipColor;
+        float titleAlpha, summaryAlpha;
         if (isEnabled()) {
-            titleColor = getContext().getColor(R.color.title);
-            summaryOrTipColor = getContext().getColor(R.color.summary);
+            titleAlpha = 1f;
+            summaryAlpha = 1f;
         } else {
-            titleColor = getContext().getColor(R.color.title_d);
-            summaryOrTipColor = getContext().getColor(R.color.summary_d);
+            titleAlpha = 0.5f;
+            summaryAlpha = 0.5f;
         }
 
-        mTitleView.setTextColor(titleColor);
-        mSummaryView.setTextColor(summaryOrTipColor);
+        mTitleView.setAlpha(titleAlpha);
+        mSummaryView.setAlpha(summaryAlpha);
         if (mTipView != null)
-            mTipView.setTextColor(summaryOrTipColor);
+            mTipView.setAlpha(summaryAlpha);
     }
 
     private void loadTipViewIfNeed() {

@@ -24,3 +24,6 @@
        private boolean mWasDetached;
        private java.lang.String mDependencyKey;
 }
+-keep class androidx.preference.PreferenceGroup {
+    private final java.util.List mPreferences;
+}

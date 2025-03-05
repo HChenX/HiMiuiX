@@ -173,6 +173,10 @@ public class MiuiEditText extends ConstraintLayout {
         });
     }
 
+    public void clearEditTextFocus() {
+        mEditTextView.clearFocus();
+    }
+
     public void updateErrorBorderState(boolean error) {
         if (isErrorBorder != error) {
             isErrorBorder = error;

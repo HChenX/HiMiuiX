@@ -143,8 +143,8 @@ public class MiuiEditTextPreference extends MiuiPreference {
         if (mWatcher != null)
             mEditTextView.removeTextChangedListener(mWatcher);
         if (isEnabled()) {
-            mTipTextView.setTextColor(getContext().getColor(R.color.title));
-            mEditTextView.setHintTextColor(getContext().getColor(R.color.summary));
+            mTipTextView.setAlpha(1f);
+            mEditTextView.setAlpha(1f);
             if (mImageView.getVisibility() != View.GONE)
                 mImageView.setOnClickListener(mImageClickListener);
             if (mWatcher != null)
@@ -152,8 +152,8 @@ public class MiuiEditTextPreference extends MiuiPreference {
             if (mInputType != -1) mEditTextView.setInputType(mInputType);
             else mEditTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         } else {
-            mTipTextView.setTextColor(getContext().getColor(R.color.title_d));
-            mEditTextView.setHintTextColor(getContext().getColor(R.color.summary_d));
+            mTipTextView.setAlpha(0.5f);
+            mEditTextView.setAlpha(0.5f);
         }
     }
 }

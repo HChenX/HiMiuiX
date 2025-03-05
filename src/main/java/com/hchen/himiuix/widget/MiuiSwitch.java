@@ -93,7 +93,7 @@ public class MiuiSwitch extends ConstraintLayout {
                 setChecked(newValue);
             }
 
-            if (v != null) v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            if (v != null) v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
         }
     };
 
@@ -182,7 +182,7 @@ public class MiuiSwitch extends ConstraintLayout {
 
         private void hapticFeedbackIfNeed(View v) {
             if (shouldHaptic)
-                v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
             shouldHaptic = false;
         }
 
@@ -213,7 +213,7 @@ public class MiuiSwitch extends ConstraintLayout {
     }
 
     private void init() {
-        setId(R.id.switch_container);
+        setId(R.id.checkbox_container);
         ConstraintLayout.LayoutParams params = new LayoutParams(
             MiuiXUtils.dp2px(getContext(), 49),
             MiuiXUtils.dp2px(getContext(), 28)
@@ -275,8 +275,6 @@ public class MiuiSwitch extends ConstraintLayout {
     }
 
     public void setChecked(boolean checked, boolean show) {
-        if (!isEnabled()) return;
-
         final boolean changed = isChecked != checked;
         if (changed) {
             isChecked = checked;

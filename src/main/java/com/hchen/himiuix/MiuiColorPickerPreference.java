@@ -15,7 +15,6 @@
  */
 package com.hchen.himiuix;
 
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,10 +25,11 @@ import android.os.Parcelable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.method.DigitsKeyListener;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -134,7 +134,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         mAlertDialog.setCustomView(R.layout.miuix_color_picker, new DialogInterface.OnBindView() {
 
             @Override
-            public void onBindView(View view) {
+            public void onBindView(ViewGroup root, View view) {
                 mNestedScrollView = view.findViewById(R.id.color_scroll_view);
                 mHueView = view.findViewById(R.id.color_hue_view);
                 mSaturationView = view.findViewById(R.id.color_saturation_view);
@@ -208,10 +208,10 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                         }
 
                         int targetHeight = oldHeight - Math.max(surplus, 0);
-                        animateHeightChange(mNestedScrollView, mNestedScrollView.getHeight(), targetHeight);
+                        animateHeightChange(mNestedScrollView, targetHeight, false);
                     }
                 } else if (oldHeight != -1) {
-                    animateHeightChange(mNestedScrollView, mNestedScrollView.getHeight(), oldHeight);
+                    animateHeightChange(mNestedScrollView, oldHeight, true);
                     oldHeight = -1;
                 }
                 return insets;
@@ -234,16 +234,16 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         mAlertDialog.show();
     }
 
-    private void animateHeightChange(View view, int startHeight, int endHeight) {
-        ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
-        animator.setDuration(250);
-        animator.setInterpolator(new AccelerateInterpolator());
-        animator.addUpdateListener(animation -> {
-            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-            layoutParams.height = (int) animation.getAnimatedValue();
-            view.setLayoutParams(layoutParams);
-        });
-        animator.start();
+    private void animateHeightChange(View view, int endHeight, boolean restore) {
+        if (restore) {
+            if (mMiuiEditText != null)
+                mMiuiEditText.clearEditTextFocus();
+        }
+
+        TransitionManager.beginDelayedTransition((ViewGroup) view, new AutoTransition());
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        params.height = endHeight;
+        view.setLayoutParams(params);
     }
 
     @Override

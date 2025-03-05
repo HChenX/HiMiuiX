@@ -11,26 +11,25 @@
     android:paddingEnd="15dp"
     android:paddingBottom="10dp">
 
+    <com.hchen.himiuix.widget.MiuiCheckBox
+        android:id="@id/checkbox_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_marginEnd="13dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/switch_title_summary"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <include
         android:id="@+id/switch_title_summary"
         layout="@layout/miuix_title_summary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/checkbox_container"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- 开关按钮部分 -->
-    <com.hchen.himiuix.widget.MiuiSwitch
-        android:id="@id/checkbox_container"
-        android:layout_width="49dp"
-        android:layout_height="28dp"
-        android:background="@drawable/switch_background_off"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/switch_title_summary"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/checkbox_container"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

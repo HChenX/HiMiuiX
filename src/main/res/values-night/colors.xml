@@ -19,8 +19,6 @@
     <color name="summary">#808080</color>
     <color name="tip">#666666</color>
     <color name="title">#E6E6E6</color>
-    <color name="title_d">#4D4D4D</color>
-    <color name="summary_d">#4D4D4D</color>
     <color name="switch_d_off">#212121</color>
     <color name="switch_d_on">#0C264B</color>
     <color name="thumb_d_on">#566781</color>
@@ -38,9 +36,7 @@
     <color name="seekbar_background">#333333</color>
     <color name="seekbar_progress">#0073DD</color>
     <color name="arrow_right">#666666</color>
-    <color name="arrow_right_d">#4D4D4D</color>
     <color name="arrow_up_down">#666666</color>
-    <color name="arrow_up_down_d">#6B6B6B</color>
     <color name="category_background">#333333</color>
     <color name="category_tip">#797E94</color>
     <color name="card_background">#222224</color>
@@ -49,4 +45,6 @@
     <color name="cancel_background_waring">#FFB459</color>
     <color name="card_text_waring">#FFA83F</color>
     <color name="seekbar_def">#AA555962</color>
+    <color name="checkbox_off">#505050</color>
+    <color name="checkbox_on">#4078EF</color>
 </resources>

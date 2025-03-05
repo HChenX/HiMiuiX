@@ -240,7 +240,7 @@ public class MiuiAlertDialogFactory {
             mMainDialogLayout = (ConstraintLayout) LayoutInflater.from(mContext).inflate(R.layout.miuix_dropdown_dialog, null);
 
             mWindow.setContentView(mMainDialogLayout);
-            mWindow.setWindowAnimations(R.style.Animation_Dialog_Center);
+            mWindow.setWindowAnimations(R.style.Animation_PopupWindow_DropDown);
 
             isVerticalScreen = MiuiXUtils.isVerticalScreen(mContext);
         }
@@ -283,9 +283,9 @@ public class MiuiAlertDialogFactory {
 
             int spaceBelow = windowHeight - (viewY + viewHeight);
             boolean showBelow = (spaceBelow - dialogHeight) > windowHeight / 8;
-            boolean shouldShowRight = x > ((float) (viewX + viewWidth) / 2);
+            boolean showRight = x > ((float) (viewX + viewWidth) / 2);
 
-            mWindow.setGravity(Gravity.TOP | (shouldShowRight ? Gravity.RIGHT : Gravity.LEFT));
+            mWindow.setGravity(Gravity.TOP | (showRight ? Gravity.RIGHT : Gravity.LEFT));
             WindowManager.LayoutParams params = mWindow.getAttributes();
             params.x = MiuiXUtils.dp2px(mContext, 35) /* 距离屏幕边缘 */;
             params.y = showBelow ? /* 是否显示在下方 */
@@ -294,6 +294,22 @@ public class MiuiAlertDialogFactory {
             params.width = calculateWidth();
             params.height = dialogHeight;
             mWindow.setAttributes(params);
+
+            updateWindowAnimations(showBelow, showRight);
+        }
+
+        private void updateWindowAnimations(boolean showBelow, boolean showRight) {
+            if (showBelow) {
+                if (showRight)
+                    mWindow.setWindowAnimations(R.style.Animation_PopupWindow_DropDown_RightTop);
+                else
+                    mWindow.setWindowAnimations(R.style.Animation_PopupWindow_DropDown_LeftTop);
+            } else {
+                if (showRight)
+                    mWindow.setWindowAnimations(R.style.Animation_PopupWindow_DropDown_RightBottom);
+                else
+                    mWindow.setWindowAnimations(R.style.Animation_PopupWindow_DropDown_LeftBottom);
+            }
         }
 
         private int calculateWidth() {
@@ -501,7 +517,7 @@ public class MiuiAlertDialogFactory {
 
             addView(mCustomLayout, mCustomView);
             if (mOnBindView != null)
-                mOnBindView.onBindView(mCustomView);
+                mOnBindView.onBindView(mCustomLayout, mCustomView);
             updateCustomLayoutBottomMarginIfNeed();
         }
 
@@ -537,7 +553,7 @@ public class MiuiAlertDialogFactory {
         protected View.OnClickListener createButtonClickAction(int id, DialogInterface.OnClickListener listener) {
             return v -> {
                 if (isEnableHapticFeedback)
-                    v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                    v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
                 if (id == BUTTON_POSITIVE) {
                     if (isEnableEditText && mTextWatcher != null)
                         mTextWatcher.onResult(this, mEditText.getText().toString());
@@ -680,7 +696,7 @@ public class MiuiAlertDialogFactory {
                         mBaseFactory.mBooleanArray.put(position, isChecked1);
                     updateSate(holder, position);
                     if (mBaseFactory.isEnableHapticFeedback)
-                        holder.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                        holder.layout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
                     if (mBaseFactory.mItemsClickListener != null)
                         mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
                     if (!mBaseFactory.isEnableMultiSelect)

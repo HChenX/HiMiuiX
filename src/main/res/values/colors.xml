@@ -20,8 +20,6 @@
     <color name="title">#000000</color>
     <color name="summary">#666666</color>
     <color name="tip">#666666</color>
-    <color name="title_d">#B1B1B1</color>
-    <color name="summary_d">#B2B2B2</color>
     <color name="switch_d_off">#F2F2F2</color>
     <color name="switch_d_on">#C1D9FF</color>
     <color name="thumb_d_on">#EDF3FF</color>
@@ -41,9 +39,7 @@
     <color name="seekbar_background">#EEF1F6</color>
     <color name="seekbar_progress">#0C84FF</color>
     <color name="arrow_right">#999999</color> <!--preference 右侧箭头颜色-->
-    <color name="arrow_right_d">#B2B2B2</color>
     <color name="arrow_up_down">#949494</color> <!--DropDownPreference 右侧上下箭头颜色-->
-    <color name="arrow_up_down_d">#999999</color>
     <color name="category_background">#E5E5E5</color> <!--MiuiPreferenceCategory 分割线背景-->
     <color name="category_tip">#8D92AF</color> <!--MiuiPreferenceCategory title 字体颜色-->
     <color name="card_background">#F0F0F0</color> <!--MiuiCardPreference 背景色-->
@@ -52,4 +48,6 @@
     <color name="cancel_background_waring">#FFB459</color>
     <color name="card_text_waring">#F4AA51</color>
     <color name="seekbar_def">#AAD7DDE9</color>
+    <color name="checkbox_off">#F0F0F0</color>
+    <color name="checkbox_on">#4980F7</color>
 </resources>

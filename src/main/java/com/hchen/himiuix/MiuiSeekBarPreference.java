@@ -58,7 +58,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
     private String mDefValueString;
     private boolean isInitialTime = true;
 
-    private final SeekBar.OnSeekBarChangeListener changeListener = new SeekBar.OnSeekBarChangeListener() {
+    private final SeekBar.OnSeekBarChangeListener mChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (fromUser && mTrackingTouch) {
@@ -66,7 +66,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                 ((MiuiSeekBar) seekBar).setShowDefaultPoint((stepAfterValue != mDefValue) && shouldShowDefTip);
                 if (stepAfterValue == mMaxValue || stepAfterValue == mMinValue
                     || stepAfterValue == mDefValue) {
-                    mMainLayout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+                    mMainLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
                 }
                 updateLabelValue(stepAfterValue);
             }
@@ -162,7 +162,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
 
         mNumberView.setVisibility(mShowSeekBarValue ? View.VISIBLE : View.GONE);
         mSeekBarView.isHapticFeedbackEnabled();
-        mSeekBarView.setOnSeekBarChangeListener(changeListener);
+        mSeekBarView.setOnSeekBarChangeListener(mChangeListener);
         mSeekBarView.setMax(shouldStep ? mStepCount : mMaxValue);
         mSeekBarView.setMin(shouldStep ? 0 : mMinValue);
 
@@ -179,10 +179,10 @@ public class MiuiSeekBarPreference extends MiuiPreference {
         updateLabelValue(mSeekBarValue);
         if (isEnabled()) {
             seekBarDrawable.setAlpha(255);
-            mNumberView.setTextColor(getContext().getColor(R.color.title));
+            mNumberView.setAlpha(1f);
         } else {
             seekBarDrawable.setAlpha(125);
-            mNumberView.setTextColor(getContext().getColor(R.color.title_d));
+            mNumberView.setAlpha(0.5f);
         }
     }
 
@@ -215,6 +215,7 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                 .setHapticFeedbackEnabled(true)
                 .setEnableEditTextView(true)
                 .setEditTextAutoKeyboard(true)
+                .setEditTextInputType(InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER)
                 .setEditText(def, new DialogInterface.TextWatcher() {
                     @Override
                     public void onResult(DialogInterface dialog, CharSequence s) {
@@ -228,7 +229,6 @@ public class MiuiSeekBarPreference extends MiuiPreference {
                         setProgressIfNeed(getStepBeforeIfNeed(result));
                     }
                 })
-                .setEditTextInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
                 .setPositiveButton("确定", null)
                 .setNegativeButton("取消", null)
                 .setOnDismissListener(dialog ->

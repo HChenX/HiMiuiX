@@ -28,7 +28,9 @@
         -->
     </style>
 
-    <style name="Animation" parent=""></style>
+    <style name="Animation" />
+
+    <style name="Animation.PopupWindow" />
 
     <style name="Animation.Dialog" parent="@style/Animation">
         <item name="android:windowEnterAnimation">@anim/dialog_anim_slide_in_bottom</item>
@@ -45,9 +47,33 @@
         <item name="android:windowExitAnimation">@anim/dialog_anim_slide_out_bottom_exist_ime</item>
     </style>
 
+    <style name="Animation.PopupWindow.DropDown">
+        <item name="android:windowEnterAnimation">@anim/drop_down_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/drop_down_popup_exit</item>
+    </style>
+
     <style name="Animation.Dialog.NoAnimation" parent="@style/Animation.Dialog">
         <item name="android:windowEnterAnimation">@anim/dialog_anim_noanim</item>
         <item name="android:windowExitAnimation">@anim/dialog_anim_noanim</item>
+    </style>
+
+    <style name="Animation.PopupWindow.DropDown.LeftTop">
+        <item name="android:windowEnterAnimation">@anim/drop_down_popup_enter_lt</item>
+        <item name="android:windowExitAnimation">@anim/drop_down_popup_exit_lt</item>
+    </style>
+
+    <style name="Animation.PopupWindow.DropDown.LeftBottom">
+        <item name="android:windowEnterAnimation">@anim/drop_down_popup_enter_lb</item>
+        <item name="android:windowExitAnimation">@anim/drop_down_popup_exit_lb</item>
+    </style>
+
+    <style name="Animation.PopupWindow.DropDown.RightBottom">
+        <item name="android:windowEnterAnimation">@anim/drop_down_popup_enter_rb</item>
+        <item name="android:windowExitAnimation">@anim/drop_down_popup_exit_rb</item>
+    </style>
+    <style name="Animation.PopupWindow.DropDown.RightTop">
+        <item name="android:windowEnterAnimation">@anim/drop_down_popup_enter_rt</item>
+        <item name="android:windowExitAnimation">@anim/drop_down_popup_exit_rt</item>
     </style>
 
     <style name="MiuiPreference">
@@ -59,7 +85,7 @@
         <item name="android:shouldDisableView">false</item>
         <item name="android:selectable">false</item>
     </style>
-    
+
     <style name="MiuiSeekBar">
         <item name="android:indeterminateOnly">false</item>
         <item name="android:focusable">true</item>

@@ -116,7 +116,7 @@ public class MiuiCardPreference extends MiuiPreference {
         mIconClickListener = v -> {
             if (clickListener != null)
                 clickListener.onClick(v);
-            v.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+            v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
         };
         notifyChanged();
     }

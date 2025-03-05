@@ -69,6 +69,13 @@
         <attr name="defaultColor" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="MiuiCheckBoxPreference">
+        <attr name="buttonLocation">
+            <enum name="start" value="0" />
+            <enum name="end" value="1" />
+        </attr>
+    </declare-styleable>
+
     <declare-styleable name="SpringBackLayout">
         <attr name="scrollableView" format="reference" />
         <attr name="scrollOrientation" format="integer" />

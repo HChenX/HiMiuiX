@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/miuix_appcompat_btn_checkbox_on_to_off_vector">
+    android:drawable="@drawable/btn_checkbox_off_to_on_vector">
     <target
         android:name="arrow"
-        android:animation="@animator/miuix_appcompat_btn_checkbox_on_to_off" />
+        android:animation="@anim/btn_checkbox_off_to_on" />
 </animated-vector>
