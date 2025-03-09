@@ -44,6 +44,7 @@ import androidx.preference.PreferenceViewHolder;
 import com.hchen.himiuix.colorpicker.ColorSelectView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MiuiPreference extends Preference {
     static String TAG = "MiuiPreference";
@@ -61,6 +62,7 @@ public class MiuiPreference extends Preference {
     private boolean isFirst;
     private boolean isLast;
     private int mCount = 1;
+    private List<MiuiPreference> mMiuiPreferences;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         @SuppressLint("RestrictedApi")
@@ -313,6 +315,10 @@ public class MiuiPreference extends Preference {
         mCount = count;
     }
 
+    void updateMiuiPrefList(List<MiuiPreference> miuiPreferences) {
+        mMiuiPreferences = miuiPreferences;
+    }
+
     void updateBackground(@ColorRes int color) {
         updateBackground(mMainLayout, color);
     }
@@ -331,17 +337,18 @@ public class MiuiPreference extends Preference {
         if (layout == null) return;
 
         GradientDrawable drawable = (GradientDrawable) (
-            mCount == 1 ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_r_l) :
-                isFirst ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_top_r_l) :
-                    isLast ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l) :
-                        ContextCompat.getDrawable(getContext(), R.drawable.not_rounded_background)
+            updateMiuiPrefBgIfNeed() ? (isFirst ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_r_l) :
+                ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l)) :
+                mCount == 1 ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_r_l) :
+                    isFirst ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_top_r_l) :
+                        isLast ? ContextCompat.getDrawable(getContext(), R.drawable.rounded_background_bottom_r_l) :
+                            ContextCompat.getDrawable(getContext(), R.drawable.not_rounded_background)
         );
         if (drawable == null) return;
 
         if (color != -1) {
             drawable.setColor(getContext().getColor(color));
         }
-        layout.invalidate();
         layout.setBackground(drawable);
     }
 
@@ -393,6 +400,7 @@ public class MiuiPreference extends Preference {
         }
 
         for (MiuiPreference preference : dependents) {
+            // Log.i(TAG, "this: " + this + ", dp: " + preference);
             preference.setVisible(!shouldDisableDependents());
             preference.onDependencyChanged(this, disableDependents);
         }
@@ -404,6 +412,23 @@ public class MiuiPreference extends Preference {
         MiuiPreference preference = findPreferenceInHierarchy(mDependencyKey);
         if (preference != null)
             preference.mDependents.remove(this);
+    }
+
+    private boolean updateMiuiPrefBgIfNeed() {
+        if (mMiuiPreferences == null || mMiuiPreferences.isEmpty()) return false;
+
+        int index = mMiuiPreferences.indexOf(this);
+        if (index == -1) return false;
+
+        boolean allHide = true;
+        for (int i = index + 1; i < mMiuiPreferences.size(); i++) {
+            MiuiPreference miuiPreference = mMiuiPreferences.get(i);
+            if (miuiPreference.isVisible()) {
+                allHide = false;
+                break;
+            }
+        }
+        return allHide;
     }
 
     boolean onMainLayoutTouch(View v, MotionEvent event) {

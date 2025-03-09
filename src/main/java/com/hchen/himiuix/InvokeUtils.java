@@ -23,58 +23,58 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class InvokeUtils {
+class InvokeUtils {
     private static final String TAG = "InvokeUtils";
     private static final HashMap<String, Method> methodCache = new HashMap<>();
     private static final HashMap<String, Field> fieldCache = new HashMap<>();
 
     // ----------------------------反射调用方法--------------------------------
-    public static <T> T callMethod(Object instance, String method, Class<?>[] param, Object... value) {
+    static <T> T callMethod(Object instance, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(null, instance, method, param, value);
     }
 
-    public static <T> T callStaticMethod(Class<?> clz, String method, Class<?>[] param, Object... value) {
+    static <T> T callStaticMethod(Class<?> clz, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(clz, null, method, param, value);
     }
 
-    public static <T> T callStaticMethod(String clz, String method, Class<?>[] param, Object... value) {
+    static <T> T callStaticMethod(String clz, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(findClass(clz), null, method, param, value);
     }
 
-    public static <T> T callStaticMethod(String clz, ClassLoader classLoader, String method, Class<?>[] param, Object... value) {
+    static <T> T callStaticMethod(String clz, ClassLoader classLoader, String method, Class<?>[] param, Object... value) {
         return baseInvokeMethod(findClass(clz, classLoader), null, method, param, value);
     }
 
     // ----------------------------设置字段--------------------------------
-    public static <T> T setField(Object instance, String field, Object value) {
+    static <T> T setField(Object instance, String field, Object value) {
         return baseInvokeField(null, instance, field, true, value);
     }
 
-    public static <T> T setStaticField(Class<?> clz, String field, Object value) {
+    static <T> T setStaticField(Class<?> clz, String field, Object value) {
         return baseInvokeField(clz, null, field, true, value);
     }
 
-    public static <T> T setStaticField(String clz, String field, Object value) {
+    static <T> T setStaticField(String clz, String field, Object value) {
         return baseInvokeField(findClass(clz), null, field, true, value);
     }
 
-    public static <T> T setStaticField(String clz, ClassLoader classLoader, String field, Object value) {
+    static <T> T setStaticField(String clz, ClassLoader classLoader, String field, Object value) {
         return baseInvokeField(findClass(clz, classLoader), null, field, true, value);
     }
 
-    public static <T> T getField(Object instance, String field) {
+    static <T> T getField(Object instance, String field) {
         return baseInvokeField(null, instance, field, false, null);
     }
 
-    public static <T> T getStaticField(Class<?> clz, String field) {
+    static <T> T getStaticField(Class<?> clz, String field) {
         return baseInvokeField(clz, null, field, false, null);
     }
 
-    public static <T> T getStaticField(String clz, String field) {
+    static <T> T getStaticField(String clz, String field) {
         return baseInvokeField(findClass(clz), null, field, false, null);
     }
 
-    public static <T> T getStaticField(String clz, ClassLoader classLoader, String field) {
+    static <T> T getStaticField(String clz, ClassLoader classLoader, String field) {
         return baseInvokeField(findClass(clz, classLoader), null, field, false, null);
     }
 
@@ -151,11 +151,11 @@ public class InvokeUtils {
         }
     }
 
-    public static Class<?> findClass(String className) {
+    static Class<?> findClass(String className) {
         return findClass(className, null);
     }
 
-    public static Class<?> findClass(String className, ClassLoader classLoader) {
+    static Class<?> findClass(String className, ClassLoader classLoader) {
         try {
             if (classLoader == null)
                 classLoader = ClassLoader.getSystemClassLoader();

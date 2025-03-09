@@ -56,7 +56,7 @@ import com.hchen.himiuix.widget.MiuiEditText;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MiuiAlertDialogFactory {
+class MiuiAlertDialogFactory {
     private final static String TAG = "MiuiPreference";
     private final Context mContext;
     private final int mThemeResId;
