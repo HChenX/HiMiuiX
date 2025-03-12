@@ -20,6 +20,12 @@
         <attr name="singeLineCenter" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="MiuiEditText">
+        <attr name="editHeight" format="dimension" />
+        <attr name="background" format="reference" />
+        <attr name="android:hint" />
+    </declare-styleable>
+
     <declare-styleable name="MiuiDropDownPreference">
         <attr name="entries" format="reference" />
         <attr name="android:entries" />
@@ -27,8 +33,7 @@
         <attr name="entryValues" format="reference" />
         <attr name="android:entryValues" />
 
-        <attr name="defaultValue" format="string|boolean|integer|reference|float" />
-        <attr name="android:defaultValue" />
+        <attr name="defaultValue" format="string" />
 
         <attr name="showOnSummary" format="boolean" /> <!--选择结果显示在 summary 上-->
     </declare-styleable>
@@ -38,8 +43,7 @@
         <attr name="minValue" format="integer" />
         <attr name="format" format="string" /> <!--可以理解为单位-->
         <attr name="stepValue" format="integer" /> <!--跳跃值-->
-        <attr name="android:defaultValue" />
-        <attr name="defaultValue" />
+        <attr name="defaultValue" format="string" />
         <attr name="showDefTip" format="boolean" /> <!--是否显示默认值位置提示标-->
         <attr name="defValueString" format="string" /> <!--处于默认值时显示的字符-->
         <attr name="dialogEnabled" format="boolean" />

@@ -1,21 +1,26 @@
 /*
  * This file is part of HiMiuiX.
 
- * HiMiuiX is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- *
- * HiMiuiX is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+ * HiMiuiX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License.
 
- * Copyright (C) 2023-2024 HiMiuiX Contributions
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.himiuix.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -41,6 +46,9 @@ public class MiuiEditText extends ConstraintLayout {
     private EditText mEditTextView;
     private ImageView mEditTextImageView;
     private LayoutParams params;
+    private int mEditHeight;
+    private Drawable mBackground;
+    private String mHint;
     private boolean isErrorBorder = false;
 
     public MiuiEditText(@NonNull Context context) {
@@ -58,6 +66,14 @@ public class MiuiEditText extends ConstraintLayout {
     public MiuiEditText(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiEditText)) {
+            mEditHeight = (int) typedArray.getDimension(R.styleable.MiuiEditText_editHeight, 50f);
+            mHint = typedArray.getString(R.styleable.MiuiEditText_android_hint);
+            if (typedArray.hasValue(R.styleable.MiuiEditText_background))
+                mBackground = typedArray.getDrawable(R.styleable.MiuiEditText_background);
+            else
+                mBackground = AppCompatResources.getDrawable(context, R.drawable.ic_edit_bg);
+        }
         init(context);
     }
 
@@ -69,7 +85,7 @@ public class MiuiEditText extends ConstraintLayout {
             ViewGroup.LayoutParams.WRAP_CONTENT
         );
         setLayoutParams(params);
-        setBackground(AppCompatResources.getDrawable(context, R.drawable.ic_edit_bg));
+        setBackground(mBackground);
 
         mEditTextTipView = new TextView(context);
         mEditTextView = new EditText(context);
@@ -85,7 +101,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextTipView.setId(R.id.edit_tip);
         params = new LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            MiuiXUtils.dp2px(mContext, 50)
+            mEditHeight
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         mEditTextTipView.setLayoutParams(params);
@@ -102,7 +118,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextView.setId(R.id.edit_text);
         params = new LayoutParams(
             0,
-            MiuiXUtils.dp2px(mContext, 50)
+            mEditHeight
         );
         params.setMarginStart(MiuiXUtils.dp2px(mContext, 15));
         params.setMarginEnd(MiuiXUtils.dp2px(mContext, 15));
@@ -112,6 +128,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextView.setFocusable(true);
         mEditTextView.setFocusableInTouchMode(true);
         mEditTextView.setSingleLine(true);
+        mEditTextView.setHint(mHint);
         mEditTextView.setTextAlignment(TEXT_ALIGNMENT_VIEW_START);
         mEditTextView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         mEditTextView.setHintTextColor(mContext.getColor(R.color.edit_hint));
@@ -122,8 +139,8 @@ public class MiuiEditText extends ConstraintLayout {
     private void loadEditTextImageView() {
         mEditTextImageView.setId(R.id.edit_image);
         params = new LayoutParams(
-            MiuiXUtils.dp2px(mContext, 50),
-            MiuiXUtils.dp2px(mContext, 50)
+            mEditHeight,
+            mEditHeight
         );
         mEditTextImageView.setLayoutParams(params);
         mEditTextImageView.setPadding(
