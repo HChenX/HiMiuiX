@@ -25,9 +25,9 @@ import android.widget.RadioButton;
 
 import com.hchen.himiuix.R;
 
-
 @SuppressLint("AppCompatCustomView")
 public class MiuiRadioButton extends RadioButton {
+    private final String TAG = "MiuiPreference";
     private OnCheckedStateChangeListener mOnCheckedStateChangeListener;
 
     public MiuiRadioButton(Context context) {
@@ -45,6 +45,7 @@ public class MiuiRadioButton extends RadioButton {
     public MiuiRadioButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        setClickable(true);
         setBackground(null);
         setButtonDrawable(R.drawable.btn_radio_arrow);
         setHapticFeedbackEnabled(false);

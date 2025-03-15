@@ -159,7 +159,7 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
     protected void onClick(View view) {
         if (mMiuiCheckBox == null) return;
 
-        mMiuiCheckBox.setChecked(!isChecked());
+        mMiuiCheckBox.performClick();
     }
 
     @Override

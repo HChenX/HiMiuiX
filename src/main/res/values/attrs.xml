@@ -94,13 +94,17 @@
         <attr name="android:summaryOff" />
         <attr name="disableDependentsState" />
         <attr name="android:disableDependentsState" />
-        <attr name="buttonLocation"/>
+        <attr name="buttonLocation" />
     </declare-styleable>
 
     <declare-styleable name="SpringBackLayout">
         <attr name="scrollableView" format="reference" />
         <attr name="scrollOrientation" format="integer" />
         <attr name="springBackMode" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiCheckBox">
+        <attr name="android:button" />
     </declare-styleable>
 
 </resources>

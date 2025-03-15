@@ -20,6 +20,8 @@ package com.hchen.himiuix.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.CheckBox;
 
@@ -44,8 +46,17 @@ public class MiuiCheckBox extends CheckBox {
     public MiuiCheckBox(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiCheckBox)) {
+            if (typedArray.hasValue(R.styleable.MiuiCheckBox_android_button)) {
+                Drawable drawable = typedArray.getDrawable(R.styleable.MiuiCheckBox_android_button);
+                setButtonDrawable(drawable);
+            } else {
+                setButtonDrawable(R.drawable.btn_checkbox);
+            }
+        }
+
+        setClickable(true);
         setBackground(null);
-        setButtonDrawable(R.drawable.btn_checkbox);
         setHapticFeedbackEnabled(false);
     }
 

@@ -159,7 +159,7 @@ public class MiuiRadioButtonPreference extends MiuiPreference {
     protected void onClick(View view) {
         if (mMiuiRadioButton == null) return;
 
-        mMiuiRadioButton.setChecked(!isChecked());
+        mMiuiRadioButton.performClick();
     }
 
     @Override

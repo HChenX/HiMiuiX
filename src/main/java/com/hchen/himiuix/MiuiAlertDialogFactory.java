@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.text.InputType;
-import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -44,15 +43,14 @@ import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hchen.himiuix.springback.SpringBackLayout;
+import com.hchen.himiuix.widget.MiuiCheckBox;
 import com.hchen.himiuix.widget.MiuiEditText;
 
 import java.util.ArrayList;
@@ -680,37 +678,43 @@ class MiuiAlertDialogFactory {
             @SuppressLint("ClickableViewAccessibility")
             public void onBindViewHolder(@NonNull MiuiAlertDialogListViewHolder holder, @SuppressLint("RecyclerView") int position) {
                 CharSequence title = mBaseFactory.mItems.get(position);
-                holder.switchCompat.setText(title);
+                holder.mTextView.setText(title);
                 boolean isChecked = mBaseFactory.mBooleanArray.get(position);
-                holder.switchCompat.setHapticFeedbackEnabled(false);
-                holder.switchCompat.setOnCheckedChangeListener(null);
-                holder.switchCompat.setChecked(isChecked);
+                holder.mMiuiCheckBox.setChecked(isChecked);
+                holder.mMiuiCheckBox.setOnCheckedStateChangeListener(null);
+                holder.mLayout.setOnTouchListener(null);
+                holder.mTextView.setOnClickListener(null);
+
                 updateSate(holder, position);
 
-                holder.layout.setOnTouchListener((v, event) -> holder.switchCompat.onTouchEvent(event));
-                holder.imageView.setOnTouchListener((v, event) -> holder.switchCompat.onTouchEvent(event));
-                holder.switchCompat.setOnCheckedChangeListener((buttonView, isChecked1) -> {
-                    if (mBaseFactory.isEnableMultiSelect)
-                        mBaseFactory.mBooleanArray.put(position, isChecked1);
-                    updateSate(holder, position);
-                    if (mBaseFactory.isEnableHapticFeedback)
-                        holder.layout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-                    if (mBaseFactory.mItemsClickListener != null)
-                        mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
-                    if (!mBaseFactory.isEnableMultiSelect)
-                        mBaseFactory.dismiss();
-                });
+                if (holder.mMiuiCheckBox.isEnabled()) {
+                    holder.mMiuiCheckBox.setClickable(true);
+                    holder.mLayout.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
+                    holder.mTextView.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
+
+                    holder.mMiuiCheckBox.setOnCheckedChangeListener((buttonView, isChecked1) -> {
+                        if (mBaseFactory.isEnableMultiSelect)
+                            mBaseFactory.mBooleanArray.put(position, isChecked1);
+                        updateSate(holder, position);
+                        if (mBaseFactory.isEnableHapticFeedback)
+                            holder.mLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+                        if (mBaseFactory.mItemsClickListener != null)
+                            mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
+                        if (!mBaseFactory.isEnableMultiSelect)
+                            mBaseFactory.dismiss();
+                    });
+                }
             }
 
             private void updateSate(MiuiAlertDialogListViewHolder holder, int position) {
                 if (mBaseFactory.mBooleanArray.get(position)) {
-                    holder.switchCompat.setTextColor(mBaseFactory.mContext.getColor(R.color.list_choose_text));
-                    holder.layout.setBackgroundResource(R.drawable.list_choose_item_background);
-                    holder.imageView.setVisibility(View.VISIBLE);
+                    holder.mTextView.setTextColor(mBaseFactory.mContext.getColor(R.color.list_choose_text));
+                    holder.mLayout.setBackgroundResource(R.drawable.list_choose_item_background);
+                    holder.mMiuiCheckBox.setVisibility(View.VISIBLE);
                 } else {
-                    holder.layout.setBackgroundResource(R.drawable.list_item_background);
-                    holder.switchCompat.setTextColor(mBaseFactory.mContext.getColor(R.color.list_text));
-                    holder.imageView.setVisibility(View.INVISIBLE);
+                    holder.mLayout.setBackgroundResource(R.drawable.list_item_background);
+                    holder.mTextView.setTextColor(mBaseFactory.mContext.getColor(R.color.list_text));
+                    holder.mMiuiCheckBox.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -720,37 +724,17 @@ class MiuiAlertDialogFactory {
             }
 
             private static class MiuiAlertDialogListViewHolder extends RecyclerView.ViewHolder {
-                ConstraintLayout layout;
-                SwitchCompat switchCompat;
-                ImageView imageView;
+                ConstraintLayout mLayout;
+                TextView mTextView;
+                MiuiCheckBox mMiuiCheckBox;
 
                 private MiuiAlertDialogListViewHolder(@NonNull View itemView) {
                     super(itemView);
-                    layout = (ConstraintLayout) itemView;
-                    switchCompat = itemView.findViewById(R.id.list_item);
-                    imageView = itemView.findViewById(R.id.list_image);
+                    mLayout = (ConstraintLayout) itemView;
+                    mTextView = itemView.findViewById(R.id.list_item);
+                    mMiuiCheckBox = itemView.findViewById(R.id.list_image);
                 }
             }
-        }
-    }
-
-    public static class MiuiSwitchCompat extends SwitchCompat {
-
-        public MiuiSwitchCompat(@NonNull Context context) {
-            super(context);
-        }
-
-        public MiuiSwitchCompat(@NonNull Context context, @Nullable AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        public MiuiSwitchCompat(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
-        }
-
-        @Override
-        public boolean isFocused() {
-            return true;
         }
     }
 }
