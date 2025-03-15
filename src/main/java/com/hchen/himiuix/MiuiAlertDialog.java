@@ -51,11 +51,11 @@ public class MiuiAlertDialog {
         this(context, themeResId, false);
     }
 
-    protected MiuiAlertDialog(@NonNull Context context, boolean enableDropDownMode) {
+    MiuiAlertDialog(@NonNull Context context, boolean enableDropDownMode) {
         this(context, R.style.MiuiAlertDialog, enableDropDownMode);
     }
 
-    protected MiuiAlertDialog(@NonNull Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
+    MiuiAlertDialog(@NonNull Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
         mBaseFactory = new MiuiAlertDialogFactory(context, themeResId, enableDropDownMode).init();
     }
 
@@ -63,7 +63,7 @@ public class MiuiAlertDialog {
         return mBaseFactory.mWindow;
     }
 
-    protected MiuiAlertDialogFactory.MiuiAlertDialogBaseFactory getBaseFactory() {
+    MiuiAlertDialogFactory.MiuiAlertDialogBaseFactory getBaseFactory() {
         return mBaseFactory;
     }
 

@@ -33,45 +33,53 @@ import androidx.annotation.StringRes;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
-import com.hchen.himiuix.widget.MiuiSwitch;
+import com.hchen.himiuix.widget.MiuiRadioButton;
 
-public class MiuiSwitchPreference extends MiuiPreference {
-    private MiuiSwitch mMiuiSwitch;
+public class MiuiRadioButtonPreference extends MiuiPreference {
+    private MiuiRadioButton mMiuiRadioButton;
+    private boolean isChecked = false;
+    private boolean isInitialState = true;
     private CharSequence mSummaryOn;
     private CharSequence mSummaryOff;
-    private boolean isChecked;
     private boolean mDisableDependentsState;
-    private boolean isInitialState = true;
-    private final MiuiSwitch.OnSwitchStateChangeListener mOnSwitchStateChangeListener = newValue -> {
-        boolean result = callChangeListener(newValue);
-        if (result)
-            setChecked(newValue, true);
-
-        return result;
+    private int mButtonLocation;
+    private final MiuiRadioButton.OnCheckedStateChangeListener mOnCheckedStateChangeListener = (miuiRadioButton, newChecked) -> {
+        if (callChangeListener(newChecked)) {
+            setChecked(newChecked);
+            getMainLayout().performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+            return true;
+        }
+        return false;
     };
 
-    public MiuiSwitchPreference(@NonNull Context context) {
+    public MiuiRadioButtonPreference(@NonNull Context context) {
         this(context, null);
     }
 
-    public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MiuiRadioButtonPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.style.MiuiPreference);
     }
 
-    public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MiuiRadioButtonPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
     @SuppressLint("RestrictedApi")
-    public MiuiSwitchPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiRadioButtonPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        setLayoutResource(R.layout.miuix_switch);
-        try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiSwitchPreference, defStyleAttr, defStyleRes)) {
-            mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOn, R.styleable.MiuiSwitchPreference_android_summaryOn);
-            mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOff, R.styleable.MiuiSwitchPreference_android_summaryOff);
-            mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiSwitchPreference_disableDependentsState,
-                R.styleable.MiuiSwitchPreference_android_disableDependentsState, false);
+        try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiRadioButtonPreference, defStyleAttr, defStyleRes)) {
+            mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiRadioButtonPreference_summaryOn, R.styleable.MiuiRadioButtonPreference_android_summaryOn);
+            mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiRadioButtonPreference_summaryOff, R.styleable.MiuiRadioButtonPreference_android_summaryOff);
+            mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiRadioButtonPreference_disableDependentsState,
+                R.styleable.MiuiRadioButtonPreference_android_disableDependentsState, false);
+            mButtonLocation = array.getInt(R.styleable.MiuiRadioButtonPreference_buttonLocation, 1);
+        }
+
+        if (mButtonLocation == 0) {
+            setLayoutResource(R.layout.miuix_radiobutton_start);
+        } else if (mButtonLocation == 1) {
+            setLayoutResource(R.layout.miuix_radiobutton_end);
         }
     }
 
@@ -101,29 +109,6 @@ public class MiuiSwitchPreference extends MiuiPreference {
         return mSummaryOff;
     }
 
-    public boolean isChecked() {
-        return isChecked;
-    }
-
-    public void setChecked(boolean checked) {
-        setChecked(checked, false);
-    }
-
-    private void setChecked(boolean checked, boolean fromUser) {
-        final boolean changed = isChecked != checked;
-        if (changed || isInitialState) {
-            isChecked = checked;
-            persistBoolean(checked);
-            notifyDependencyChange(shouldDisableDependents());
-            if (!isInitialState) {
-                if (!fromUser && mMiuiSwitch != null) {
-                    mMiuiSwitch.setChecked(isChecked, false);
-                }
-                notifyChanged();
-            }
-        }
-    }
-
     public void setDisableDependentsState(boolean disableDependentsState) {
         mDisableDependentsState = disableDependentsState;
         notifyChanged();
@@ -139,18 +124,21 @@ public class MiuiSwitchPreference extends MiuiPreference {
         return shouldDisable || super.shouldDisableDependents();
     }
 
-    @Nullable
-    @Override
-    protected Object onGetDefaultValue(@NonNull TypedArray a, int index) {
-        return a.getBoolean(index, false);
+    public boolean isChecked() {
+        return isChecked;
     }
 
-    @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
-        super.onSetInitialValue(defaultValue);
-        if (defaultValue == null) defaultValue = false;
-        setChecked(getPersistedBoolean((Boolean) defaultValue), false);
-        isInitialState = false;
+    public void setChecked(boolean checked) {
+        final boolean changed = isChecked != checked;
+        if (changed || isInitialState) {
+            isChecked = checked;
+            persistBoolean(checked);
+            notifyDependencyChange(shouldDisableDependents());
+
+            if (!isInitialState) {
+                notifyChanged();
+            }
+        }
     }
 
     @Override
@@ -158,27 +146,25 @@ public class MiuiSwitchPreference extends MiuiPreference {
         isInitialState = false;
         super.onBindViewHolder(holder);
 
-        mMiuiSwitch = holder.itemView.findViewById(R.id.checkbox_container);
-        mMiuiSwitch.setOnSwitchStateChangeListener(mOnSwitchStateChangeListener);
-        mMiuiSwitch.setChecked(isChecked, false);
+        mMiuiRadioButton = holder.itemView.findViewById(R.id.radio_button);
+        mMiuiRadioButton.setOnCheckedStateChangeListener(null);
+        mMiuiRadioButton.setChecked(isChecked);
+
+        if (isEnabled()) {
+            mMiuiRadioButton.setOnCheckedStateChangeListener(mOnCheckedStateChangeListener);
+        }
+    }
+
+    @Override
+    protected void onClick(View view) {
+        if (mMiuiRadioButton == null) return;
+
+        mMiuiRadioButton.setChecked(!isChecked());
     }
 
     @Override
     boolean shouldShowSummary() {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
-    }
-
-    @Override
-    protected void onClick(View view) {
-        if (mMiuiSwitch == null) return;
-        if (mMiuiSwitch.isAnimationShowing()) return;
-
-        if (callChangeListener(!isChecked())) {
-            mMiuiSwitch.setChecked(!isChecked());
-            setChecked(!isChecked(), true);
-
-            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-        }
     }
 
     @Override
@@ -194,6 +180,20 @@ public class MiuiSwitchPreference extends MiuiPreference {
             if (isChecked()) return mSummaryOn;
             else return mSummaryOff;
         }
+    }
+
+    @Nullable
+    @Override
+    protected Object onGetDefaultValue(@NonNull TypedArray a, int index) {
+        return a.getBoolean(index, false);
+    }
+
+    @Override
+    protected void onSetInitialValue(@Nullable Object defaultValue) {
+        super.onSetInitialValue(defaultValue);
+        if (defaultValue == null) defaultValue = false;
+        setChecked(getPersistedBoolean((Boolean) defaultValue));
+        isInitialState = false;
     }
 
     @Nullable
@@ -217,7 +217,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
-        setChecked(savedState.isChecked, false);
+        setChecked(savedState.isChecked);
     }
 
     private static class SavedState extends BaseSavedState {

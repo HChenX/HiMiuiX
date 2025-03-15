@@ -1,56 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <Button
         android:id="@android:id/button1"
+        style="@style/DialogButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="@drawable/dialog_nagative_background"
-        android:ellipsize="marquee"
-        android:maxLines="1"
-        android:scrollbars="none"
-        android:singleLine="true"
-        android:stateListAnimator="@null"
         android:textColor="@color/dialog_button1"
-        android:textSize="17sp"
-        android:visibility="gone"
-        app:backgroundTint="@null" />
+        android:visibility="gone" />
 
     <Button
         android:id="@android:id/button3"
+        style="@style/DialogButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
         android:layout_weight="1"
         android:background="@drawable/dialog_nagative_background"
-        android:ellipsize="marquee"
-        android:maxLines="1"
-        android:scrollbars="none"
-        android:singleLine="true"
-        android:stateListAnimator="@null"
         android:textColor="@color/dialog_button1"
-        android:textSize="17sp"
-        app:backgroundTint="@null" />
+        android:visibility="gone" />
 
     <Button
         android:id="@android:id/button2"
+        style="@style/DialogButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="@drawable/dialog_positive_background"
-        android:ellipsize="marquee"
-        android:maxLines="1"
-        android:scrollbars="vertical"
-        android:singleLine="true"
-        android:stateListAnimator="@null"
         android:textColor="@color/dialog_button2"
-        android:textSize="17sp"
-        android:visibility="gone"
-        app:backgroundTint="@null" />
+        android:visibility="gone" />
 </LinearLayout>

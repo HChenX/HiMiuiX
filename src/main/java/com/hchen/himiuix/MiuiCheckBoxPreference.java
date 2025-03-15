@@ -68,14 +68,11 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
     public MiuiCheckBoxPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiSwitchPreference, defStyleAttr, defStyleRes)) {
-            mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOn, R.styleable.MiuiSwitchPreference_android_summaryOn);
-            mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiSwitchPreference_summaryOff, R.styleable.MiuiSwitchPreference_android_summaryOff);
-            mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiSwitchPreference_disableDependentsState,
-                R.styleable.MiuiSwitchPreference_android_disableDependentsState, false);
-        }
-
         try (TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.MiuiCheckBoxPreference, defStyleAttr, defStyleRes)) {
+            mSummaryOn = TypedArrayUtils.getString(array, R.styleable.MiuiCheckBoxPreference_summaryOn, R.styleable.MiuiCheckBoxPreference_android_summaryOn);
+            mSummaryOff = TypedArrayUtils.getString(array, R.styleable.MiuiCheckBoxPreference_summaryOff, R.styleable.MiuiCheckBoxPreference_android_summaryOff);
+            mDisableDependentsState = TypedArrayUtils.getBoolean(array, R.styleable.MiuiCheckBoxPreference_disableDependentsState,
+                R.styleable.MiuiCheckBoxPreference_android_disableDependentsState, false);
             mButtonLocation = array.getInt(R.styleable.MiuiCheckBoxPreference_buttonLocation, 1);
         }
 
@@ -144,7 +141,6 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
         }
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         isInitialState = false;
@@ -157,7 +153,6 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
         if (isEnabled()) {
             mMiuiCheckBox.setOnCheckedStateChangeListener(mOnCheckedStateChangeListener);
         }
-        updateSummaryIfNeed();
     }
 
     @Override
@@ -172,19 +167,18 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
         return getSummary() != null || mSummaryOn != null || mSummaryOff != null;
     }
 
-    private void updateSummaryIfNeed() {
-        if (shouldShowSummary()) {
-            if (mSummaryOn == null && mSummaryOff == null) getSummaryView().setText(getSummary());
-            else if (mSummaryOn != null && mSummaryOff == null) {
-                if (isChecked()) getSummaryView().setText(mSummaryOn);
-                else getSummaryView().setText(getSummary());
-            } else if (mSummaryOn == null) {
-                if (isChecked()) getSummaryView().setText(getSummary());
-                else getSummaryView().setText(mSummaryOff);
-            } else {
-                if (isChecked()) getSummaryView().setText(mSummaryOn);
-                else getSummaryView().setText(mSummaryOff);
-            }
+    @Override
+    CharSequence getSummaryText() {
+        if (mSummaryOn == null && mSummaryOff == null) return getSummary();
+        else if (mSummaryOn != null && mSummaryOff == null) {
+            if (isChecked()) return mSummaryOn;
+            else return getSummary();
+        } else if (mSummaryOn == null && mSummaryOff != null) {
+            if (isChecked()) return getSummary();
+            else return mSummaryOff;
+        } else {
+            if (isChecked()) return mSummaryOn;
+            else return mSummaryOff;
         }
     }
 

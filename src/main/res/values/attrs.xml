@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="hint" format="string" />
+    <attr name="disableDependentsState" format="boolean" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
+    <attr name="summaryOn" format="string" />
+    <attr name="summaryOff" format="string" />
+
     <declare-styleable name="MiuiPreference">
         <attr name="tip" format="string" />
-        <attr name="disableDependentsState" format="boolean" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
+        <attr name="disableDependentsState" />
         <attr name="android:disableDependentsState" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
     </declare-styleable>
 
     <declare-styleable name="MiuiSwitchPreference">
-        <attr name="summaryOn" format="string" />
-        <attr name="summaryOff" format="string" />
+        <attr name="summaryOn" />
+        <attr name="summaryOff" />
         <attr name="android:summaryOn" />
         <attr name="android:summaryOff" />
         <attr name="disableDependentsState" />
@@ -24,17 +29,14 @@
         <attr name="editHeight" format="dimension" />
         <attr name="background" format="reference" />
         <attr name="android:hint" />
+        <attr name="hint" />
     </declare-styleable>
 
     <declare-styleable name="MiuiDropDownPreference">
         <attr name="entries" format="reference" />
         <attr name="android:entries" />
-
         <attr name="entryValues" format="reference" />
         <attr name="android:entryValues" />
-
-        <attr name="defaultValue" format="string" />
-
         <attr name="showOnSummary" format="boolean" /> <!--选择结果显示在 summary 上-->
     </declare-styleable>
 
@@ -43,7 +45,6 @@
         <attr name="minValue" format="integer" />
         <attr name="format" format="string" /> <!--可以理解为单位-->
         <attr name="stepValue" format="integer" /> <!--跳跃值-->
-        <attr name="defaultValue" format="string" />
         <attr name="showDefTip" format="boolean" /> <!--是否显示默认值位置提示标-->
         <attr name="defValueString" format="string" /> <!--处于默认值时显示的字符-->
         <attr name="dialogEnabled" format="boolean" />
@@ -64,7 +65,7 @@
     </declare-styleable>
 
     <declare-styleable name="MiuiEditTextPreference">
-        <attr name="hint" format="string" />
+        <attr name="hint" />
         <attr name="android:hint" />
         <attr name="android:inputType" />
     </declare-styleable>
@@ -74,10 +75,26 @@
     </declare-styleable>
 
     <declare-styleable name="MiuiCheckBoxPreference">
+        <attr name="summaryOn" />
+        <attr name="summaryOff" />
+        <attr name="android:summaryOn" />
+        <attr name="android:summaryOff" />
+        <attr name="disableDependentsState" />
+        <attr name="android:disableDependentsState" />
         <attr name="buttonLocation">
             <enum name="start" value="0" />
             <enum name="end" value="1" />
         </attr>
+    </declare-styleable>
+
+    <declare-styleable name="MiuiRadioButtonPreference">
+        <attr name="summaryOn" />
+        <attr name="summaryOff" />
+        <attr name="android:summaryOn" />
+        <attr name="android:summaryOff" />
+        <attr name="disableDependentsState" />
+        <attr name="android:disableDependentsState" />
+        <attr name="buttonLocation"/>
     </declare-styleable>
 
     <declare-styleable name="SpringBackLayout">

@@ -46,9 +46,9 @@ public class MiuiEditText extends ConstraintLayout {
     private EditText mEditTextView;
     private ImageView mEditTextImageView;
     private LayoutParams params;
-    private int mEditHeight;
-    private Drawable mBackground;
-    private String mHint;
+    private final int mEditHeight;
+    private final Drawable mBackground;
+    private final String mHint;
     private boolean isErrorBorder = false;
 
     public MiuiEditText(@NonNull Context context) {
@@ -67,7 +67,7 @@ public class MiuiEditText extends ConstraintLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiEditText)) {
-            mEditHeight = (int) typedArray.getDimension(R.styleable.MiuiEditText_editHeight, 50f);
+            mEditHeight = (int) typedArray.getDimension(R.styleable.MiuiEditText_editHeight, MiuiXUtils.dp2px(getContext(), 50));
             mHint = typedArray.getString(R.styleable.MiuiEditText_android_hint);
             if (typedArray.hasValue(R.styleable.MiuiEditText_background))
                 mBackground = typedArray.getDrawable(R.styleable.MiuiEditText_background);
@@ -109,7 +109,7 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextTipView.setSingleLine(true);
         mEditTextTipView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
         mEditTextTipView.setTextColor(mContext.getColor(R.color.edit_text));
-        mEditTextTipView.setTextSize(18);
+        mEditTextTipView.setTextSize(17);
         mEditTextTipView.setVisibility(GONE);
         addView(mEditTextTipView);
     }
@@ -190,8 +190,8 @@ public class MiuiEditText extends ConstraintLayout {
         });
     }
 
-    public void clearEditTextFocus() {
-        mEditTextView.clearFocus();
+    public EditText getEditTextView() {
+        return mEditTextView;
     }
 
     public void updateErrorBorderState(boolean error) {

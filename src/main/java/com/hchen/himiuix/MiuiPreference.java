@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -178,12 +179,17 @@ public class MiuiPreference extends Preference {
         }
     }
 
+    @CallSuper
     private void updateSummaryIfNeed() {
         mSummaryView.setVisibility(GONE);
         if (shouldShowSummary()) {
             mSummaryView.setVisibility(VISIBLE);
-            mSummaryView.setText(getSummary());
+            mSummaryView.setText(getSummaryText());
         }
+    }
+
+    CharSequence getSummaryText() {
+        return getSummary();
     }
 
     private void updateTextColorIfNeed() {
@@ -418,7 +424,8 @@ public class MiuiPreference extends Preference {
     }
 
     private boolean updateMiuiPrefBgIfNeed() {
-        if (mMiuiPreferences == null || mMiuiPreferences.isEmpty()) return false;
+        if (mMiuiPreferences == null || mMiuiPreferences.isEmpty() || mMiuiPreferences.size() == 1)
+            return false;
 
         int index = mMiuiPreferences.indexOf(this);
         if (index == -1) return false;

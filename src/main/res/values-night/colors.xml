@@ -47,4 +47,5 @@
     <color name="seekbar_def">#AA555962</color>
     <color name="checkbox_off">#505050</color>
     <color name="checkbox_on">#4078EF</color>
+    <color name="radio_on">#277af7</color>
 </resources>

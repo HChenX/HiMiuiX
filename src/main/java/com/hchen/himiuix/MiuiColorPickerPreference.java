@@ -240,7 +240,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private void animateHeightChange(View view, int endHeight, boolean restore) {
         if (restore) {
             if (mMiuiEditText != null)
-                mMiuiEditText.clearEditTextFocus();
+                mMiuiEditText.getEditTextView().clearFocus();
         }
 
         TransitionManager.beginDelayedTransition((ViewGroup) view, new AutoTransition());

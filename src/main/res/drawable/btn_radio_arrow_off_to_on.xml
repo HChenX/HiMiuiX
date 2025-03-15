@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/btn_radio_arrow_on_vector">
+    <target
+        android:name="arrowanimation"
+        android:animation="@animator/btn_radio_arrow_off_to_on" />
+</animated-vector>

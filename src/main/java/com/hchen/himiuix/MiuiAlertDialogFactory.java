@@ -42,7 +42,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,13 +64,13 @@ class MiuiAlertDialogFactory {
     private final int mThemeResId;
     private final boolean mEnableDropDownMode;
 
-    protected MiuiAlertDialogFactory(Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
+    MiuiAlertDialogFactory(Context context, @StyleRes int themeResId, boolean enableDropDownMode) {
         mContext = context;
         mThemeResId = themeResId;
         mEnableDropDownMode = enableDropDownMode;
     }
 
-    protected MiuiAlertDialogBaseFactory init() {
+    MiuiAlertDialogBaseFactory init() {
         Dialog mDialog = new Dialog(mContext, mThemeResId);
         MiuiAlertDialogBaseFactory baseFactory;
         if (mEnableDropDownMode)
@@ -88,7 +87,7 @@ class MiuiAlertDialogFactory {
     }
 
     private static class MiuiAlertDialogVerticalFactory extends MiuiAlertDialogBaseFactory {
-        public MiuiAlertDialogVerticalFactory(Dialog dialog) {
+        private MiuiAlertDialogVerticalFactory(Dialog dialog) {
             super(dialog);
         }
 
@@ -107,24 +106,23 @@ class MiuiAlertDialogFactory {
             } else {
                 mWindow.setGravity(Gravity.BOTTOM); // 底部
                 WindowManager.LayoutParams params = mWindow.getAttributes();
-                params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 16) / mPoint.y; // 距离底部的百分比
-                params.width = (int) (mPoint.x / 1.08); // 距离屏幕左右间隔
+                params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 15) / mPoint.y; // 距离底部的百分比
+                params.width = (int) (mPoint.x / 1.06); // 距离屏幕左右间隔
                 params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
                 mWindow.setAttributes(params);
             }
             mWindow.setWindowAnimations(R.style.Animation_Dialog); // 弹出动画
 
-            loadView();
-            hideAllViews();
+            super.init();
         }
 
         @Override
-        protected void updateView() {
+        void updateView() {
             super.updateView();
             if (isUsePositiveButton && isUseNegativeButton && isUseNeutralButton)
-                loadButtonView(R.layout.miuix_vertical_button); // 垂直布局
+                loadButtonView(true, R.layout.miuix_vertical_button); // 垂直布局
             else
-                loadButtonView(R.layout.miuix_horizontal_button); // 水平布局
+                loadButtonView(false, R.layout.miuix_horizontal_button); // 水平布局
 
             if (isEnableCustomView) {
                 loadCustomView();
@@ -140,26 +138,34 @@ class MiuiAlertDialogFactory {
          * 根据使用的 button 更新位置。
          * */
         @Override
-        protected void updateButtonLocation() {
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mNeutralButton.getLayoutParams();
-            if (!isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
-                params.weight = 1;
-                params.setMarginEnd(0);
-                params.setMarginStart(MiuiXUtils.dp2px(mContext, 10));
-            } else if (isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
-                params.weight = 1;
-                params.setMarginStart(0);
-                params.setMarginEnd(MiuiXUtils.dp2px(mContext, 10));
-            } else if (!isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
-                params.weight = 1;
-                params.setMarginStart(0);
-                params.setMarginEnd(0);
+        void updateButtonLocation(boolean vertical) {
+            int px5 = MiuiXUtils.dp2px(mContext, 5);
+            LinearLayout.LayoutParams positiveParams = (LinearLayout.LayoutParams) mPositiveButton.getLayoutParams();
+            LinearLayout.LayoutParams negativeParams = (LinearLayout.LayoutParams) mNegativeButton.getLayoutParams();
+            LinearLayout.LayoutParams neutralParams = (LinearLayout.LayoutParams) mNeutralButton.getLayoutParams();
+            if (vertical) {
+                neutralParams.topMargin = MiuiXUtils.dp2px(mContext, 10);
+                neutralParams.bottomMargin = MiuiXUtils.dp2px(mContext, 10);
+            } else {
+                if (isUsePositiveButton && isUseNegativeButton && !isUseNeutralButton) {
+                    positiveParams.setMarginStart(px5);
+                    negativeParams.setMarginEnd(px5);
+                } else if (!isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
+                    negativeParams.setMarginEnd(px5);
+                    neutralParams.setMarginStart(px5);
+                } else if (isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
+                    positiveParams.setMarginStart(px5);
+                    neutralParams.setMarginEnd(px5);
+                }
             }
-            mNeutralButton.setLayoutParams(params);
+
+            mPositiveButton.setLayoutParams(positiveParams);
+            mNegativeButton.setLayoutParams(negativeParams);
+            mNeutralButton.setLayoutParams(neutralParams);
         }
 
         @Override
-        protected void updateCustomLayoutBottomMarginIfNeed() {
+        void updateCustomLayoutBottomMarginIfNeed() {
             ConstraintLayout.LayoutParams customParams = (ConstraintLayout.LayoutParams) mCustomLayout.getLayoutParams();
             customParams.bottomMargin = MiuiXUtils.dp2px(mContext, 25);
             mCustomLayout.setLayoutParams(customParams);
@@ -167,7 +173,7 @@ class MiuiAlertDialogFactory {
     }
 
     private static class MiuiAlertDialogHorizontalFactory extends MiuiAlertDialogBaseFactory {
-        public MiuiAlertDialogHorizontalFactory(Dialog dialog) {
+        private MiuiAlertDialogHorizontalFactory(Dialog dialog) {
             super(dialog);
         }
 
@@ -184,14 +190,13 @@ class MiuiAlertDialogFactory {
             mWindow.setAttributes(params);
             mWindow.setWindowAnimations(R.style.Animation_Dialog); // 弹出动画
 
-            loadView();
-            hideAllViews();
+            super.init();
         }
 
         @Override
-        protected void updateView() {
+        void updateView() {
             super.updateView();
-            loadButtonView(R.layout.miuix_vertical_button);
+            loadButtonView(true, R.layout.miuix_vertical_button);
 
             if (isEnableCustomView) {
                 loadCustomView();
@@ -208,33 +213,42 @@ class MiuiAlertDialogFactory {
          * 根据使用的 button 更新位置。
          * */
         @Override
-        protected void updateButtonLocation() {
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mNeutralButton.getLayoutParams();
+        void updateButtonLocation(boolean vertical) {
+            int px5 = MiuiXUtils.dp2px(mContext, 10);
+            LinearLayout.LayoutParams positiveParams = (LinearLayout.LayoutParams) mPositiveButton.getLayoutParams();
+            LinearLayout.LayoutParams negativeParams = (LinearLayout.LayoutParams) mNegativeButton.getLayoutParams();
+            LinearLayout.LayoutParams neutralParams = (LinearLayout.LayoutParams) mNeutralButton.getLayoutParams();
+
             if (isUsePositiveButton && isUseNegativeButton && !isUseNeutralButton) {
-                params.weight = 0;
-                params.topMargin = 0;
+                negativeParams.bottomMargin = px5;
+                positiveParams.topMargin = px5;
             } else if (!isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
-                params.topMargin = 0;
+                negativeParams.bottomMargin = px5;
+                neutralParams.topMargin = px5;
             } else if (isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
-                params.bottomMargin = 0;
-            } else if (!isUsePositiveButton && !isUseNegativeButton && isUseNeutralButton) {
-                params.topMargin = 0;
-                params.bottomMargin = 0;
+                neutralParams.bottomMargin = px5;
+                positiveParams.topMargin = px5;
+            } else if (isUsePositiveButton && isUseNegativeButton && isUseNeutralButton) {
+                neutralParams.topMargin = px5;
+                neutralParams.bottomMargin = px5;
             }
-            mNeutralButton.setLayoutParams(params);
+
+            mPositiveButton.setLayoutParams(positiveParams);
+            mNegativeButton.setLayoutParams(negativeParams);
+            mNeutralButton.setLayoutParams(neutralParams);
         }
 
         @Override
-        protected void updateCustomLayoutBottomMarginIfNeed() {
+        void updateCustomLayoutBottomMarginIfNeed() {
             super.updateCustomLayoutBottomMarginIfNeed();
         }
     }
 
-    protected static class MiuiAlertDialogDropDownFactory extends MiuiAlertDialogBaseFactory {
+    static class MiuiAlertDialogDropDownFactory extends MiuiAlertDialogBaseFactory {
         private View mRootView;
         private boolean isVerticalScreen;
 
-        public MiuiAlertDialogDropDownFactory(Dialog dialog) {
+        private MiuiAlertDialogDropDownFactory(Dialog dialog) {
             super(dialog);
         }
 
@@ -249,12 +263,7 @@ class MiuiAlertDialogFactory {
         }
 
         @Override
-        protected void updateView() {
-            super.updateView();
-            loadDropDownListSelectView();
-        }
-
-        private void loadDropDownListSelectView() {
+        void updateView() {
             mRecyclerView = new MiuiAlertDialogRecyclerView(mContext).getRecyclerView();
             addView(mMainDialogLayout, mRecyclerView);
 
@@ -270,11 +279,11 @@ class MiuiAlertDialogFactory {
             mRecyclerView.addItemDecoration(cornerRadius);
         }
 
-        public void setRootPreferenceView(View rootView) {
+        void setRootPreferenceView(View rootView) {
             mRootView = rootView;
         }
 
-        public void showDialogByTouchPosition(float x, float y) {
+        void showDialogByTouchPosition(float x, float y) {
             int dialogHeight = calculateHeight();
             int windowHeight = mPoint.y;
             int[] location = new int[2];
@@ -340,84 +349,74 @@ class MiuiAlertDialogFactory {
         }
     }
 
-    protected static abstract class MiuiAlertDialogBaseFactory implements DialogInterface {
-        public Dialog mDialog;
-        public Window mWindow;
-        protected Point mPoint;
-        public Context mContext;
-        public ConstraintLayout mMainDialogLayout;
-        public TextView mTitleView;
-        public TextView mMessageView;
-        public CharSequence mTitle;
-        public CharSequence mMessage;
-        public ConstraintLayout mCustomLayout;
-        public LinearLayout mButtonLayout;
-        public HashMap<Integer, Pair<CharSequence,
-            OnClickListener>> mButtonHashMap = new HashMap<>();
-        protected Button mNegativeButton;
-        protected Button mPositiveButton;
-        protected Button mNeutralButton;
-        public boolean isUsePositiveButton;
-        public boolean isUseNegativeButton;
-        public boolean isUseNeutralButton;
-        public boolean isEnableEditText;
-        protected EditText mEditText;
-        public CharSequence mDefEditText = "";
-        public CharSequence mEditTextHint = "";
-        public CharSequence mEditTextTip = "";
-        public Drawable mEditTextImage;
-        public boolean mEditTextAutoKeyboard;
-        public int mEditTextInputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
-        public DialogInterface.TextWatcher mTextWatcher;
-        public boolean isEnableListSelect;
-        public ArrayList<CharSequence> mItems;
-        protected RecyclerView mRecyclerView;
-        protected MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter mListAdapter;
-        protected SparseBooleanArray mBooleanArray = new SparseBooleanArray();
-        public DialogInterface.OnItemsClickListener mItemsClickListener;
-        public boolean isEnableListSpringBack;
-        public boolean isEnableMultiSelect;
-        public boolean isEnableCustomView;
-        public View mCustomView;
-        public OnBindView mOnBindView;
-        public int mWindowAnimations = -1;
-        public boolean isEnableHapticFeedback;
-        public boolean isCreated;
-        public boolean isCanceled;
-        public boolean isCancelable = true;
-        public boolean isCanceledOnTouchOutside = true;
-        public boolean isAutoDismiss = true;
-        public OnShowListener mOnShowListener;
-        public OnCancelListener mOnCancelListener;
-        public OnDismissListener mOnDismissListener;
+    static abstract class MiuiAlertDialogBaseFactory implements DialogInterface {
+        private final Dialog mDialog;
+        Window mWindow;
+        Point mPoint;
+        Context mContext;
+        ConstraintLayout mMainDialogLayout;
+        private TextView mTitleView;
+        private TextView mMessageView;
+        CharSequence mTitle;
+        CharSequence mMessage;
+        ConstraintLayout mCustomLayout;
+        private LinearLayout mButtonLayout;
+        HashMap<Integer, Pair<CharSequence, OnClickListener>> mButtonHashMap = new HashMap<>();
+        Button mNegativeButton;
+        Button mPositiveButton;
+        Button mNeutralButton;
+        boolean isUsePositiveButton;
+        boolean isUseNegativeButton;
+        boolean isUseNeutralButton;
+        boolean isEnableEditText;
+        private EditText mEditText;
+        CharSequence mDefEditText = "";
+        CharSequence mEditTextHint = "";
+        CharSequence mEditTextTip = "";
+        Drawable mEditTextImage;
+        boolean mEditTextAutoKeyboard;
+        int mEditTextInputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        DialogInterface.TextWatcher mTextWatcher;
+        boolean isEnableListSelect;
+        ArrayList<CharSequence> mItems;
+        RecyclerView mRecyclerView;
+        MiuiAlertDialogRecyclerView.MiuiAlertDialogListAdapter mListAdapter;
+        SparseBooleanArray mBooleanArray = new SparseBooleanArray();
+        DialogInterface.OnItemsClickListener mItemsClickListener;
+        boolean isEnableListSpringBack;
+        boolean isEnableMultiSelect;
+        boolean isEnableCustomView;
+        View mCustomView;
+        OnBindView mOnBindView;
+        int mWindowAnimations = -1;
+        boolean isEnableHapticFeedback;
+        private boolean isCreated;
+        private boolean isCanceled;
+        boolean isCancelable = true;
+        boolean isCanceledOnTouchOutside = true;
+        boolean isAutoDismiss = true;
+        OnShowListener mOnShowListener;
+        OnCancelListener mOnCancelListener;
+        OnDismissListener mOnDismissListener;
 
-        public MiuiAlertDialogBaseFactory(Dialog dialog) {
+        private MiuiAlertDialogBaseFactory(Dialog dialog) {
             mDialog = dialog;
             mWindow = mDialog.getWindow();
             mContext = mDialog.getContext();
             mPoint = MiuiXUtils.getWindowSize(mContext);
         }
 
-        public abstract void init();
-
-        @CallSuper
-        protected void updateView() {
-            updateText();
-        }
-
-        protected void loadView() {
+        public void init() {
             mTitleView = mMainDialogLayout.findViewById(R.id.dialog_title);
             mMessageView = mMainDialogLayout.findViewById(R.id.dialog_message);
-            mButtonLayout = mMainDialogLayout.findViewById(R.id.dialog_button_view);
             mCustomLayout = mMainDialogLayout.findViewById(R.id.dialog_custom_view);
-        }
+            mButtonLayout = mMainDialogLayout.findViewById(R.id.dialog_button_view);
 
-        protected void hideAllViews() {
             mTitleView.setVisibility(View.GONE);
             mMessageView.setVisibility(View.GONE);
         }
 
-        private void updateText() {
+        void updateView() {
             if (mTitle != null) {
                 mTitleView.setVisibility(View.VISIBLE);
                 mTitleView.setText(mTitle);
@@ -428,8 +427,9 @@ class MiuiAlertDialogFactory {
             }
         }
 
-        protected void loadButtonView(@LayoutRes int id) {
+        void loadButtonView(boolean vertical, @LayoutRes int id) {
             addView(mButtonLayout, id);
+
             mNegativeButton = mButtonLayout.findViewById(android.R.id.button1);
             mPositiveButton = mButtonLayout.findViewById(android.R.id.button2);
             mNeutralButton = mButtonLayout.findViewById(android.R.id.button3);
@@ -452,29 +452,24 @@ class MiuiAlertDialogFactory {
                     }
                 }
             });
-            updateButtonLocation();
+            updateButtonLocation(vertical);
         }
 
-        protected void updateButtonLocation() {
+        void updateButtonLocation(boolean vertical) {
         }
 
-        protected void loadEditTextView() {
+        void loadEditTextView() {
             mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme); // 存在键盘
 
             addView(mCustomLayout, new MiuiEditText(mContext));
             ConstraintLayout editLayout = mCustomLayout.findViewById(R.id.edit_layout);
-            // 设置输入框的边距
-            ConstraintLayout.LayoutParams editParams = (ConstraintLayout.LayoutParams) editLayout.getLayoutParams();
-            editParams.setMarginStart(0);
-            editParams.setMarginEnd(0);
-            editLayout.setLayoutParams(editParams);
-
             mEditText = editLayout.findViewById(R.id.edit_text);
             mEditText.setText(mDefEditText);
             mEditText.setSelection(mDefEditText.length());
             mEditText.setHint(mEditTextHint);
             mEditText.setInputType(mEditTextInputType);
-            if (mTextWatcher != null) mEditText.addTextChangedListener(mTextWatcher);
+            if (mTextWatcher != null)
+                mEditText.addTextChangedListener(mTextWatcher);
 
             if (mEditTextTip != "") {
                 TextView editTip = editLayout.findViewById(R.id.edit_tip);
@@ -490,7 +485,7 @@ class MiuiAlertDialogFactory {
             updateCustomLayoutBottomMarginIfNeed();
         }
 
-        protected void loadListSelectView(int maxHeight) {
+        void loadListSelectView(int maxHeight) {
             if (mItems == null) {
                 throw new RuntimeException("MiuiAlertDialog: Enable list select view, but items is null?? are you sure?");
             }
@@ -514,7 +509,7 @@ class MiuiAlertDialogFactory {
             updateCustomLayoutBottomMarginIfNeed();
         }
 
-        protected void loadCustomView() {
+        void loadCustomView() {
             if (isExistEditTextView(mCustomLayout))
                 mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme);
 
@@ -537,14 +532,14 @@ class MiuiAlertDialogFactory {
             return false;
         }
 
-        protected void updateCustomLayoutBottomMarginIfNeed() {
+        void updateCustomLayoutBottomMarginIfNeed() {
         }
 
-        protected void addView(ViewGroup supperView, @LayoutRes int id) {
+        private void addView(ViewGroup supperView, @LayoutRes int id) {
             addView(supperView, LayoutInflater.from(mContext).inflate(id, supperView, false));
         }
 
-        protected void addView(ViewGroup supperView, View view) {
+        void addView(ViewGroup supperView, View view) {
             ViewGroup viewGroup = (ViewGroup) view.getParent();
             if (viewGroup != supperView) {
                 if (viewGroup != null)
@@ -553,7 +548,7 @@ class MiuiAlertDialogFactory {
             }
         }
 
-        protected View.OnClickListener createButtonClickAction(int id, DialogInterface.OnClickListener listener) {
+        private View.OnClickListener createButtonClickAction(int id, DialogInterface.OnClickListener listener) {
             return v -> {
                 if (isEnableHapticFeedback)
                     v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
@@ -576,13 +571,13 @@ class MiuiAlertDialogFactory {
             };
         }
 
-        protected boolean isInputVisible(EditText editText) {
+        private boolean isInputVisible(EditText editText) {
             if (editText == null) return false;
             if (editText.getRootWindowInsets() == null) return false;
             return editText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         }
 
-        protected void showInputIfNeed() {
+        private void showInputIfNeed() {
             if (!isEnableEditText) return;
             if (mEditText == null) return;
             mEditText.setFocusable(true);
@@ -599,11 +594,11 @@ class MiuiAlertDialogFactory {
             }
         }
 
-        public boolean isShowing() {
+        boolean isShowing() {
             return mDialog.isShowing();
         }
 
-        public void create() {
+        void create() {
             if (isCreated) return;
             updateView();
 
@@ -626,7 +621,7 @@ class MiuiAlertDialogFactory {
             isCreated = true;
         }
 
-        public void show() {
+        void show() {
             if (!isCreated) create();
             mDialog.show();
         }
@@ -664,11 +659,11 @@ class MiuiAlertDialogFactory {
             mRecyclerView.setHorizontalScrollBarEnabled(false);
         }
 
-        public RecyclerView getRecyclerView() {
+        RecyclerView getRecyclerView() {
             return mRecyclerView;
         }
 
-        protected static class MiuiAlertDialogListAdapter extends RecyclerView.Adapter<MiuiAlertDialogListAdapter.MiuiAlertDialogListViewHolder> {
+        static class MiuiAlertDialogListAdapter extends RecyclerView.Adapter<MiuiAlertDialogListAdapter.MiuiAlertDialogListViewHolder> {
             private final MiuiAlertDialogBaseFactory mBaseFactory;
 
             private MiuiAlertDialogListAdapter(MiuiAlertDialogBaseFactory baseFactory) {
@@ -729,7 +724,7 @@ class MiuiAlertDialogFactory {
                 SwitchCompat switchCompat;
                 ImageView imageView;
 
-                public MiuiAlertDialogListViewHolder(@NonNull View itemView) {
+                private MiuiAlertDialogListViewHolder(@NonNull View itemView) {
                     super(itemView);
                     layout = (ConstraintLayout) itemView;
                     switchCompat = itemView.findViewById(R.id.list_item);

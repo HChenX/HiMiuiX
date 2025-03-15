@@ -44,7 +44,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
     private MiuiAlertDialog mDialog;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
-    private CharSequence mDefValue;
     private boolean shouldShowOnSummary;
     private String mValue;
     private View mTouchView;
@@ -74,13 +73,11 @@ public class MiuiDropDownPreference extends MiuiPreference {
                 R.styleable.MiuiDropDownPreference_android_entries);
             mEntryValues = TypedArrayUtils.getTextArray(array, R.styleable.MiuiDropDownPreference_entryValues,
                 R.styleable.MiuiDropDownPreference_android_entryValues);
-            mDefValue = array.getString(R.styleable.MiuiDropDownPreference_defaultValue);
             shouldShowOnSummary = array.getBoolean(R.styleable.MiuiDropDownPreference_showOnSummary, false);
         }
 
         safeCheck();
         mEntriesList.addAll(Arrays.asList(mEntries));
-        setDefaultValue(mDefValue);
     }
 
     public void setEntries(CharSequence[] entries) {
