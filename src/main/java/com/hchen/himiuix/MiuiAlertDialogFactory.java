@@ -105,7 +105,7 @@ class MiuiAlertDialogFactory {
                 mWindow.setGravity(Gravity.BOTTOM); // 底部
                 WindowManager.LayoutParams params = mWindow.getAttributes();
                 params.verticalMargin = (float) MiuiXUtils.dp2px(mContext, 15) / mPoint.y; // 距离底部的百分比
-                params.width = (int) (mPoint.x / 1.06); // 距离屏幕左右间隔
+                params.width = (int) (mPoint.x / 1.065); // 距离屏幕左右间隔
                 params.height = WindowManager.LayoutParams.WRAP_CONTENT; // 自适应
                 mWindow.setAttributes(params);
             }
@@ -273,7 +273,7 @@ class MiuiAlertDialogFactory {
             mRecyclerView.setLayoutParams(params);
 
             RecyclerViewCornerRadius cornerRadius = new RecyclerViewCornerRadius(mRecyclerView);
-            cornerRadius.setCornerRadius(MiuiXUtils.dp2px(mContext, 18));
+            cornerRadius.setCornerRadius(MiuiXUtils.dp2px(mContext, 18)); // 选项圆角
             mRecyclerView.addItemDecoration(cornerRadius);
         }
 
@@ -325,7 +325,7 @@ class MiuiAlertDialogFactory {
         private int calculateWidth() {
             final int[] textWidth = {-1};
             mItems.forEach(sequence -> {
-                int width = sequence.length() * MiuiXUtils.sp2px(mContext, 18);
+                int width = sequence.length() * MiuiXUtils.sp2px(mContext, 17);
                 if (width > textWidth[0])
                     textWidth[0] = width;
             });
@@ -680,11 +680,10 @@ class MiuiAlertDialogFactory {
                 CharSequence title = mBaseFactory.mItems.get(position);
                 holder.mTextView.setText(title);
                 boolean isChecked = mBaseFactory.mBooleanArray.get(position);
+                holder.mMiuiCheckBox.setOnCheckedChangeListener(null);
                 holder.mMiuiCheckBox.setChecked(isChecked);
-                holder.mMiuiCheckBox.setOnCheckedStateChangeListener(null);
                 holder.mLayout.setOnTouchListener(null);
-                holder.mTextView.setOnClickListener(null);
-
+                holder.mTextView.setOnTouchListener(null);
                 updateSate(holder, position);
 
                 if (holder.mMiuiCheckBox.isEnabled()) {
@@ -695,11 +694,15 @@ class MiuiAlertDialogFactory {
                     holder.mMiuiCheckBox.setOnCheckedChangeListener((buttonView, isChecked1) -> {
                         if (mBaseFactory.isEnableMultiSelect)
                             mBaseFactory.mBooleanArray.put(position, isChecked1);
+
                         updateSate(holder, position);
+
                         if (mBaseFactory.isEnableHapticFeedback)
                             holder.mLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+
                         if (mBaseFactory.mItemsClickListener != null)
                             mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
+
                         if (!mBaseFactory.isEnableMultiSelect)
                             mBaseFactory.dismiss();
                     });
@@ -710,11 +713,9 @@ class MiuiAlertDialogFactory {
                 if (mBaseFactory.mBooleanArray.get(position)) {
                     holder.mTextView.setTextColor(mBaseFactory.mContext.getColor(R.color.list_choose_text));
                     holder.mLayout.setBackgroundResource(R.drawable.list_choose_item_background);
-                    holder.mMiuiCheckBox.setVisibility(View.VISIBLE);
                 } else {
                     holder.mLayout.setBackgroundResource(R.drawable.list_item_background);
                     holder.mTextView.setTextColor(mBaseFactory.mContext.getColor(R.color.list_text));
-                    holder.mMiuiCheckBox.setVisibility(View.INVISIBLE);
                 }
             }
 
