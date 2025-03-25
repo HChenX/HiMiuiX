@@ -44,9 +44,8 @@ public class MiuiDropDownPreference extends MiuiPreference {
     private MiuiAlertDialog mDialog;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
-    private boolean shouldShowOnSummary;
+    private final boolean shouldShowOnSummary;
     private String mValue;
-    private View mTouchView;
     private boolean isInitialTime = true;
     private final ArrayList<CharSequence> mEntriesList = new ArrayList<>();
     private MiuiAlertDialogFactory.MiuiAlertDialogDropDownFactory mDialogDropDownFactory;
@@ -261,7 +260,6 @@ public class MiuiDropDownPreference extends MiuiPreference {
             if (mDialog != null && mDialog.isShowing()) return false;
             updateBackground(R.color.touch_down);
             v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-            mTouchView = v;
             initDropDownDialog(event.getRawX(), event.getRawY());
         }
         return false;

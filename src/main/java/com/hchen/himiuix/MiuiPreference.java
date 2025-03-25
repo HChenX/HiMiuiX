@@ -41,6 +41,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
@@ -60,21 +61,21 @@ public class MiuiPreference extends Preference {
     private TextView mTipView;
     private ImageView mArrowRightView;
     private String mTipText;
-    private int mViewId = -1;
+    private final int mLayoutId;
+    private final boolean isDisableBackgroundStyle;
+    private final boolean isDisableTouchFeedback;
     private String mDependencyKey;
     private ArrayList<MiuiPreference> mDependents = null;
     private boolean isFirst;
     private boolean isLast;
     private int mCount = 1;
+    private OnBindViewListener mOnBindViewListener;
     private List<MiuiPreference> mMiuiPreferences;
     private final View.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         @SuppressLint("RestrictedApi")
         public void onClick(View v) {
             performClick(v);
-            if (!isEnabled() || !isSelectable())
-                return;
-            MiuiPreference.this.onClick(v);
         }
     };
 
@@ -90,10 +91,10 @@ public class MiuiPreference extends Preference {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressLint("RestrictedApi")
     public MiuiPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        setLayoutResource(R.layout.miuix_preference);
         try (
             TypedArray typedArray = context.obtainStyledAttributes(
                 attrs,
@@ -103,15 +104,18 @@ public class MiuiPreference extends Preference {
             )
         ) {
             mTipText = typedArray.getString(R.styleable.MiuiPreference_tip);
+            mLayoutId = TypedArrayUtils.getResourceId(
+                typedArray,
+                R.styleable.MiuiPreference_layout,
+                R.styleable.MiuiPreference_android_layout,
+                0
+            );
+            isDisableBackgroundStyle = typedArray.getBoolean(R.styleable.MiuiPreference_disableBackgroundStyle, false);
+            isDisableTouchFeedback = typedArray.getBoolean(R.styleable.MiuiPreference_disableTouchFeedback, false);
         }
-    }
 
-    public void setViewId(int viewId) {
-        if (mMainLayout.getId() == viewId && mViewId == viewId)
-            return;
-
-        mViewId = viewId;
-        notifyChanged();
+        if (mLayoutId != 0) setLayoutResource(mLayoutId);
+        else setLayoutResource(R.layout.miuix_preference);
     }
 
     public void setTipText(String tipText) {
@@ -122,8 +126,10 @@ public class MiuiPreference extends Preference {
         notifyChanged();
     }
 
-    public int getId() {
-        return mViewId;
+    public void setLayoutViewBindListener(OnBindViewListener onBindViewListener) {
+        mOnBindViewListener = onBindViewListener;
+        notifyChanged();
+
     }
 
     public String getTipText() {
@@ -142,31 +148,36 @@ public class MiuiPreference extends Preference {
         mMainLayout = (ConstraintLayout) holder.itemView;
         mMainLayout.setOnTouchListener(null);
         mMainLayout.setOnHoverListener(null);
-        // mMainLayout.setBackground(null);
-        updateBackground(-1, isFirst, isLast);
         mMainLayout.setOnClickListener(mClickListener);
-        if (mViewId != -1)
-            mMainLayout.setId(mViewId);
 
-        mIconView = (ImageView) holder.findViewById(R.id.pref_icon);
-        mTitleView = (TextView) holder.findViewById(R.id.prefs_text);
-        mSummaryView = (TextView) holder.findViewById(R.id.prefs_summary);
-        mTipView = (TextView) holder.findViewById(R.id.pref_tip);
-        mArrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
-        mColorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
+        if (mLayoutId == 0) {
+            updateBackground(-1, isFirst, isLast);
 
-        mTitleView.setText(getTitle());
-        updateSummaryIfNeed();
-        loadArrowRightIfNeed();
-        loadColorSelectViewIfNeed();
-        loadIconIfNeed(getIcon());
-        loadTipViewIfNeed();
-        updateTextColorIfNeed();
+            mIconView = (ImageView) holder.findViewById(R.id.pref_icon);
+            mTitleView = (TextView) holder.findViewById(R.id.prefs_text);
+            mSummaryView = (TextView) holder.findViewById(R.id.prefs_summary);
+            mTipView = (TextView) holder.findViewById(R.id.pref_tip);
+            mArrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
+            mColorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
 
-        if (isEnabled()) {
-            mMainLayout.setOnTouchListener(MiuiPreference.this::onMainLayoutTouch);
-            mMainLayout.setOnHoverListener(MiuiPreference.this::onMainLayoutHover);
+            mTitleView.setText(getTitle());
+            updateSummaryIfNeed();
+            loadArrowRightIfNeed();
+            loadColorSelectViewIfNeed();
+            loadIconIfNeed(getIcon());
+            loadTipViewIfNeed();
+            updateTextColorIfNeed();
+
+            if (isEnabled() && !isDisableTouchFeedback) {
+                mMainLayout.setOnTouchListener(MiuiPreference.this::onMainLayoutTouch);
+                mMainLayout.setOnHoverListener(MiuiPreference.this::onMainLayoutHover);
+            }
+        } else {
+            if (mOnBindViewListener != null) {
+                mOnBindViewListener.onBindView(mMainLayout);
+            }
         }
+
         mMainLayout.setClickable(isSelectable());
         mMainLayout.setFocusable(isSelectable());
         holder.setDividerAllowedAbove(false);
@@ -317,9 +328,6 @@ public class MiuiPreference extends Preference {
         return false;
     }
 
-    protected void onClick(View view) {
-    }
-
     void updateCount(int count) {
         mCount = count;
     }
@@ -341,6 +349,8 @@ public class MiuiPreference extends Preference {
     }
 
     void updateBackground(View layout, @ColorRes int color, boolean isFirst, boolean isLast) {
+        if (isDisableBackgroundStyle) return;
+
         this.isFirst = isFirst;
         this.isLast = isLast;
         if (layout == null) return;
@@ -463,5 +473,9 @@ public class MiuiPreference extends Preference {
             }
         }
         return false;
+    }
+
+    public interface OnBindViewListener {
+        void onBindView(View view);
     }
 }

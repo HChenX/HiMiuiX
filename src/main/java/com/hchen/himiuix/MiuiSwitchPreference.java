@@ -25,7 +25,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -169,7 +168,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
     }
 
     @Override
-    protected void onClick(View view) {
+    protected void onClick() {
         if (mMiuiSwitch == null) return;
         if (mMiuiSwitch.isAnimationShowing()) return;
 
@@ -177,7 +176,7 @@ public class MiuiSwitchPreference extends MiuiPreference {
             mMiuiSwitch.setChecked(!isChecked());
             setChecked(!isChecked(), true);
 
-            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+            getMainLayout().performHapticFeedback(HapticFeedbackConstants.CONFIRM);
         }
     }
 

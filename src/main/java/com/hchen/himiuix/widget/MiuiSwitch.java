@@ -216,7 +216,6 @@ public class MiuiSwitch extends ConstraintLayout {
     }
 
     private void init() {
-        setId(R.id.checkbox_container);
         ConstraintLayout.LayoutParams params = new LayoutParams(
             MiuiXUtils.dp2px(getContext(), 49),
             MiuiXUtils.dp2px(getContext(), 28)

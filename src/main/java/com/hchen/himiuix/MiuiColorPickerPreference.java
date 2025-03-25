@@ -125,7 +125,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private View mShowColorView;
 
     @Override
-    protected void onClick(View view) {
+    protected void onClick() {
         if (mAlertDialog != null && mAlertDialog.isShowing()) return;
 
         mColorPickerData = new ColorPickerData();

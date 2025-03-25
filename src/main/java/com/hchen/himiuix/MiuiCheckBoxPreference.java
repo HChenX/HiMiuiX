@@ -25,7 +25,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -156,7 +155,7 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
     }
 
     @Override
-    protected void onClick(View view) {
+    protected void onClick() {
         if (mMiuiCheckBox == null) return;
 
         mMiuiCheckBox.performClick();

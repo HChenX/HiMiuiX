@@ -27,6 +27,9 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -79,7 +82,6 @@ public class MiuiEditText extends ConstraintLayout {
 
     private void init(Context context) {
         mContext = context;
-        setId(R.id.edit_layout);
         params = new LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -184,8 +186,10 @@ public class MiuiEditText extends ConstraintLayout {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus)
                     MiuiEditText.this.setBackgroundResource(R.drawable.focused_border_input_box);
-                else
+                else {
+                    hideInputIfNeed();
                     MiuiEditText.this.setBackgroundResource(R.drawable.nofocused_border_input_box);
+                }
             }
         });
     }
@@ -201,5 +205,23 @@ public class MiuiEditText extends ConstraintLayout {
             if (isErrorBorder) setBackgroundResource(R.drawable.error_border_input_box);
             else setBackgroundResource(R.drawable.focused_border_input_box);
         }
+    }
+
+    private void hideInputIfNeed() {
+        if (isInputVisible()) {
+            WindowInsetsController windowInsetsController = getWindowInsetsController();
+            if (windowInsetsController != null)
+                windowInsetsController.hide(WindowInsets.Type.ime());
+            else {
+                InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
+        }
+    }
+
+    private boolean isInputVisible() {
+        if (mEditTextView == null) return false;
+        if (mEditTextView.getRootWindowInsets() == null) return false;
+        return mEditTextView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
     }
 }

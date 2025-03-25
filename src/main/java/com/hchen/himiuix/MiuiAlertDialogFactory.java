@@ -460,8 +460,7 @@ class MiuiAlertDialogFactory {
             mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme); // 存在键盘
 
             addView(mCustomLayout, new MiuiEditText(mContext));
-            ConstraintLayout editLayout = mCustomLayout.findViewById(R.id.edit_layout);
-            mEditText = editLayout.findViewById(R.id.edit_text);
+            mEditText = mCustomLayout.findViewById(R.id.edit_text);
             mEditText.setText(mDefEditText);
             mEditText.setSelection(mDefEditText.length());
             mEditText.setHint(mEditTextHint);
@@ -470,12 +469,12 @@ class MiuiAlertDialogFactory {
                 mEditText.addTextChangedListener(mTextWatcher);
 
             if (mEditTextTip != "") {
-                TextView editTip = editLayout.findViewById(R.id.edit_tip);
+                TextView editTip = mCustomLayout.findViewById(R.id.edit_tip);
                 editTip.setText(mEditTextTip);
                 editTip.setVisibility(View.VISIBLE);
             }
             if (mEditTextImage != null) {
-                ImageView editImage = editLayout.findViewById(R.id.edit_image);
+                ImageView editImage = mCustomLayout.findViewById(R.id.edit_image);
                 editImage.setImageDrawable(mEditTextImage);
                 editImage.setVisibility(View.VISIBLE);
             }
@@ -733,7 +732,7 @@ class MiuiAlertDialogFactory {
                     super(itemView);
                     mLayout = (ConstraintLayout) itemView;
                     mTextView = itemView.findViewById(R.id.list_item);
-                    mMiuiCheckBox = itemView.findViewById(R.id.list_image);
+                    mMiuiCheckBox = itemView.findViewById(R.id.list_checkbox);
                 }
             }
         }

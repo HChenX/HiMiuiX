@@ -11,7 +11,7 @@
     android:paddingBottom="10dp">
 
     <com.hchen.himiuix.widget.MiuiEditText
-        android:id="@id/edit_layout"
+        android:id="@+id/edit_layout"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
