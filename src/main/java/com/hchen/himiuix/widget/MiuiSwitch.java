@@ -106,6 +106,8 @@ public class MiuiSwitch extends ConstraintLayout {
     private final View.OnHoverListener mHoverListener = new View.OnHoverListener() {
         @Override
         public boolean onHover(View v, MotionEvent event) {
+            if (isAnimationShowing) return true;
+
             if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
                 mSwitchAnimationAction.animZoom();
             } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {

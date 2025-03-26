@@ -184,9 +184,9 @@ public class MiuiEditText extends ConstraintLayout {
         mEditTextView.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    MiuiEditText.this.setBackgroundResource(R.drawable.focused_border_input_box);
-                else {
+                if (hasFocus) {
+                    updateErrorBorderState();
+                } else {
                     hideInputIfNeed();
                     MiuiEditText.this.setBackgroundResource(R.drawable.nofocused_border_input_box);
                 }
@@ -198,13 +198,17 @@ public class MiuiEditText extends ConstraintLayout {
         return mEditTextView;
     }
 
-    public void updateErrorBorderState(boolean error) {
+    public void setErrorBorderState(boolean error) {
         if (isErrorBorder != error) {
             isErrorBorder = error;
 
-            if (isErrorBorder) setBackgroundResource(R.drawable.error_border_input_box);
-            else setBackgroundResource(R.drawable.focused_border_input_box);
+            updateErrorBorderState();
         }
+    }
+
+    private void updateErrorBorderState() {
+        if (isErrorBorder) setBackgroundResource(R.drawable.error_border_input_box);
+        else setBackgroundResource(R.drawable.focused_border_input_box);
     }
 
     private void hideInputIfNeed() {

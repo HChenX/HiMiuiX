@@ -18,11 +18,16 @@
  */
 package com.hchen.himiuix.springback;
 
-public interface ScrollStateDispatcher {
-    int STATE_IDLE = 0;
-    int STATE_DRAGGING = 1;
-    int STATE_SETTLING = 2;
+public class SpringOperator {
+    private final double damping;
+    private final double tension;
 
-    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
-    void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
+    public SpringOperator(float n, float n2) {
+        tension = Math.pow(6.283185307179586 / (double) n2, 2.0);
+        damping = n * 12.566370614359172 / (double) n2;
+    }
+
+    public double updateVelocity(double n, float n2, double n3, double n4) {
+        return n * (1.0 - damping * (double) n2) + (float) (tension * (n3 - n4) * (double) n2);
+    }
 }

@@ -16,13 +16,13 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.himiuix.springback;
+package com.hchen.himiuix.widget;
 
-public interface ScrollStateDispatcher {
-    int STATE_IDLE = 0;
-    int STATE_DRAGGING = 1;
-    int STATE_SETTLING = 2;
+import android.widget.Button;
 
-    void addOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
-    void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
+public interface OnCheckStateChangeListener {
+    /**
+     * 状态变化之前调用，可阻止状态更改。
+     */
+    boolean onCheckChange(Button button, boolean newCheck);
 }

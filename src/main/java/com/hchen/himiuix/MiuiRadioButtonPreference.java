@@ -33,6 +33,7 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
 import com.hchen.himiuix.widget.MiuiRadioButton;
+import com.hchen.himiuix.widget.OnCheckStateChangeListener;
 
 public class MiuiRadioButtonPreference extends MiuiPreference {
     private MiuiRadioButton mMiuiRadioButton;
@@ -42,9 +43,9 @@ public class MiuiRadioButtonPreference extends MiuiPreference {
     private CharSequence mSummaryOff;
     private boolean mDisableDependentsState;
     private int mButtonLocation;
-    private final MiuiRadioButton.OnCheckedStateChangeListener mOnCheckedStateChangeListener = (miuiRadioButton, newChecked) -> {
-        if (callChangeListener(newChecked)) {
-            setChecked(newChecked);
+    private final OnCheckStateChangeListener mOnCheckStateChangeListener = (button, newCheck) -> {
+        if (callChangeListener(newCheck)) {
+            setChecked(newCheck);
             getMainLayout().performHapticFeedback(HapticFeedbackConstants.CONFIRM);
             return true;
         }
@@ -146,11 +147,11 @@ public class MiuiRadioButtonPreference extends MiuiPreference {
         super.onBindViewHolder(holder);
 
         mMiuiRadioButton = holder.itemView.findViewById(R.id.radio_button);
-        mMiuiRadioButton.setOnCheckedStateChangeListener(null);
+        mMiuiRadioButton.setOnCheckStateChangeListener(null);
         mMiuiRadioButton.setChecked(isChecked);
 
         if (isEnabled()) {
-            mMiuiRadioButton.setOnCheckedStateChangeListener(mOnCheckedStateChangeListener);
+            mMiuiRadioButton.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
         }
     }
 

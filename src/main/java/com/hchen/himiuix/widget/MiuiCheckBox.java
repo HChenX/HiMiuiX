@@ -29,7 +29,7 @@ import com.hchen.himiuix.R;
 
 @SuppressLint("AppCompatCustomView")
 public class MiuiCheckBox extends CheckBox {
-    private OnCheckedStateChangeListener mOnCheckedStateChangeListener;
+    private OnCheckStateChangeListener mOnCheckStateChangeListener;
 
     public MiuiCheckBox(Context context) {
         this(context, null);
@@ -63,21 +63,17 @@ public class MiuiCheckBox extends CheckBox {
     @Override
     public void setChecked(boolean checked) {
         if (isChecked() == checked) return;
-        if (mOnCheckedStateChangeListener == null) {
+        if (mOnCheckStateChangeListener == null) {
             super.setChecked(checked);
             return;
         }
 
-        if (mOnCheckedStateChangeListener.onCheckedChange(this, checked)) {
+        if (mOnCheckStateChangeListener.onCheckChange(this, checked)) {
             super.setChecked(checked);
         }
     }
 
-    public void setOnCheckedStateChangeListener(OnCheckedStateChangeListener onCheckedStateChangeListener) {
-        mOnCheckedStateChangeListener = onCheckedStateChangeListener;
-    }
-
-    public interface OnCheckedStateChangeListener {
-        boolean onCheckedChange(MiuiCheckBox miuiCheckBox, boolean newChecked);
+    public void setOnCheckStateChangeListener(OnCheckStateChangeListener onCheckStateChangeListener) {
+        mOnCheckStateChangeListener = onCheckStateChangeListener;
     }
 }

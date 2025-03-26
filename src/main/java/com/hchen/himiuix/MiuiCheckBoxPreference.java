@@ -33,6 +33,7 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
 import com.hchen.himiuix.widget.MiuiCheckBox;
+import com.hchen.himiuix.widget.OnCheckStateChangeListener;
 
 public class MiuiCheckBoxPreference extends MiuiPreference {
     private MiuiCheckBox mMiuiCheckBox;
@@ -42,9 +43,9 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
     private CharSequence mSummaryOff;
     private boolean mDisableDependentsState;
     private int mButtonLocation;
-    private final MiuiCheckBox.OnCheckedStateChangeListener mOnCheckedStateChangeListener = (miuiCheckBox, newChecked) -> {
-        if (callChangeListener(newChecked)) {
-            setChecked(newChecked);
+    private final OnCheckStateChangeListener mOnCheckStateChangeListener = (button, newCheck) -> {
+        if (callChangeListener(newCheck)) {
+            setChecked(newCheck);
             getMainLayout().performHapticFeedback(HapticFeedbackConstants.CONFIRM);
             return true;
         }
@@ -146,11 +147,11 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
         super.onBindViewHolder(holder);
 
         mMiuiCheckBox = holder.itemView.findViewById(R.id.checkbox_container);
-        mMiuiCheckBox.setOnCheckedStateChangeListener(null);
+        mMiuiCheckBox.setOnCheckStateChangeListener(null);
         mMiuiCheckBox.setChecked(isChecked);
 
         if (isEnabled()) {
-            mMiuiCheckBox.setOnCheckedStateChangeListener(mOnCheckedStateChangeListener);
+            mMiuiCheckBox.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
         }
     }
 

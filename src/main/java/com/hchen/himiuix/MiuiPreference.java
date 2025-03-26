@@ -20,16 +20,20 @@ package com.hchen.himiuix;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.hchen.himiuix.MiuiXUtils.drawableToBitmap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -154,8 +158,8 @@ public class MiuiPreference extends Preference {
             updateBackground(-1, isFirst, isLast);
 
             mIconView = (ImageView) holder.findViewById(R.id.pref_icon);
-            mTitleView = (TextView) holder.findViewById(R.id.prefs_text);
-            mSummaryView = (TextView) holder.findViewById(R.id.prefs_summary);
+            mTitleView = (TextView) holder.findViewById(R.id.pref_title);
+            mSummaryView = (TextView) holder.findViewById(R.id.pref_summary);
             mTipView = (TextView) holder.findViewById(R.id.pref_tip);
             mArrowRightView = (ImageView) holder.findViewById(R.id.pref_arrow_right);
             mColorSelectView = (ColorSelectView) holder.findViewById(R.id.pref_color_select);
@@ -275,16 +279,14 @@ public class MiuiPreference extends Preference {
     private void loadIconIfNeed(Drawable drawable) {
         if (mIconView != null) {
             if (drawable != null) {
-                drawable.setAlpha(isEnabled() ? 255 : 125);
                 mIconView.setVisibility(VISIBLE);
-                mIconView.setImageDrawable(drawable);
 
-                mMainLayout.setPadding(
-                    MiuiXUtils.dp2px(getContext(), 10),
-                    mMainLayout.getPaddingTop(),
-                    mMainLayout.getPaddingEnd(),
-                    mMainLayout.getPaddingBottom()
+                MiuiXUtils.RoundedDrawable roundedDrawable = MiuiXUtils.RoundedDrawable.fromBitmap(
+                    drawableToBitmap(drawable),
+                    MiuiXUtils.dp2px(getContext(), 10)
                 );
+                roundedDrawable.setAlpha(isEnabled() ? 255 : 125);
+                mIconView.setImageDrawable(roundedDrawable);
             } else
                 mIconView.setVisibility(GONE);
         }
@@ -300,7 +302,7 @@ public class MiuiPreference extends Preference {
         }
     }
 
-    ConstraintLayout getMainLayout() {
+    public ConstraintLayout getMainLayout() {
         return mMainLayout;
     }
 
@@ -451,13 +453,58 @@ public class MiuiPreference extends Preference {
         return allHide;
     }
 
+    // -------------------------------------------------------------------------
+    private float initialX, initialY;
+    private boolean isPressCandidate = false;
+    private final int touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mTouchDownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isPressCandidate) {
+                updateBackground(R.color.touch_down, isFirst, isLast);
+            }
+        }
+    };
+    private final Runnable mTouchRemoveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            isPressCandidate = false;
+            mHandler.removeCallbacks(mTouchDownRunnable);
+            updateBackground(R.color.touch_up, isFirst, isLast);
+        }
+    };
+
     boolean onMainLayoutTouch(View v, MotionEvent event) {
         int action = event.getAction();
         if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
-            if (action == MotionEvent.ACTION_DOWN) {
-                updateBackground(R.color.touch_down, isFirst, isLast);
-            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                updateBackground(R.color.touch_up, isFirst, isLast);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    initialX = event.getX();
+                    initialY = event.getY();
+                    isPressCandidate = true;
+                    mHandler.removeCallbacks(mTouchDownRunnable);
+                    mHandler.postDelayed(mTouchDownRunnable, 100);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (isPressCandidate) {
+                        float dx = event.getX() - initialX;
+                        float dy = event.getY() - initialY;
+                        if (Math.hypot(dx, dy) > touchSlop) {
+                            isPressCandidate = false;
+                            mHandler.removeCallbacks(mTouchDownRunnable);
+                            updateBackground(R.color.touch_up, isFirst, isLast);
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mHandler.postDelayed(mTouchRemoveRunnable, 150);
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    isPressCandidate = false;
+                    mHandler.removeCallbacks(mTouchDownRunnable);
+                    updateBackground(R.color.touch_up, isFirst, isLast);
+                    break;
             }
         }
         return false;

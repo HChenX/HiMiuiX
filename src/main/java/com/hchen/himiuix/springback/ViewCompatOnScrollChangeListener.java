@@ -21,7 +21,7 @@ package com.hchen.himiuix.springback;
 import android.view.View;
 
 public interface ViewCompatOnScrollChangeListener {
-    void onScrollChange(View view, int l, int t, int oldl, int oldt);
+    void onStateChanged(int i, int i2, boolean finished);
 
-    void onStateChanged(int lastState, int state, boolean isFinished);
+    void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY);
 }

@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <com.hchen.himiuix.widget.MiuiTextView
-        android:id="@+id/prefs_text"
+        android:id="@+id/pref_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="marquee"
@@ -20,12 +20,12 @@
         android:textColor="@color/title"
         android:textSize="17sp"
         app:focusable="true"
-        app:layout_constraintBottom_toTopOf="@id/prefs_summary"
+        app:layout_constraintBottom_toTopOf="@id/pref_summary"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/prefs_summary"
+        android:id="@+id/pref_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="1dp"
@@ -37,6 +37,6 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/prefs_text" />
+        app:layout_constraintTop_toBottomOf="@id/pref_title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

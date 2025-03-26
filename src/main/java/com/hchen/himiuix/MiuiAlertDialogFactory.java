@@ -385,6 +385,7 @@ class MiuiAlertDialogFactory {
         boolean isEnableMultiSelect;
         boolean isEnableCustomView;
         View mCustomView;
+        int mCustomViewId = 0;
         OnBindView mOnBindView;
         int mWindowAnimations = -1;
         boolean isEnableHapticFeedback;
@@ -510,7 +511,10 @@ class MiuiAlertDialogFactory {
             if (isExistEditTextView(mCustomLayout))
                 mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme);
 
-            addView(mCustomLayout, mCustomView);
+            if (mCustomView != null)
+                addView(mCustomLayout, mCustomView);
+            else mCustomView = addView(mCustomLayout, mCustomViewId);
+
             if (mOnBindView != null)
                 mOnBindView.onBindView(mCustomLayout, mCustomView);
             updateCustomLayoutBottomMarginIfNeed();
@@ -532,17 +536,19 @@ class MiuiAlertDialogFactory {
         void updateCustomLayoutBottomMarginIfNeed() {
         }
 
-        private void addView(ViewGroup supperView, @LayoutRes int id) {
-            addView(supperView, LayoutInflater.from(mContext).inflate(id, supperView, false));
+        private View addView(ViewGroup supperView, @LayoutRes int id) {
+            return addView(supperView, LayoutInflater.from(mContext).inflate(id, supperView, false));
         }
 
-        void addView(ViewGroup supperView, View view) {
+        View addView(ViewGroup supperView, View view) {
             ViewGroup viewGroup = (ViewGroup) view.getParent();
             if (viewGroup != supperView) {
                 if (viewGroup != null)
                     viewGroup.removeView(view);
                 supperView.addView(view);
             }
+
+            return view;
         }
 
         private View.OnClickListener createButtonClickAction(int id, DialogInterface.OnClickListener listener) {

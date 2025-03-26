@@ -28,7 +28,7 @@ import com.hchen.himiuix.R;
 @SuppressLint("AppCompatCustomView")
 public class MiuiRadioButton extends RadioButton {
     private final String TAG = "MiuiPreference";
-    private OnCheckedStateChangeListener mOnCheckedStateChangeListener;
+    private OnCheckStateChangeListener mOnCheckStateChangeListener;
 
     public MiuiRadioButton(Context context) {
         this(context, null);
@@ -54,21 +54,17 @@ public class MiuiRadioButton extends RadioButton {
     @Override
     public void setChecked(boolean checked) {
         if (isChecked() == checked) return;
-        if (mOnCheckedStateChangeListener == null) {
+        if (mOnCheckStateChangeListener == null) {
             super.setChecked(checked);
             return;
         }
 
-        if (mOnCheckedStateChangeListener.onCheckedChange(this, checked)) {
+        if (mOnCheckStateChangeListener.onCheckChange(this, checked)) {
             super.setChecked(checked);
         }
     }
 
-    public void setOnCheckedStateChangeListener(OnCheckedStateChangeListener onCheckedStateChangeListener) {
-        mOnCheckedStateChangeListener = onCheckedStateChangeListener;
-    }
-
-    public interface OnCheckedStateChangeListener {
-        boolean onCheckedChange(MiuiRadioButton miuiRadioButton, boolean newChecked);
+    public void setOnCheckStateChangeListener(OnCheckStateChangeListener onCheckStateChangeListener) {
+        mOnCheckStateChangeListener = onCheckStateChangeListener;
     }
 }

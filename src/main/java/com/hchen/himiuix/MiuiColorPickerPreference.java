@@ -176,13 +176,13 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                     public void afterTextChanged(Editable s) {
                         if (!mEditTextView.hasFocus()) return;
                         if (s.length() == 8) {
-                            mMiuiEditText.updateErrorBorderState(false);
+                            mMiuiEditText.setErrorBorderState(false);
                             long alpha = Long.parseLong(s.subSequence(0, 2).toString(), 16);
                             int argb = Color.parseColor("#" + s);
                             colorToHsv(argb, (int) alpha);
                             setShowColorView(argb);
                         } else {
-                            mMiuiEditText.updateErrorBorderState(true);
+                            mMiuiEditText.setErrorBorderState(true);
                         }
                     }
                 });

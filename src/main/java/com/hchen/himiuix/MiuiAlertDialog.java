@@ -24,7 +24,6 @@ import static com.hchen.himiuix.MiuiAlertDialogFactory.MiuiAlertDialogBaseFactor
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 
@@ -202,7 +201,9 @@ public class MiuiAlertDialog {
     }
 
     public MiuiAlertDialog setCustomView(@LayoutRes int viewId, DialogInterface.OnBindView onBindView) {
-        return setCustomView(LayoutInflater.from(mBaseFactory.mContext).inflate(viewId, mBaseFactory.mCustomLayout, false), onBindView);
+        mBaseFactory.mCustomViewId = viewId;
+        mBaseFactory.mOnBindView = onBindView;
+        return this;
     }
 
     public MiuiAlertDialog setCustomView(View view, DialogInterface.OnBindView onBindView) {
