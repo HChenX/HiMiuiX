@@ -22,8 +22,6 @@ import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 public interface DialogInterface {
     int BUTTON_POSITIVE = -1;
     int BUTTON_NEGATIVE = -2;
@@ -41,7 +39,7 @@ public interface DialogInterface {
         default void onClick(DialogInterface dialog, CharSequence item, int which) {
         }
 
-        default void onResult(DialogInterface dialog, ArrayList<CharSequence> items, ArrayList<CharSequence> selectedItems) {
+        default void onResult(DialogInterface dialog, CharSequence[] items, CharSequence[] selectedItems) {
         }
     }
 

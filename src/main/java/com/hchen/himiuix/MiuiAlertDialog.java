@@ -181,6 +181,11 @@ public class MiuiAlertDialog {
         return this;
     }
 
+    public MiuiAlertDialog setUseCheckBoxButtonStyle(boolean use) {
+        mBaseFactory.isUseCheckBoxButtonStyle = use;
+        return this;
+    }
+
     public MiuiAlertDialog setItems(@ArrayRes int itemsId, DialogInterface.OnItemsClickListener itemsChangeListener) {
         return setItems(mBaseFactory.mContext.getResources().getTextArray(itemsId), itemsChangeListener);
     }

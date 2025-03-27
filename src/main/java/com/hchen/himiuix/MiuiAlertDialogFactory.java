@@ -383,6 +383,7 @@ class MiuiAlertDialogFactory {
         DialogInterface.OnItemsClickListener mItemsClickListener;
         boolean isEnableListSpringBack;
         boolean isEnableMultiSelect;
+        boolean isUseCheckBoxButtonStyle;
         boolean isEnableCustomView;
         View mCustomView;
         int mCustomViewId = 0;
@@ -565,7 +566,7 @@ class MiuiAlertDialogFactory {
                                 result.add(mItems.get(i));
                             }
                         }
-                        mItemsClickListener.onResult(this, mItems, result);
+                        mItemsClickListener.onResult(this, mItems.toArray(new CharSequence[0]), result.toArray(new CharSequence[0]));
                     }
                 }
                 if (listener != null)
@@ -676,46 +677,70 @@ class MiuiAlertDialogFactory {
             @NonNull
             @Override
             public MiuiAlertDialogListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new MiuiAlertDialogListViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false));
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+                if (mBaseFactory.isUseCheckBoxButtonStyle) {
+                    MiuiCheckBox miuiCheckBox = view.findViewById(R.id.list_checkbox);
+                    miuiCheckBox.setButtonDrawable(MiuiXUtils.getDrawable(parent.getContext(), R.drawable.btn_checkbox));
+                }
+                return new MiuiAlertDialogListViewHolder(view);
             }
+
+            private int selectedPosition = -1;
 
             @Override
             @SuppressLint("ClickableViewAccessibility")
-            public void onBindViewHolder(@NonNull MiuiAlertDialogListViewHolder holder, @SuppressLint("RecyclerView") int position) {
-                CharSequence title = mBaseFactory.mItems.get(position);
-                holder.mTextView.setText(title);
-                boolean isChecked = mBaseFactory.mBooleanArray.get(position);
-                holder.mMiuiCheckBox.setOnCheckedChangeListener(null);
-                holder.mMiuiCheckBox.setChecked(isChecked);
+            public void onBindViewHolder(@NonNull MiuiAlertDialogListViewHolder holder, int position) {
                 holder.mLayout.setOnTouchListener(null);
                 holder.mTextView.setOnTouchListener(null);
-                updateSate(holder, position);
+                holder.mMiuiCheckBox.setOnCheckedChangeListener(null);
+
+                CharSequence title = mBaseFactory.mItems.get(position);
+                holder.mTextView.setText(title);
+
+                if (mBaseFactory.isEnableMultiSelect)
+                    holder.mMiuiCheckBox.setChecked(mBaseFactory.mBooleanArray.get(position));
+                else {
+                    mBaseFactory.mBooleanArray.put(position, position == selectedPosition);
+                    holder.mMiuiCheckBox.setChecked(position == selectedPosition);
+                }
+                updateSate(holder);
 
                 if (holder.mMiuiCheckBox.isEnabled()) {
                     holder.mMiuiCheckBox.setClickable(true);
                     holder.mLayout.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
                     holder.mTextView.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
 
-                    holder.mMiuiCheckBox.setOnCheckedChangeListener((buttonView, isChecked1) -> {
-                        if (mBaseFactory.isEnableMultiSelect)
-                            mBaseFactory.mBooleanArray.put(position, isChecked1);
-
-                        updateSate(holder, position);
+                    holder.mMiuiCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                        if (mBaseFactory.isEnableMultiSelect) {
+                            mBaseFactory.mBooleanArray.put(holder.getAbsoluteAdapterPosition(), isChecked);
+                        } else {
+                            if (isChecked) {
+                                int previousSelected = selectedPosition;
+                                selectedPosition = holder.getAbsoluteAdapterPosition();
+                                if (previousSelected != -1 && previousSelected != selectedPosition) {
+                                    mBaseFactory.mBooleanArray.put(previousSelected, false);
+                                    notifyItemChanged(previousSelected);
+                                }
+                                mBaseFactory.mBooleanArray.put(selectedPosition, true);
+                            } else {
+                                mBaseFactory.mBooleanArray.put(holder.getAbsoluteAdapterPosition(), false);
+                                if (selectedPosition == holder.getAbsoluteAdapterPosition())
+                                    selectedPosition = -1;
+                            }
+                        }
+                        updateSate(holder);
 
                         if (mBaseFactory.isEnableHapticFeedback)
                             holder.mLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
 
                         if (mBaseFactory.mItemsClickListener != null)
-                            mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, position);
-
-                        if (!mBaseFactory.isEnableMultiSelect)
-                            mBaseFactory.dismiss();
+                            mBaseFactory.mItemsClickListener.onClick(mBaseFactory, title, holder.getAbsoluteAdapterPosition());
                     });
                 }
             }
 
-            private void updateSate(MiuiAlertDialogListViewHolder holder, int position) {
-                if (mBaseFactory.mBooleanArray.get(position)) {
+            private void updateSate(MiuiAlertDialogListViewHolder holder) {
+                if (mBaseFactory.mBooleanArray.get(holder.getAbsoluteAdapterPosition())) {
                     holder.mTextView.setTextColor(mBaseFactory.mContext.getColor(R.color.list_choose_text));
                     holder.mLayout.setBackgroundResource(R.drawable.list_choose_item_background);
                 } else {
