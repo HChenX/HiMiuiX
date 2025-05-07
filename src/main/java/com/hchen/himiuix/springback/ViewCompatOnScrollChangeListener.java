@@ -20,6 +20,9 @@ package com.hchen.himiuix.springback;
 
 import android.view.View;
 
+/**
+ * @author Hyper OS2
+ */
 public interface ViewCompatOnScrollChangeListener {
     void onStateChanged(int i, int i2, boolean finished);
 

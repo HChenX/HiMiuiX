@@ -18,6 +18,9 @@
  */
 package com.hchen.himiuix.springback;
 
+/**
+ * @author Hyper OS2
+ */
 public interface ScrollStateDispatcher {
     int STATE_IDLE = 0;
     int STATE_DRAGGING = 1;

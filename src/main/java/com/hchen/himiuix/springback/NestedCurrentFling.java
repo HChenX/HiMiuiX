@@ -18,6 +18,9 @@
  */
 package com.hchen.himiuix.springback;
 
+/**
+ * @author Hyper OS2
+ */
 public interface NestedCurrentFling {
     boolean onNestedCurrentFling(float velocityX, float velocityY);
 }

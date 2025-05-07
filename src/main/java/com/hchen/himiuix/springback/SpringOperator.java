@@ -18,6 +18,9 @@
  */
 package com.hchen.himiuix.springback;
 
+/**
+ * @author Hyper OS2
+ */
 class SpringOperator {
     private final double damping;
     private final double tension;

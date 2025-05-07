@@ -20,6 +20,9 @@ package com.hchen.himiuix.springback;
 
 import android.view.animation.AnimationUtils;
 
+/**
+ * @author Hyper OS2
+ */
 class SpringScroller {
     private static final float MAX_DELTA_TIME = 0.016f;
     private static final float VALUE_THRESHOLD = 1.0f;

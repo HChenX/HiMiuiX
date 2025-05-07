@@ -28,6 +28,9 @@ import android.view.Choreographer;
 
 import java.util.ArrayList;
 
+/**
+ * @author Hyper OS2
+ */
 class AnimationHandler {
     public static final ThreadLocal<AnimationHandler> sAnimatorHandler = new ThreadLocal<>();
     private static final long FRAME_DELAY_MS = 10;
@@ -223,7 +226,7 @@ class AnimationHandler {
             super(animationCallbackDispatcher);
             this.mChoreographer = Choreographer.getInstance();
             this.mLooper = Looper.myLooper();
-            this.mChoreographerCallback = new AnonymousClass1();
+            this.mChoreographerCallback = new ChoreographerCallback();
         }
 
         @Override
@@ -241,10 +244,7 @@ class AnimationHandler {
             return this.mLooper;
         }
 
-        class AnonymousClass1 implements Choreographer.FrameCallback {
-            AnonymousClass1() {
-            }
-
+        class ChoreographerCallback implements Choreographer.FrameCallback {
             @Override
             public void doFrame(long j) {
                 FrameCallbackProvider16.this.mDispatcher.dispatchAnimationFrame(j);

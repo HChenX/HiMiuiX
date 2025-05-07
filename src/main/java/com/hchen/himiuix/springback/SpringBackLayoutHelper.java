@@ -23,6 +23,9 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
+/**
+ * @author Hyper OS2
+ */
 class SpringBackLayoutHelper {
     float mInitialDownX;
     float mInitialDownY;

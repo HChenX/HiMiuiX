@@ -20,6 +20,9 @@ package com.hchen.himiuix.springback;
 
 import android.view.View;
 
+/**
+ * @author Hyper OS2
+ */
 class AnimationHelper {
     public static void postInvalidateOnAnimation(View view) {
         AnimationHandler.getInstance().postVsyncCallback();
