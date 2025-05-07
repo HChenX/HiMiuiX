@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.NestedScrollingChild3;
 import androidx.core.view.NestedScrollingChildHelper;
 import androidx.core.view.NestedScrollingParent3;
@@ -45,23 +46,39 @@ import com.hchen.himiuix.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 越界回弹
+ *
+ * @author Hyper OS2
+ */
 public class SpringBackLayout extends ViewGroup implements NestedScrollingParent3, NestedScrollingChild3, NestedCurrentFling, ScrollStateDispatcher {
     public static final int ANGLE = 4;
     public static final int HORIZONTAL = 1;
+    public static final int SPRING_BACK_BOTTOM = 2;
+    public static final int SPRING_BACK_TOP = 1;
+    public static final int UNCHECK_ORIENTATION = 0;
+    public static final int VERTICAL = 2;
+    private static final String TAG = "SpringBackLayout";
     private static final int INVALID_ID = -1;
     private static final int INVALID_POINTER = -1;
     private static final int MAX_FLING_CONSUME_COUNTER = 4;
-    public static final int SPRING_BACK_BOTTOM = 2;
-    public static final int SPRING_BACK_TOP = 1;
-    private static final String TAG = "MiuiPreference";
-    public static final int UNCHECK_ORIENTATION = 0;
     private static final int VELOCITY_THRESHOLD = 2000;
-    public static final int VERTICAL = 2;
-    private int consumeNestFlingCounter;
-    private int mActivePointerId;
+    private final SpringBackLayoutHelper mHelper;
+    private final NestedScrollingChildHelper mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
+    private final NestedScrollingParentHelper mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
+    private final int[] mNestedScrollingV2ConsumedCompat = new int[2];
+    private final List<ViewCompatOnScrollChangeListener> mOnScrollChangeListeners = new ArrayList<>();
+    private final int[] mParentOffsetInWindow = new int[2];
+    private final int[] mParentScrollConsumed = new int[2];
+    private final SpringScroller mSpringScroller = new SpringScroller();
+    private final int mTargetId;
+    private final int mTouchSlop;
+    protected int mScreenHeight;
+    protected int mScreenWidth;
+    private int consumeNestFlingCounter = 0;
+    private int mActivePointerId = -1;
     private int mFakeScrollX;
     private int mFakeScrollY;
-    private SpringBackLayoutHelper mHelper;
     private int mInitPaddingTop;
     private float mInitialDownX;
     private float mInitialDownY;
@@ -71,65 +88,38 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     private boolean mNestedFlingInProgress;
     private int mNestedScrollAxes;
     private boolean mNestedScrollInProgress;
-    private final NestedScrollingChildHelper mNestedScrollingChildHelper;
-    private final NestedScrollingParentHelper mNestedScrollingParentHelper;
-    private final int[] mNestedScrollingV2ConsumedCompat;
-    private List<ViewCompatOnScrollChangeListener> mOnScrollChangeListeners;
-    private OnSpringListener mOnSpringListener;
     private int mOriginScrollOrientation;
-    private final int[] mParentOffsetInWindow;
-    private final int[] mParentScrollConsumed;
-    protected int mScreenHeight;
-    protected int mScreenWidth;
+    private OnSpringListener mOnSpringListener;
     private boolean mScrollByFling;
     private int mScrollOrientation;
-    private int mScrollState;
-    private boolean mSpringBackEnable;
+    private int mScrollState = 0;
+    private boolean mSpringBackEnable = true;
     private int mSpringBackMode;
-    private SpringScroller mSpringScroller;
     private View mTarget;
-    private int mTargetId;
     private float mTotalFlingUnconsumed;
     private float mTotalScrollBottomUnconsumed;
     private float mTotalScrollTopUnconsumed;
-    private int mTouchSlop;
     private float mVelocityX;
     private float mVelocityY;
 
-    public interface OnSpringListener {
-        boolean onSpringBack();
-    }
-
-    public SpringBackLayout(Context context) {
-        this(context, null);
-    }
-
     public SpringBackLayout(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        this.mActivePointerId = -1;
-        this.consumeNestFlingCounter = 0;
-        this.mParentScrollConsumed = new int[2];
-        this.mParentOffsetInWindow = new int[2];
-        this.mNestedScrollingV2ConsumedCompat = new int[2];
-        this.mOnScrollChangeListeners = new ArrayList<>();
-        this.mScrollState = 0;
-        this.mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
-        this.mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
         this.mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.SpringBackLayout);
         this.mTargetId = obtainStyledAttributes.getResourceId(R.styleable.SpringBackLayout_scrollableView, -1);
         this.mOriginScrollOrientation = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_scrollOrientation, 2);
         this.mSpringBackMode = obtainStyledAttributes.getInt(R.styleable.SpringBackLayout_springBackMode, 3);
         obtainStyledAttributes.recycle();
 
-        this.mSpringScroller = new SpringScroller();
-        this.mHelper = new SpringBackLayoutHelper(this, this.mOriginScrollOrientation);
         setNestedScrollingEnabled(true);
+        this.mHelper = new SpringBackLayoutHelper(this, this.mOriginScrollOrientation);
         Point screenSize = MiuiXUtils.getScreenSize(context);
         this.mScreenWidth = screenSize.x;
         this.mScreenHeight = screenSize.y;
-        this.mSpringBackEnable = true;
+    }
+
+    public SpringBackLayout(Context context) {
+        this(context, null);
     }
 
     @Override
@@ -155,12 +145,12 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         this.mHelper.mTargetScrollOrientation = i;
     }
 
-    public void setSpringBackMode(int i) {
-        this.mSpringBackMode = i;
-    }
-
     public int getSpringBackMode() {
         return this.mSpringBackMode;
+    }
+
+    public void setSpringBackMode(int i) {
+        this.mSpringBackMode = i;
     }
 
     private int getFakeScrollX() {
@@ -203,18 +193,6 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return (this.mSpringBackMode & 2) != 0;
     }
 
-    public void setTarget(View view) {
-        this.mTarget = view;
-        View view2 = this.mTarget;
-        if ((view2 instanceof NestedScrollingChild3) && !view2.isNestedScrollingEnabled()) {
-            this.mTarget.setNestedScrollingEnabled(true);
-        }
-        if (this.mTarget.getOverScrollMode() == 2 || !this.mSpringBackEnable) {
-            return;
-        }
-        this.mTarget.setOverScrollMode(2);
-    }
-
     private void ensureTarget() {
         if (this.mTarget == null) {
             int i = this.mTargetId;
@@ -240,6 +218,18 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
 
     public View getTarget() {
         return this.mTarget;
+    }
+
+    public void setTarget(View view) {
+        this.mTarget = view;
+        View view2 = this.mTarget;
+        if ((view2 instanceof NestedScrollingChild3) && !view2.isNestedScrollingEnabled()) {
+            this.mTarget.setNestedScrollingEnabled(true);
+        }
+        if (this.mTarget.getOverScrollMode() == 2 || !this.mSpringBackEnable) {
+            return;
+        }
+        this.mTarget.setOverScrollMode(2);
     }
 
     @Override
@@ -437,11 +427,10 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             }
             if ((this.mOriginScrollOrientation & 2) != 0) {
                 checkScrollStart(2);
-                return;
             } else {
                 checkScrollStart(1);
-                return;
             }
+            return;
         }
         if (actionMasked != 1) {
             if (actionMasked == 2) {
@@ -606,21 +595,6 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         super.requestDisallowInterceptTouchEvent(z);
     }
 
-    public void internalRequestDisallowInterceptTouchEvent(boolean z) {
-        super.requestDisallowInterceptTouchEvent(z);
-    }
-
-    public void requestDisallowParentInterceptTouchEvent(boolean z) {
-        ViewParent parent = getParent();
-        parent.requestDisallowInterceptTouchEvent(z);
-        while (parent != null) {
-            if (parent instanceof SpringBackLayout) {
-                ((SpringBackLayout) parent).internalRequestDisallowInterceptTouchEvent(z);
-            }
-            parent = parent.getParent();
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         int actionMasked = motionEvent.getActionMasked();
@@ -639,26 +613,19 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return false;
     }
 
-    private boolean onHorizontalTouchEvent(MotionEvent motionEvent) {
-        int actionMasked = motionEvent.getActionMasked();
-        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1)) {
-            return onScrollEvent(motionEvent, actionMasked, 1);
-        }
-        if (isTargetScrollToBottom(1)) {
-            return onScrollUpEvent(motionEvent, actionMasked, 1);
-        }
-        return onScrollDownEvent(motionEvent, actionMasked, 1);
+    public void internalRequestDisallowInterceptTouchEvent(boolean z) {
+        super.requestDisallowInterceptTouchEvent(z);
     }
 
-    private boolean onVerticalTouchEvent(MotionEvent motionEvent) {
-        int actionMasked = motionEvent.getActionMasked();
-        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2)) {
-            return onScrollEvent(motionEvent, actionMasked, 2);
+    public void requestDisallowParentInterceptTouchEvent(boolean z) {
+        ViewParent parent = getParent();
+        parent.requestDisallowInterceptTouchEvent(z);
+        while (parent != null) {
+            if (parent instanceof SpringBackLayout) {
+                ((SpringBackLayout) parent).internalRequestDisallowInterceptTouchEvent(z);
+            }
+            parent = parent.getParent();
         }
-        if (isTargetScrollToBottom(2)) {
-            return onScrollUpEvent(motionEvent, actionMasked, 2);
-        }
-        return onScrollDownEvent(motionEvent, actionMasked, 2);
     }
 
     private boolean onScrollEvent(MotionEvent motionEvent, int i, int i2) {
@@ -735,6 +702,28 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return true;
     }
 
+    private boolean onHorizontalTouchEvent(MotionEvent motionEvent) {
+        int actionMasked = motionEvent.getActionMasked();
+        if (!isTargetScrollToTop(1) && !isTargetScrollToBottom(1)) {
+            return onScrollEvent(motionEvent, actionMasked, 1);
+        }
+        if (isTargetScrollToBottom(1)) {
+            return onScrollUpEvent(motionEvent, actionMasked, 1);
+        }
+        return onScrollDownEvent(motionEvent, actionMasked, 1);
+    }
+
+    private boolean onVerticalTouchEvent(MotionEvent motionEvent) {
+        int actionMasked = motionEvent.getActionMasked();
+        if (!isTargetScrollToTop(2) && !isTargetScrollToBottom(2)) {
+            return onScrollEvent(motionEvent, actionMasked, 2);
+        }
+        if (isTargetScrollToBottom(2)) {
+            return onScrollUpEvent(motionEvent, actionMasked, 2);
+        }
+        return onScrollDownEvent(motionEvent, actionMasked, 2);
+    }
+
     private void checkVerticalScrollStart(int i) {
         if (getScrollY() != 0) {
             this.mIsBeingDragged = true;
@@ -750,14 +739,6 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         this.mIsBeingDragged = false;
     }
 
-    private void checkScrollStart(int i) {
-        if (i == 2) {
-            checkVerticalScrollStart(i);
-        } else {
-            checkHorizontalScrollStart(i);
-        }
-    }
-
     private void checkHorizontalScrollStart(int i) {
         if (getScrollX() != 0) {
             this.mIsBeingDragged = true;
@@ -771,6 +752,14 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             return;
         }
         this.mIsBeingDragged = false;
+    }
+
+    private void checkScrollStart(int i) {
+        if (i == 2) {
+            checkVerticalScrollStart(i);
+        } else {
+            checkHorizontalScrollStart(i);
+        }
     }
 
     private boolean onScrollDownEvent(MotionEvent motionEvent, int i, int i2) {
@@ -854,18 +843,6 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return true;
     }
 
-    private void moveTarget(float f, int i) {
-        if (i == 2) {
-            scrollTo(0, (int) (-f));
-        } else {
-            scrollTo((int) (-f), 0);
-        }
-    }
-
-    private void springBack(int i) {
-        springBack(0.0f, i, true);
-    }
-
     private void springBack(float f, int i, boolean z) {
         OnSpringListener onSpringListener = this.mOnSpringListener;
         if (onSpringListener == null || !onSpringListener.onSpringBack()) {
@@ -882,6 +859,18 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                 AnimationHelper.postInvalidateOnAnimation(this);
             }
         }
+    }
+
+    private void moveTarget(float f, int i) {
+        if (i == 2) {
+            scrollTo(0, (int) (-f));
+        } else {
+            scrollTo((int) (-f), 0);
+        }
+    }
+
+    private void springBack(int i) {
+        springBack(0.0f, i, true);
     }
 
     private boolean onScrollUpEvent(MotionEvent motionEvent, int i, int i2) {
@@ -976,6 +965,14 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return i == 2 ? this.mScreenHeight : this.mScreenWidth;
     }
 
+    protected float obtainTouchDistance(float f, float f2, int i) {
+        int springBackRange = getSpringBackRange(i);
+        if (Math.abs(f) >= Math.abs(f2)) {
+            f = f2;
+        }
+        return (float) ((double) springBackRange - (Math.pow(springBackRange, 0.6666666666666666d) * Math.pow(springBackRange - (f * 3.0f), 0.3333333333333333d)));
+    }
+
     protected float obtainSpringBackDistance(float f, int i) {
         int springBackRange = getSpringBackRange(i);
         return obtainDampingDistance(Math.min(Math.abs(f) / springBackRange, 1.0f), springBackRange);
@@ -990,17 +987,8 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         return ((float) (((Math.pow(min, 3.0d) / 3.0d) - Math.pow(min, 2.0d)) + min)) * i;
     }
 
-    protected float obtainTouchDistance(float f, float f2, int i) {
-        int springBackRange = getSpringBackRange(i);
-        if (Math.abs(f) >= Math.abs(f2)) {
-            f = f2;
-        }
-        double d = springBackRange;
-        return (float) (d - (Math.pow(d, 0.6666666666666666d) * Math.pow(springBackRange - (f * 3.0f), 0.3333333333333333d)));
-    }
-
     @Override
-    public void onNestedScroll(View view, int i, int i2, int i3, int i4, int i5, int[] iArr) {
+    public void onNestedScroll(@NonNull View view, int i, int i2, int i3, int i4, int i5, @NonNull int[] iArr) {
         boolean z = this.mNestedScrollAxes == 2;
         int i6 = z ? i2 : i;
         int i7 = z ? iArr[1] : iArr[0];
@@ -1008,26 +996,25 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         if (this.mSpringBackEnable) {
             int i8 = (z ? iArr[1] : iArr[0]) - i7;
             int i9 = z ? i4 - i8 : i3 - i8;
-            int i10 = i9 != 0 ? i9 : 0;
             int i11 = z ? 2 : 1;
-            if (i10 < 0 && isTargetScrollToTop(i11) && supportTopSpringBackMode()) {
+            if (i9 < 0 && isTargetScrollToTop(i11) && supportTopSpringBackMode()) {
                 if (i5 != 0) {
                     float obtainMaxSpringBackDistance = obtainMaxSpringBackDistance(i11);
                     if (this.mVelocityY != 0.0f || this.mVelocityX != 0.0f) {
                         this.mScrollByFling = true;
-                        if (i6 != 0 && (-i10) <= obtainMaxSpringBackDistance) {
-                            this.mSpringScroller.setFirstStep(i10);
+                        if (i6 != 0 && (-i9) <= obtainMaxSpringBackDistance) {
+                            this.mSpringScroller.setFirstStep(i9);
                         }
                         dispatchScrollState(2);
                     } else if (this.mTotalScrollTopUnconsumed != 0.0f) {
                     } else {
                         float f = obtainMaxSpringBackDistance - this.mTotalFlingUnconsumed;
                         if (this.consumeNestFlingCounter < 4) {
-                            if (f <= Math.abs(i10)) {
+                            if (f <= Math.abs(i9)) {
                                 this.mTotalFlingUnconsumed += f;
                                 iArr[1] = (int) (iArr[1] + f);
                             } else {
-                                this.mTotalFlingUnconsumed += Math.abs(i10);
+                                this.mTotalFlingUnconsumed += Math.abs(i9);
                                 iArr[1] = iArr[1] + i9;
                             }
                             dispatchScrollState(2);
@@ -1036,29 +1023,29 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                         }
                     }
                 } else if (this.mSpringScroller.isFinished()) {
-                    this.mTotalScrollTopUnconsumed += Math.abs(i10);
+                    this.mTotalScrollTopUnconsumed += Math.abs(i9);
                     dispatchScrollState(1);
                     moveTarget(obtainSpringBackDistance(this.mTotalScrollTopUnconsumed, i11), i11);
                     iArr[1] = iArr[1] + i9;
                 }
-            } else if (i10 > 0 && isTargetScrollToBottom(i11) && supportBottomSpringBackMode()) {
+            } else if (i9 > 0 && isTargetScrollToBottom(i11) && supportBottomSpringBackMode()) {
                 if (i5 != 0) {
                     float obtainMaxSpringBackDistance2 = obtainMaxSpringBackDistance(i11);
                     if (this.mVelocityY != 0.0f || this.mVelocityX != 0.0f) {
                         this.mScrollByFling = true;
-                        if (i6 != 0 && i10 <= obtainMaxSpringBackDistance2) {
-                            this.mSpringScroller.setFirstStep(i10);
+                        if (i6 != 0 && i9 <= obtainMaxSpringBackDistance2) {
+                            this.mSpringScroller.setFirstStep(i9);
                         }
                         dispatchScrollState(2);
                     } else if (this.mTotalScrollBottomUnconsumed != 0.0f) {
                     } else {
                         float f2 = obtainMaxSpringBackDistance2 - this.mTotalFlingUnconsumed;
                         if (this.consumeNestFlingCounter < 4) {
-                            if (f2 <= Math.abs(i10)) {
+                            if (f2 <= Math.abs(i9)) {
                                 this.mTotalFlingUnconsumed += f2;
                                 iArr[1] = (int) (iArr[1] + f2);
                             } else {
-                                this.mTotalFlingUnconsumed += Math.abs(i10);
+                                this.mTotalFlingUnconsumed += Math.abs(i9);
                                 iArr[1] = iArr[1] + i9;
                             }
                             dispatchScrollState(2);
@@ -1067,7 +1054,7 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
                         }
                     }
                 } else if (this.mSpringScroller.isFinished()) {
-                    this.mTotalScrollBottomUnconsumed += Math.abs(i10);
+                    this.mTotalScrollBottomUnconsumed += Math.abs(i9);
                     dispatchScrollState(1);
                     moveTarget(-obtainSpringBackDistance(this.mTotalScrollBottomUnconsumed, i11), i11);
                     iArr[1] = iArr[1] + i9;
@@ -1077,17 +1064,17 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     }
 
     @Override
-    public void onNestedScroll(View view, int i, int i2, int i3, int i4, int i5) {
+    public void onNestedScroll(@NonNull View view, int i, int i2, int i3, int i4, int i5) {
         onNestedScroll(view, i, i2, i3, i4, i5, this.mNestedScrollingV2ConsumedCompat);
     }
 
     @Override
-    public void onNestedScroll(View view, int i, int i2, int i3, int i4) {
+    public void onNestedScroll(@NonNull View view, int i, int i2, int i3, int i4) {
         onNestedScroll(view, i, i2, i3, i4, ViewCompat.TYPE_TOUCH, this.mNestedScrollingV2ConsumedCompat);
     }
 
     @Override
-    public boolean onStartNestedScroll(View view, View view2, int i, int i2) {
+    public boolean onStartNestedScroll(@NonNull View view, @NonNull View view2, int i, int i2) {
         this.mNestedScrollAxes = i;
         boolean z = i == 2;
         if (((z ? 2 : 1) & this.mOriginScrollOrientation) == 0) {
@@ -1107,12 +1094,12 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     }
 
     @Override
-    public boolean onStartNestedScroll(View view, View view2, int i) {
+    public boolean onStartNestedScroll(@NonNull View view, @NonNull View view2, int i) {
         return isEnabled();
     }
 
     @Override
-    public void onNestedScrollAccepted(View view, View view2, int i, int i2) {
+    public void onNestedScrollAccepted(@NonNull View view, @NonNull View view2, int i, int i2) {
         if (this.mSpringBackEnable) {
             boolean z = this.mNestedScrollAxes == 2;
             int i3 = z ? 2 : 1;
@@ -1147,13 +1134,13 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     }
 
     @Override
-    public void onNestedScrollAccepted(View view, View view2, int i) {
+    public void onNestedScrollAccepted(@NonNull View view, @NonNull View view2, int i) {
         this.mNestedScrollingParentHelper.onNestedScrollAccepted(view, view2, i);
         startNestedScroll(i & ViewCompat.SCROLL_AXIS_VERTICAL);
     }
 
     @Override
-    public void onNestedPreScroll(View view, int i, int i2, int[] iArr, int i3) {
+    public void onNestedPreScroll(@NonNull View view, int i, int i2, @NonNull int[] iArr, int i3) {
         if (this.mSpringBackEnable) {
             if (this.mNestedScrollAxes == 2) {
                 onNestedPreScroll(i2, iArr, i3);
@@ -1177,12 +1164,11 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             if (i > 0) {
                 float f2 = this.mTotalScrollTopUnconsumed;
                 if (f2 > 0.0f) {
-                    float f3 = i;
-                    if (f3 > f2) {
+                    if ((float) i > f2) {
                         consumeDelta((int) f2, iArr, i3);
                         this.mTotalScrollTopUnconsumed = 0.0f;
                     } else {
-                        this.mTotalScrollTopUnconsumed = f2 - f3;
+                        this.mTotalScrollTopUnconsumed = f2 - (float) i;
                         consumeDelta(i, iArr, i3);
                     }
                     dispatchScrollState(1);
@@ -1193,12 +1179,11 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             if (i < 0) {
                 float f4 = this.mTotalScrollBottomUnconsumed;
                 if ((-f4) < 0.0f) {
-                    float f5 = i;
-                    if (f5 < (-f4)) {
+                    if ((float) i < (-f4)) {
                         consumeDelta((int) f4, iArr, i3);
                         this.mTotalScrollBottomUnconsumed = 0.0f;
                     } else {
-                        this.mTotalScrollBottomUnconsumed = f4 + f5;
+                        this.mTotalScrollBottomUnconsumed = f4 + (float) i;
                         consumeDelta(i, iArr, i3);
                     }
                     dispatchScrollState(1);
@@ -1215,13 +1200,12 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             if (f7 > 0.0f) {
                 if (f6 > 2000.0f) {
                     float obtainSpringBackDistance = obtainSpringBackDistance(f7, i3);
-                    float f8 = i;
-                    if (f8 > obtainSpringBackDistance) {
+                    if ((float) i > obtainSpringBackDistance) {
                         consumeDelta((int) obtainSpringBackDistance, iArr, i3);
                         this.mTotalScrollTopUnconsumed = 0.0f;
                     } else {
                         consumeDelta(i, iArr, i3);
-                        f = obtainSpringBackDistance - f8;
+                        f = obtainSpringBackDistance - (float) i;
                         this.mTotalScrollTopUnconsumed = obtainTouchDistance(f, Math.signum(f) * Math.abs(obtainMaxSpringBackDistance(i3)), i3);
                     }
                     moveTarget(f, i3);
@@ -1247,13 +1231,12 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
             if ((-f9) < 0.0f) {
                 if (f6 < -2000.0f) {
                     float obtainSpringBackDistance2 = obtainSpringBackDistance(f9, i3);
-                    float f10 = i;
-                    if (f10 < (-obtainSpringBackDistance2)) {
+                    if ((float) i < (-obtainSpringBackDistance2)) {
                         consumeDelta((int) obtainSpringBackDistance2, iArr, i3);
                         this.mTotalScrollBottomUnconsumed = 0.0f;
                     } else {
                         consumeDelta(i, iArr, i3);
-                        f = obtainSpringBackDistance2 + f10;
+                        f = obtainSpringBackDistance2 + (float) i;
                         this.mTotalScrollBottomUnconsumed = obtainTouchDistance(f, Math.signum(f) * Math.abs(obtainMaxSpringBackDistance(i3)), i3);
                     }
                     dispatchScrollState(1);
@@ -1281,6 +1264,16 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         }
     }
 
+    @Override
+    public boolean isNestedScrollingEnabled() {
+        return this.mNestedScrollingChildHelper.isNestedScrollingEnabled();
+    }
+
+    @Override
+    public void setNestedScrollingEnabled(boolean z) {
+        this.mNestedScrollingChildHelper.setNestedScrollingEnabled(z);
+    }
+
     private void consumeDelta(int i, int[] iArr, int i2) {
         if (i2 == 2) {
             iArr[1] = i;
@@ -1290,17 +1283,7 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     }
 
     @Override
-    public void setNestedScrollingEnabled(boolean z) {
-        this.mNestedScrollingChildHelper.setNestedScrollingEnabled(z);
-    }
-
-    @Override
-    public boolean isNestedScrollingEnabled() {
-        return this.mNestedScrollingChildHelper.isNestedScrollingEnabled();
-    }
-
-    @Override
-    public void onStopNestedScroll(View view, int i) {
+    public void onStopNestedScroll(@NonNull View view, int i) {
         this.mNestedScrollingParentHelper.onStopNestedScroll(view, i);
         stopNestedScroll(i);
         if (this.mSpringBackEnable) {
@@ -1338,17 +1321,17 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
     }
 
     @Override
-    public boolean onNestedFling(View view, float f, float f2, boolean z) {
+    public boolean onNestedFling(@NonNull View view, float f, float f2, boolean z) {
         return dispatchNestedFling(f, f2, z);
     }
 
     @Override
-    public boolean onNestedPreFling(View view, float f, float f2) {
+    public boolean onNestedPreFling(@NonNull View view, float f, float f2) {
         return dispatchNestedPreFling(f, f2);
     }
 
     @Override
-    public void dispatchNestedScroll(int i, int i2, int i3, int i4, int[] iArr, int i5, int[] iArr2) {
+    public void dispatchNestedScroll(int i, int i2, int i3, int i4, int[] iArr, int i5, @NonNull int[] iArr2) {
         this.mNestedScrollingChildHelper.dispatchNestedScroll(i, i2, i3, i4, iArr, i5, iArr2);
     }
 
@@ -1448,5 +1431,9 @@ public class SpringBackLayout extends ViewGroup implements NestedScrollingParent
         this.mVelocityX = f;
         this.mVelocityY = f2;
         return true;
+    }
+
+    public interface OnSpringListener {
+        boolean onSpringBack();
     }
 }

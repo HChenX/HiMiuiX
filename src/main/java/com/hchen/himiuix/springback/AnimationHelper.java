@@ -18,26 +18,16 @@
  */
 package com.hchen.himiuix.springback;
 
-import android.animation.ValueAnimator;
-import android.os.Build;
 import android.view.View;
 
-public class AnimationHelper {
+class AnimationHelper {
     public static void postInvalidateOnAnimation(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            AnimationHandler.getInstance().postVsyncCallback();
-            view.postInvalidateOnAnimation();
-        } else {
-            view.postInvalidate();
-        }
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postInvalidateOnAnimation();
     }
 
     public static void postOnAnimation(View view, Runnable action) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            AnimationHandler.getInstance().postVsyncCallback();
-            view.postOnAnimation(action);
-        } else {
-            view.postDelayed(action, ValueAnimator.getFrameDelay());
-        }
+        AnimationHandler.getInstance().postVsyncCallback();
+        view.postOnAnimation(action);
     }
 }

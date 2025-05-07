@@ -18,7 +18,7 @@
  */
 package com.hchen.himiuix.springback;
 
-public class SpringOperator {
+class SpringOperator {
     private final double damping;
     private final double tension;
 

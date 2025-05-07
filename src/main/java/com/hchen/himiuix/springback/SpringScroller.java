@@ -20,7 +20,7 @@ package com.hchen.himiuix.springback;
 
 import android.view.animation.AnimationUtils;
 
-public class SpringScroller {
+class SpringScroller {
     private static final float MAX_DELTA_TIME = 0.016f;
     private static final float VALUE_THRESHOLD = 1.0f;
     private double mCurrX;
@@ -55,8 +55,7 @@ public class SpringScroller {
             if (this.mOrientation == 1) {
                 this.mCurrX = mFirstStep;
                 this.mStartX = mFirstStep;
-            }
-            else {
+            } else {
                 this.mCurrY = mFirstStep;
                 this.mStartY = mFirstStep;
             }
@@ -86,8 +85,7 @@ public class SpringScroller {
             } else {
                 this.mStartY = this.mCurrY;
             }
-        }
-        else {
+        } else {
             final double updateVelocity2 = this.mSpringOperator.updateVelocity(this.mVelocity, n, this.mEndX, this.mStartX);
             final double mCurrX = this.mStartX + n * updateVelocity2;
             this.mCurrX = mCurrX;
@@ -95,8 +93,7 @@ public class SpringScroller {
             if (this.isAtEquilibrium(mCurrX, this.mOriginStartX, this.mEndX)) {
                 this.mLastStep = true;
                 this.mCurrX = this.mEndX;
-            }
-            else {
+            } else {
                 this.mStartX = this.mCurrX;
             }
         }
@@ -109,11 +106,11 @@ public class SpringScroller {
     }
 
     public final int getCurrX() {
-        return (int)this.mCurrX;
+        return (int) this.mCurrX;
     }
 
     public final int getCurrY() {
-        return (int)this.mCurrY;
+        return (int) this.mCurrY;
     }
 
     public boolean isAtEquilibrium(double d, double d2, double d3) {
@@ -133,22 +130,19 @@ public class SpringScroller {
     public void scrollByFling(final float n, final float n2, final float n3, final float n4, final float n5, final int mOrientation, final boolean b) {
         this.mFinished = false;
         this.mLastStep = false;
-        final double n6 = n;
-        this.mStartX = n6;
-        this.mOriginStartX = n6;
+        this.mStartX = n;
+        this.mOriginStartX = n;
         this.mEndX = n2;
-        final double n7 = n3;
-        this.mStartY = n7;
-        this.mOriginStartY = n7;
-        this.mCurrY = (int)n7;
+        this.mStartY = n3;
+        this.mOriginStartY = n3;
+        this.mCurrY = (int) (double) n3;
         this.mEndY = n4;
         final double a = n5;
         this.mOriginVelocity = a;
         this.mVelocity = a;
         if (Math.abs(a) > 5000.0 && !b) {
             this.mSpringOperator = new SpringOperator(1.0f, 0.55f);
-        }
-        else {
+        } else {
             this.mSpringOperator = new SpringOperator(1.0f, 0.4f);
         }
         this.mOrientation = mOrientation;

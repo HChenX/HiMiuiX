@@ -28,31 +28,15 @@ import android.view.Choreographer;
 
 import java.util.ArrayList;
 
-public class AnimationHandler {
-    private static final long FRAME_DELAY_MS = 10;
+class AnimationHandler {
     public static final ThreadLocal<AnimationHandler> sAnimatorHandler = new ThreadLocal<>();
-    private AnimationFrameCallbackProvider mProvider;
+    private static final long FRAME_DELAY_MS = 10;
     private final ArrayMap<AnimationFrameCallback, Long> mDelayedCallbackStartTime = new ArrayMap<>();
     private final ArrayList<AnimationFrameCallback> mAnimationCallbacks = new ArrayList<>();
     private final AnimationCallbackDispatcher mCallbackDispatcher = new AnimationCallbackDispatcher();
-    private long mCurrentFrameTime = 0;
+    private AnimationFrameCallbackProvider mProvider;
+    private final long mCurrentFrameTime = 0;
     private boolean mListDirty = false;
-
-    public interface AnimationFrameCallback {
-        boolean doAnimationFrame(long j);
-    }
-
-    public class AnimationCallbackDispatcher {
-        AnimationCallbackDispatcher() {
-        }
-
-        void dispatchAnimationFrame(long j) {
-            AnimationHandler.this.doAnimationFrame(j);
-            if (AnimationHandler.this.mAnimationCallbacks.size() > 0) {
-                AnimationHandler.this.getProvider().postFrameCallback();
-            }
-        }
-    }
 
     public static AnimationHandler getInstance() {
         ThreadLocal<AnimationHandler> threadLocal = sAnimatorHandler;
@@ -68,10 +52,6 @@ public class AnimationHandler {
             return 0L;
         }
         return threadLocal.get().mCurrentFrameTime;
-    }
-
-    public void setProvider(AnimationFrameCallbackProvider animationFrameCallbackProvider) {
-        this.mProvider = animationFrameCallbackProvider;
     }
 
     public void postVsyncCallback() {
@@ -97,15 +77,19 @@ public class AnimationHandler {
         return this.mProvider;
     }
 
+    public void setProvider(AnimationFrameCallbackProvider animationFrameCallbackProvider) {
+        this.mProvider = animationFrameCallbackProvider;
+    }
+
     public void addAnimationFrameCallback(AnimationFrameCallback animationFrameCallback, long j) {
-        if (this.mAnimationCallbacks.size() == 0) {
+        if (this.mAnimationCallbacks.isEmpty()) {
             getProvider().postFrameCallback();
         }
         if (!this.mAnimationCallbacks.contains(animationFrameCallback)) {
             this.mAnimationCallbacks.add(animationFrameCallback);
         }
         if (j > 0) {
-            this.mDelayedCallbackStartTime.put(animationFrameCallback, Long.valueOf(SystemClock.uptimeMillis() + j));
+            this.mDelayedCallbackStartTime.put(animationFrameCallback, SystemClock.uptimeMillis() + j);
         }
     }
 
@@ -142,7 +126,7 @@ public class AnimationHandler {
         if (l == null) {
             return true;
         }
-        if (l.longValue() < j) {
+        if (l < j) {
             this.mDelayedCallbackStartTime.remove(animationFrameCallback);
             return true;
         }
@@ -164,45 +148,25 @@ public class AnimationHandler {
         return getProvider().getFrameDeltaNanos();
     }
 
+    public interface AnimationFrameCallback {
+        boolean doAnimationFrame(long j);
+    }
+
     @SuppressLint("NewApi")
     public static class FrameCallbackProvider33 extends AnimationFrameCallbackProvider {
         private final Choreographer mChoreographer;
         private final Choreographer.FrameCallback mChoreographerCallback;
-        private long mFrameDeltaNanos;
         private final Looper mLooper;
         private final Choreographer.VsyncCallback mVsyncCallback;
-
-        class AnonymousClass1 implements Choreographer.VsyncCallback {
-            AnonymousClass1() {
-            }
-
-            public void onVsync(Choreographer.FrameData frameData) {
-                Choreographer.FrameTimeline[] frameTimelines = frameData.getFrameTimelines();
-                int length = frameTimelines.length;
-                if (length > 1) {
-                    int i = length - 1;
-                    FrameCallbackProvider33.this.mFrameDeltaNanos = Math.round(((frameTimelines[i].getExpectedPresentationTimeNanos() - frameTimelines[0].getExpectedPresentationTimeNanos()) * 1.0d) / i);
-                }
-            }
-        }
+        private long mFrameDeltaNanos;
 
         FrameCallbackProvider33(AnimationCallbackDispatcher animationCallbackDispatcher) {
             super(animationCallbackDispatcher);
             this.mChoreographer = Choreographer.getInstance();
             this.mLooper = Looper.myLooper();
             this.mFrameDeltaNanos = 0L;
-            this.mVsyncCallback = new AnonymousClass1();
-            this.mChoreographerCallback = new AnonymousClass2();
-        }
-
-        class AnonymousClass2 implements Choreographer.FrameCallback {
-            AnonymousClass2() {
-            }
-
-            @Override
-            public void doFrame(long j) {
-                FrameCallbackProvider33.this.mDispatcher.dispatchAnimationFrame(j);
-            }
+            this.mVsyncCallback = new VsyncFrameCallback();
+            this.mChoreographerCallback = new ChoreographerCallback();
         }
 
         @Override
@@ -230,22 +194,30 @@ public class AnimationHandler {
         long getFrameDeltaNanos() {
             return this.mFrameDeltaNanos;
         }
+
+        class VsyncFrameCallback implements Choreographer.VsyncCallback {
+            public void onVsync(Choreographer.FrameData frameData) {
+                Choreographer.FrameTimeline[] frameTimelines = frameData.getFrameTimelines();
+                int length = frameTimelines.length;
+                if (length > 1) {
+                    int i = length - 1;
+                    FrameCallbackProvider33.this.mFrameDeltaNanos = Math.round(((frameTimelines[i].getExpectedPresentationTimeNanos() - frameTimelines[0].getExpectedPresentationTimeNanos()) * 1.0d) / i);
+                }
+            }
+        }
+
+        class ChoreographerCallback implements Choreographer.FrameCallback {
+            @Override
+            public void doFrame(long j) {
+                FrameCallbackProvider33.this.mDispatcher.dispatchAnimationFrame(j);
+            }
+        }
     }
 
     public static class FrameCallbackProvider16 extends AnimationFrameCallbackProvider {
         private final Choreographer mChoreographer;
         private final Choreographer.FrameCallback mChoreographerCallback;
         private final Looper mLooper;
-
-        class AnonymousClass1 implements Choreographer.FrameCallback {
-            AnonymousClass1() {
-            }
-
-            @Override
-            public void doFrame(long j) {
-                FrameCallbackProvider16.this.mDispatcher.dispatchAnimationFrame(j);
-            }
-        }
 
         FrameCallbackProvider16(AnimationCallbackDispatcher animationCallbackDispatcher) {
             super(animationCallbackDispatcher);
@@ -268,29 +240,28 @@ public class AnimationHandler {
         Looper getLooper() {
             return this.mLooper;
         }
+
+        class AnonymousClass1 implements Choreographer.FrameCallback {
+            AnonymousClass1() {
+            }
+
+            @Override
+            public void doFrame(long j) {
+                FrameCallbackProvider16.this.mDispatcher.dispatchAnimationFrame(j);
+            }
+        }
     }
 
     @Deprecated
     private static class FrameCallbackProvider14 extends AnimationFrameCallbackProvider {
         private final Handler mHandler;
-        private long mLastFrameTime;
         private final Runnable mRunnable;
-
-        class AnonymousClass1 implements Runnable {
-            AnonymousClass1() {
-            }
-
-            @Override
-            public void run() {
-                FrameCallbackProvider14.this.mLastFrameTime = SystemClock.uptimeMillis();
-                FrameCallbackProvider14.this.mDispatcher.dispatchAnimationFrame(FrameCallbackProvider14.this.mLastFrameTime);
-            }
-        }
+        private long mLastFrameTime;
 
         FrameCallbackProvider14(AnimationCallbackDispatcher animationCallbackDispatcher) {
             super(animationCallbackDispatcher);
             this.mLastFrameTime = -1L;
-            this.mRunnable = new AnonymousClass1();
+            this.mRunnable = new FrameRunnable();
             this.mHandler = new Handler(Looper.myLooper());
         }
 
@@ -308,10 +279,22 @@ public class AnimationHandler {
         Looper getLooper() {
             return this.mHandler.getLooper();
         }
+
+        class FrameRunnable implements Runnable {
+            @Override
+            public void run() {
+                FrameCallbackProvider14.this.mLastFrameTime = SystemClock.uptimeMillis();
+                FrameCallbackProvider14.this.mDispatcher.dispatchAnimationFrame(FrameCallbackProvider14.this.mLastFrameTime);
+            }
+        }
     }
 
     public static abstract class AnimationFrameCallbackProvider {
         final AnimationCallbackDispatcher mDispatcher;
+
+        AnimationFrameCallbackProvider(AnimationCallbackDispatcher animationCallbackDispatcher) {
+            this.mDispatcher = animationCallbackDispatcher;
+        }
 
         long getFrameDeltaNanos() {
             return 0L;
@@ -325,9 +308,17 @@ public class AnimationHandler {
 
         void postVsyncCallback() {
         }
+    }
 
-        AnimationFrameCallbackProvider(AnimationCallbackDispatcher animationCallbackDispatcher) {
-            this.mDispatcher = animationCallbackDispatcher;
+    public class AnimationCallbackDispatcher {
+        AnimationCallbackDispatcher() {
+        }
+
+        void dispatchAnimationFrame(long j) {
+            AnimationHandler.this.doAnimationFrame(j);
+            if (!AnimationHandler.this.mAnimationCallbacks.isEmpty()) {
+                AnimationHandler.this.getProvider().postFrameCallback();
+            }
         }
     }
 }

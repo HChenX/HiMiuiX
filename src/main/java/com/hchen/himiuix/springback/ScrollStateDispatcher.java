@@ -24,5 +24,6 @@ public interface ScrollStateDispatcher {
     int STATE_SETTLING = 2;
 
     void addOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
+
     void removeOnScrollChangeListener(ViewCompatOnScrollChangeListener onScrollChangeListener);
 }

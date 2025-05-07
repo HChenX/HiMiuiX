@@ -23,14 +23,14 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
-public class SpringBackLayoutHelper {
+class SpringBackLayoutHelper {
     float mInitialDownX;
     float mInitialDownY;
     int mScrollOrientation;
     int mActivePointerId = -1;
     int mTargetScrollOrientation;
-    private int mTouchSlop;
-    private ViewGroup mTarget;
+    private final int mTouchSlop;
+    private final ViewGroup mTarget;
 
     public SpringBackLayoutHelper(ViewGroup target, int orientation) {
         mTarget = target;
