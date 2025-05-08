@@ -51,19 +51,21 @@ public class MiuiXItem extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        loadItemView();
         PressHelper.init(this, true);
         updateIndicatorVisibility();
-        loadView();
+        applyClickListener();
     }
 
-    private void updateIndicatorVisibility() {
+    protected void updateIndicatorVisibility() {
         findViewById(R.id.miuix_item_custom_indicator).setVisibility(View.VISIBLE);
         findViewById(R.id.miuix_item_color_indicator).setVisibility(View.GONE);
         findViewById(R.id.miuix_item_switch).setVisibility(View.GONE);
         findViewById(R.id.miuix_item_checkbox).setVisibility(View.GONE);
+        findViewById(R.id.miuix_item_radiobutton).setVisibility(View.GONE);
     }
 
-    private void loadView() {
+    protected void loadItemView() {
         titleView = findViewById(R.id.miuix_item_title);
         summaryView = findViewById(R.id.miuix_item_summary);
         tipView = findViewById(R.id.miuix_item_tip);
@@ -71,32 +73,32 @@ public class MiuiXItem extends FrameLayout {
         customIndicatorView = findViewById(R.id.miuix_item_custom_indicator);
     }
 
-    public MiuiXItem setTitle(CharSequence title) {
+    protected void applyClickListener() {
+    }
+
+    public void setTitle(CharSequence title) {
         titleView.setText(title);
-        return this;
     }
 
-    public MiuiXItem setTitle(@StringRes int titleId) {
-        return setTitle(getResources().getString(titleId));
+    public void setTitle(@StringRes int titleId) {
+        setTitle(getResources().getString(titleId));
     }
 
 
-    public MiuiXItem setSummary(CharSequence summary) {
+    public void setSummary(CharSequence summary) {
         summaryView.setText(summary);
-        return this;
     }
 
-    public MiuiXItem setSummary(@StringRes int summaryId) {
-        return setSummary(getResources().getString(summaryId));
+    public void setSummary(@StringRes int summaryId) {
+        setSummary(getResources().getString(summaryId));
     }
 
-    public MiuiXItem setTip(CharSequence tip) {
+    public void setTip(CharSequence tip) {
         tipView.setText(tip);
-        return this;
     }
 
-    public MiuiXItem setTip(@StringRes int tipId) {
-        return setTip(getResources().getString(tipId));
+    public void setTip(@StringRes int tipId) {
+        setTip(getResources().getString(tipId));
     }
 
     public TextView getTitleView() {

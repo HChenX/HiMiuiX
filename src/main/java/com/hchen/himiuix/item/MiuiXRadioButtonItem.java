@@ -8,24 +8,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.himiuix.R;
-import com.hchen.himiuix.widget.MiuiXCheckBox;
+import com.hchen.himiuix.widget.MiuiXRadioButton;
 
-public class MiuiXCheckBoxItem extends MiuiXItem {
-    private MiuiXCheckBox checkBox;
+public class MiuiXRadioButtonItem extends MiuiXItem {
+    private MiuiXRadioButton miuiXRadioButton;
 
-    public MiuiXCheckBoxItem(@NonNull Context context) {
+    public MiuiXRadioButtonItem(@NonNull Context context) {
         this(context, null);
     }
 
-    public MiuiXCheckBoxItem(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MiuiXRadioButtonItem(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MiuiXCheckBoxItem(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MiuiXRadioButtonItem(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public MiuiXCheckBoxItem(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiXRadioButtonItem(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -34,14 +34,14 @@ public class MiuiXCheckBoxItem extends MiuiXItem {
         findViewById(R.id.miuix_item_custom_indicator).setVisibility(View.GONE);
         findViewById(R.id.miuix_item_color_indicator).setVisibility(View.GONE);
         findViewById(R.id.miuix_item_switch).setVisibility(View.GONE);
-        findViewById(R.id.miuix_item_checkbox).setVisibility(View.VISIBLE);
-        findViewById(R.id.miuix_item_radiobutton).setVisibility(View.GONE);
+        findViewById(R.id.miuix_item_checkbox).setVisibility(View.GONE);
+        findViewById(R.id.miuix_item_radiobutton).setVisibility(View.VISIBLE);
     }
 
     @Override
     protected void loadItemView() {
         super.loadItemView();
-        checkBox = findViewById(R.id.miuix_item_checkbox);
+        miuiXRadioButton = findViewById(R.id.miuix_item_radiobutton);
     }
 
     @Override
@@ -50,20 +50,22 @@ public class MiuiXCheckBoxItem extends MiuiXItem {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkBox.setChecked(!checkBox.isChecked());
+                if (!miuiXRadioButton.isChecked()) {
+                    miuiXRadioButton.setChecked(!miuiXRadioButton.isChecked());
+                }
             }
         });
     }
 
     public void setChecked(boolean checked) {
-        checkBox.setChecked(checked);
+        miuiXRadioButton.setChecked(checked);
     }
 
     public boolean isChecked() {
-        return checkBox.isChecked();
+        return miuiXRadioButton.isChecked();
     }
 
-    public MiuiXCheckBox getCheckBox() {
-        return checkBox;
+    public MiuiXRadioButton getMiuiXRadioButton() {
+        return miuiXRadioButton;
     }
 }

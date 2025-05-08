@@ -26,23 +26,23 @@ import android.widget.RadioButton;
 import com.hchen.himiuix.R;
 
 @SuppressLint("AppCompatCustomView")
-public class MiuiRadioButton extends RadioButton {
+public class MiuiXRadioButton extends RadioButton {
     private final String TAG = "MiuiPreference";
     private OnCheckStateChangeListener mOnCheckStateChangeListener;
 
-    public MiuiRadioButton(Context context) {
+    public MiuiXRadioButton(Context context) {
         this(context, null);
     }
 
-    public MiuiRadioButton(Context context, AttributeSet attrs) {
+    public MiuiXRadioButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MiuiRadioButton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MiuiXRadioButton(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public MiuiRadioButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiXRadioButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         setClickable(true);

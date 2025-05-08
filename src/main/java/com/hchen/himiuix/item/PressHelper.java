@@ -99,9 +99,9 @@ class PressHelper {
                         }
                         break;
                     case MotionEvent.ACTION_UP:
+                        handler.post(touchUpRunnable);
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(touchDownRunnable);
-                        handler.post(touchUpRunnable);
                         break;
                 }
                 return false;

@@ -22,6 +22,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="色相"
+                android:textColor="@color/summary"
                 android:textSize="13sp"
                 app:layout_constraintBottom_toTopOf="@id/color_hue_view"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -43,6 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="饱和度"
+                android:textColor="@color/summary"
                 android:textSize="13sp"
                 app:layout_constraintBottom_toTopOf="@id/color_saturation_view"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -64,6 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="亮度"
+                android:textColor="@color/summary"
                 android:textSize="13sp"
                 app:layout_constraintBottom_toTopOf="@id/color_lightness_view"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -85,6 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="不透明度"
+                android:textColor="@color/summary"
                 android:textSize="13sp"
                 app:layout_constraintBottom_toTopOf="@id/color_alpha_view"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -115,7 +119,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="35dp"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/color_alpha_view"  />
+                app:layout_constraintTop_toBottomOf="@id/color_alpha_view" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

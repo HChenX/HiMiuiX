@@ -324,9 +324,12 @@ public class MiuiXSwitch extends ConstraintLayout {
         updateSwitchState(showAnimation);
         int translationX = getWidth() - thumbView.getWidth() - (THUMB_MARGINS * 2);
         if (!showAnimation) {
-            if (toRight) thumbView.setTranslationX(translationX);
-            else thumbView.setTranslationX(0);
-            isAnimationShowing = false;
+            thumbView.post(() -> {
+                if (toRight)
+                    thumbView.setTranslationX(getWidth() - thumbView.getWidth() - (THUMB_MARGINS * 2));
+                else thumbView.setTranslationX(0);
+                isAnimationShowing = false;
+            });
             return;
         }
         int thumbPosition = toRight ? translationX : 0;

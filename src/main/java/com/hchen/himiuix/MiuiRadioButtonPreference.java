@@ -32,11 +32,11 @@ import androidx.annotation.StringRes;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
-import com.hchen.himiuix.widget.MiuiRadioButton;
+import com.hchen.himiuix.widget.MiuiXRadioButton;
 import com.hchen.himiuix.widget.OnCheckStateChangeListener;
 
 public class MiuiRadioButtonPreference extends MiuiPreference {
-    private MiuiRadioButton mMiuiRadioButton;
+    private MiuiXRadioButton mMiuiXRadioButton;
     private boolean isChecked = false;
     private boolean isInitialState = true;
     private CharSequence mSummaryOn;
@@ -146,20 +146,20 @@ public class MiuiRadioButtonPreference extends MiuiPreference {
         isInitialState = false;
         super.onBindViewHolder(holder);
 
-        mMiuiRadioButton = holder.itemView.findViewById(R.id.radio_button);
-        mMiuiRadioButton.setOnCheckStateChangeListener(null);
-        mMiuiRadioButton.setChecked(isChecked);
+        mMiuiXRadioButton = holder.itemView.findViewById(R.id.radio_button);
+        mMiuiXRadioButton.setOnCheckStateChangeListener(null);
+        mMiuiXRadioButton.setChecked(isChecked);
 
         if (isEnabled()) {
-            mMiuiRadioButton.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
+            mMiuiXRadioButton.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
         }
     }
 
     @Override
     protected void onClick() {
-        if (mMiuiRadioButton == null) return;
+        if (mMiuiXRadioButton == null) return;
 
-        mMiuiRadioButton.performClick();
+        mMiuiXRadioButton.performClick();
     }
 
     @Override
