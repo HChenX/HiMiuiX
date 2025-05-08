@@ -53,9 +53,9 @@ import com.hchen.himiuix.colorpicker.ColorPickerData;
 import com.hchen.himiuix.colorpicker.ColorPickerHueView;
 import com.hchen.himiuix.colorpicker.ColorPickerLightnessView;
 import com.hchen.himiuix.colorpicker.ColorPickerSaturationView;
-import com.hchen.himiuix.widget.MiuiEditText;
+import com.hchen.himiuix.widget.MiuiXEditText;
 
-public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChanged {
+public class MiuiColorPickerPreference extends MiuiPreference implements ColorBaseSeekBar.OnColorValueChangedListener {
     private MiuiAlertDialog mAlertDialog;
     private boolean isInitialTime = true;
     private int mColor;
@@ -110,7 +110,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
         super.onBindViewHolder(holder);
 
         getColorSelectView().setGrayedOut(!isEnabled());
-        getColorSelectView().setColor(mColor);
+        getColorSelectView().setColorValue(mColor);
         isInitialTime = false;
     }
 
@@ -119,7 +119,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     private ColorPickerSaturationView mSaturationView;
     private ColorPickerLightnessView mLightnessView;
     private ColorPickerAlphaView mAlphaView;
-    private MiuiEditText mMiuiEditText;
+    private MiuiXEditText mMiuiXEditText;
     private EditText mEditTextView = null;
     private ColorPickerData mColorPickerData;
     private View mShowColorView;
@@ -143,7 +143,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 mSaturationView = view.findViewById(R.id.color_saturation_view);
                 mLightnessView = view.findViewById(R.id.color_lightness_view);
                 mAlphaView = view.findViewById(R.id.color_alpha_view);
-                mMiuiEditText = view.findViewById(R.id.edit_layout);
+                mMiuiXEditText = view.findViewById(R.id.edit_layout);
                 TextView editTipView = view.findViewById(R.id.edit_tip);
                 mShowColorView = view.findViewById(R.id.color_show_view);
                 mEditTextView = view.findViewById(R.id.edit_text);
@@ -158,7 +158,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                 mLightnessView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
                 mAlphaView.setColorPickerValueChangedListener(MiuiColorPickerPreference.this);
 
-                mHueView.registerHueChangeListener(new ColorPickerHueView.OnColorHueChanged[]{
+                mHueView.registerHueChangeListener(new ColorPickerHueView.OnColorHueChangedListener[]{
                     mSaturationView, mLightnessView, mAlphaView
                 });
 
@@ -176,13 +176,13 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
                     public void afterTextChanged(Editable s) {
                         if (!mEditTextView.hasFocus()) return;
                         if (s.length() == 8) {
-                            mMiuiEditText.setErrorBorderState(false);
+                            mMiuiXEditText.setErrorBorderState(false);
                             long alpha = Long.parseLong(s.subSequence(0, 2).toString(), 16);
                             int argb = Color.parseColor("#" + s);
                             colorToHsv(argb, (int) alpha);
                             setShowColorView(argb);
                         } else {
-                            mMiuiEditText.setErrorBorderState(true);
+                            mMiuiXEditText.setErrorBorderState(true);
                         }
                     }
                 });
@@ -225,7 +225,6 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
             public void onClick(DialogInterface dialog, int which) {
                 if (mEditTextView.getText().length() < 8) {
                     Toast.makeText(getContext(), "Color 值应是 8 位！", Toast.LENGTH_SHORT).show();
-
                 } else {
                     innerSetValue(mColorPickerData.HSVToColor(), true);
                     dialog.dismiss();
@@ -239,8 +238,8 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
     private void animateHeightChange(View view, int endHeight, boolean restore) {
         if (restore) {
-            if (mMiuiEditText != null)
-                mMiuiEditText.getEditTextView().clearFocus();
+            if (mMiuiXEditText != null)
+                mMiuiXEditText.getEditTextView().clearFocus();
         }
 
         TransitionManager.beginDelayedTransition((ViewGroup) view, new AutoTransition());
@@ -250,7 +249,7 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
     }
 
     @Override
-    public void changed(ColorBaseSeekBar.ColorPickerTag tag, int value) {
+    public void onColorValueChanged(ColorBaseSeekBar.ColorPickerTag tag, int value) {
         switch (tag) {
             case TAG_DEF:
                 return;
@@ -298,10 +297,10 @@ public class MiuiColorPickerPreference extends MiuiPreference implements ColorBa
 
         float[] hsv = new float[3];
         Color.colorToHSV(rgb, hsv);
-        mHueView.updateColorPickerHueState(Math.round(hsv[0] * 100));
-        mSaturationView.updateColorPickerSaturationState(Math.round(hsv[1] * 10000));
-        mLightnessView.updateColorPickerLightnessState(Math.round(hsv[2] * 10000));
-        mAlphaView.updateColorPickerAlphaState(alpha);
+        mHueView.updateColorPickerHueValue(Math.round(hsv[0] * 100));
+        mSaturationView.updateColorPickerSaturationValue(Math.round(hsv[1] * 10000));
+        mLightnessView.updateColorPickerLightnessValue(Math.round(hsv[2] * 10000));
+        mAlphaView.updateColorPickerAlphaValue(alpha);
     }
 
     @Override

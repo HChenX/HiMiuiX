@@ -109,7 +109,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/color_alpha_view" />
 
-            <com.hchen.himiuix.widget.MiuiEditText
+            <com.hchen.himiuix.widget.MiuiXEditText
                 android:id="@+id/edit_layout"
                 android:layout_width="160dp"
                 android:layout_height="50dp"

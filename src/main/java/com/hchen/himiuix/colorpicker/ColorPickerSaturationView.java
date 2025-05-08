@@ -26,17 +26,17 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class ColorPickerSaturationView extends ColorBaseSeekBar implements ColorPickerHueView.OnColorHueChanged {
+public class ColorPickerSaturationView extends ColorBaseSeekBar implements ColorPickerHueView.OnColorHueChangedListener {
     public ColorPickerSaturationView(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public ColorPickerSaturationView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ColorPickerSaturationView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ColorPickerSaturationView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -45,33 +45,33 @@ public class ColorPickerSaturationView extends ColorBaseSeekBar implements Color
 
     @Override
     protected void init() {
-        mColorPickerTag = ColorPickerTag.TAG_SATURATION;
-        mColors = new int[]{
-                Color.HSVToColor(new float[]{0, 0, 1}),
-                Color.HSVToColor(new float[]{0, 1, 1})
+        colorPickerTag = ColorPickerTag.TAG_SATURATION;
+        colors = new int[]{
+            Color.HSVToColor(new float[]{0, 0, 1}),
+            Color.HSVToColor(new float[]{0, 1, 1})
         };
         setMax(10000);
         setProgress(0);
         super.init();
     }
 
-    public void updateColorPickerSaturationState(int saturation) {
+    public void updateColorPickerSaturationValue(int saturation) {
         setProgress(saturation);
-        if (mColorPickerData != null)
-            mColorPickerData.saturation = saturation;
+        if (colorPickerData != null)
+            colorPickerData.saturation = saturation;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (mColorPickerData != null)
-            mColorPickerData.saturation = seekBar.getProgress();
+        if (colorPickerData != null)
+            colorPickerData.saturation = seekBar.getProgress();
     }
 
     @Override
     public void onColorHueChanged(float changed) {
-        mColors = new int[]{
-                Color.HSVToColor(new float[]{changed, 0, 1}),
-                Color.HSVToColor(new float[]{changed, 1, 1}),
+        colors = new int[]{
+            Color.HSVToColor(new float[]{changed, 0, 1}),
+            Color.HSVToColor(new float[]{changed, 1, 1}),
         };
         updateProgressBackground();
     }

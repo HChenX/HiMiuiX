@@ -32,16 +32,16 @@ import androidx.annotation.StringRes;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
-import com.hchen.himiuix.widget.MiuiSwitch;
+import com.hchen.himiuix.widget.MiuiXSwitch;
 
 public class MiuiSwitchPreference extends MiuiPreference {
-    private MiuiSwitch mMiuiSwitch;
+    private MiuiXSwitch mMiuiXSwitch;
     private CharSequence mSummaryOn;
     private CharSequence mSummaryOff;
     private boolean isChecked;
     private boolean mDisableDependentsState;
     private boolean isInitialState = true;
-    private final MiuiSwitch.OnSwitchStateChangeListener mOnSwitchStateChangeListener = newValue -> {
+    private final MiuiXSwitch.OnSwitchStateChangeListener mOnSwitchStateChangeListener = newValue -> {
         boolean result = callChangeListener(newValue);
         if (result)
             setChecked(newValue, true);
@@ -115,8 +115,8 @@ public class MiuiSwitchPreference extends MiuiPreference {
             persistBoolean(checked);
             notifyDependencyChange(shouldDisableDependents());
             if (!isInitialState) {
-                if (!fromUser && mMiuiSwitch != null) {
-                    mMiuiSwitch.setChecked(isChecked, false);
+                if (!fromUser && mMiuiXSwitch != null) {
+                    mMiuiXSwitch.setChecked(isChecked, false);
                 }
                 notifyChanged();
             }
@@ -157,9 +157,9 @@ public class MiuiSwitchPreference extends MiuiPreference {
         isInitialState = false;
         super.onBindViewHolder(holder);
 
-        mMiuiSwitch = holder.itemView.findViewById(R.id.checkbox_container);
-        mMiuiSwitch.setOnSwitchStateChangeListener(mOnSwitchStateChangeListener);
-        mMiuiSwitch.setChecked(isChecked, false);
+        mMiuiXSwitch = holder.itemView.findViewById(R.id.checkbox_container);
+        mMiuiXSwitch.setOnSwitchStateChangeListener(mOnSwitchStateChangeListener);
+        mMiuiXSwitch.setChecked(isChecked, false);
     }
 
     @Override
@@ -169,11 +169,11 @@ public class MiuiSwitchPreference extends MiuiPreference {
 
     @Override
     protected void onClick() {
-        if (mMiuiSwitch == null) return;
-        if (mMiuiSwitch.isAnimationShowing()) return;
+        if (mMiuiXSwitch == null) return;
+        if (mMiuiXSwitch.isAnimationShowing()) return;
 
         if (callChangeListener(!isChecked())) {
-            mMiuiSwitch.setChecked(!isChecked());
+            mMiuiXSwitch.setChecked(!isChecked());
             setChecked(!isChecked(), true);
 
             getMainLayout().performHapticFeedback(HapticFeedbackConstants.CONFIRM);

@@ -32,11 +32,11 @@ import androidx.annotation.StringRes;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 
-import com.hchen.himiuix.widget.MiuiCheckBox;
+import com.hchen.himiuix.widget.MiuiXCheckBox;
 import com.hchen.himiuix.widget.OnCheckStateChangeListener;
 
 public class MiuiCheckBoxPreference extends MiuiPreference {
-    private MiuiCheckBox mMiuiCheckBox;
+    private MiuiXCheckBox mMiuiXCheckBox;
     private boolean isChecked = false;
     private boolean isInitialState = true;
     private CharSequence mSummaryOn;
@@ -146,20 +146,20 @@ public class MiuiCheckBoxPreference extends MiuiPreference {
         isInitialState = false;
         super.onBindViewHolder(holder);
 
-        mMiuiCheckBox = holder.itemView.findViewById(R.id.checkbox_container);
-        mMiuiCheckBox.setOnCheckStateChangeListener(null);
-        mMiuiCheckBox.setChecked(isChecked);
+        mMiuiXCheckBox = holder.itemView.findViewById(R.id.checkbox_container);
+        mMiuiXCheckBox.setOnCheckStateChangeListener(null);
+        mMiuiXCheckBox.setChecked(isChecked);
 
         if (isEnabled()) {
-            mMiuiCheckBox.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
+            mMiuiXCheckBox.setOnCheckStateChangeListener(mOnCheckStateChangeListener);
         }
     }
 
     @Override
     protected void onClick() {
-        if (mMiuiCheckBox == null) return;
+        if (mMiuiXCheckBox == null) return;
 
-        mMiuiCheckBox.performClick();
+        mMiuiXCheckBox.performClick();
     }
 
     @Override

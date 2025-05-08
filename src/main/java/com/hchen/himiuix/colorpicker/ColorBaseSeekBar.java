@@ -36,12 +36,12 @@ import com.hchen.himiuix.R;
 @SuppressLint("AppCompatCustomView")
 public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChangeListener {
     public static String TAG = "MiuiPreference";
-    protected GradientDrawable mGradientDrawable;
-    protected Drawable mBackgroundImg;
-    protected ColorPickerData mColorPickerData;
-    protected OnColorValueChanged mValueChanged;
-    protected ColorPickerTag mColorPickerTag = ColorPickerTag.TAG_DEF;
-    protected int[] mColors;
+    protected GradientDrawable gradientDrawable;
+    protected Drawable backgroundImage;
+    protected ColorPickerData colorPickerData;
+    protected OnColorValueChangedListener valueChangedListener;
+    protected ColorPickerTag colorPickerTag = ColorPickerTag.TAG_DEF;
+    protected int[] colors;
 
     public enum ColorPickerTag {
         TAG_DEF,
@@ -56,7 +56,7 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
     }
 
     public ColorBaseSeekBar(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, R.style.MiuiSeekBar);
+        this(context, attrs,0);
     }
 
     public ColorBaseSeekBar(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -76,32 +76,32 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
     }
 
     public void updateProgressBackground() {
-        mGradientDrawable = new GradientDrawable();
-        mGradientDrawable.setColors(mColors);
-        mGradientDrawable.setShape(GradientDrawable.RECTANGLE);
-        mGradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
-        mGradientDrawable.setCornerRadius(MiuiXUtils.dp2px(getContext(), 15));
-        mGradientDrawable.setSize(-1, MiuiXUtils.dp2px(getContext(), 29));
-        mGradientDrawable.setStroke(0, 0);
-        if (mBackgroundImg == null)
-            setProgressDrawable(mGradientDrawable);
+        gradientDrawable = new GradientDrawable();
+        gradientDrawable.setColors(colors);
+        gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+        gradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
+        gradientDrawable.setCornerRadius(MiuiXUtils.dp2px(getContext(), 15));
+        gradientDrawable.setSize(-1, MiuiXUtils.dp2px(getContext(), 29));
+        gradientDrawable.setStroke(0, 0);
+        if (backgroundImage == null)
+            setProgressDrawable(gradientDrawable);
         else
-            setProgressDrawable(new LayerDrawable(new Drawable[]{mBackgroundImg, mGradientDrawable}));
+            setProgressDrawable(new LayerDrawable(new Drawable[]{backgroundImage, gradientDrawable}));
     }
 
     public void setColorPickerData(ColorPickerData colorPickerData) {
-        this.mColorPickerData = colorPickerData;
+        this.colorPickerData = colorPickerData;
     }
 
-    public void setColorPickerValueChangedListener(OnColorValueChanged valueChanged) {
-        this.mValueChanged = valueChanged;
+    public void setColorPickerValueChangedListener(OnColorValueChangedListener valueChanged) {
+        this.valueChangedListener = valueChanged;
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (mValueChanged != null) {
+        if (valueChangedListener != null) {
             if (fromUser)
-                mValueChanged.changed(mColorPickerTag, progress);
+                valueChangedListener.onColorValueChanged(colorPickerTag, progress);
         }
     }
 
@@ -113,7 +113,7 @@ public class ColorBaseSeekBar extends SeekBar implements SeekBar.OnSeekBarChange
     public void onStopTrackingTouch(SeekBar seekBar) {
     }
 
-    public interface OnColorValueChanged {
-        void changed(ColorPickerTag tag, int value);
+    public interface OnColorValueChangedListener {
+        void onColorValueChanged(ColorPickerTag tag, int value);
     }
 }

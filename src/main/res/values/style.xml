@@ -1,6 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="MiuiXItemContainerStyle">
+        <!-- 外边距 -->
+        <item name="android:layout_marginStart">13dp</item>
+        <item name="android:layout_marginEnd">13dp</item>
+
+        <!-- 内边距 -->
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingEnd">15dp</item>
+        <item name="android:paddingBottom">10dp</item>
+
+        <!-- 最小高度 -->
+        <item name="android:minHeight">65dp</item>
+    </style>
+
+    <style name="MiuiXItemTitleStyle">
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:focusable">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:requiresFadingEdge">horizontal</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/title</item>
+    </style>
+
+    <style name="MiuiXItemSummaryStyle">
+        <item name="android:focusable">false</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/summary</item>
+    </style>
+
+    <style name="MiuiXItemTipStyle">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:textColor">@color/tip</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+
+    <style name="MiuiXItemDividerTextStyle">
+        <item name="android:paddingStart">28dp</item>
+        <item name="android:paddingEnd">28dp</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="android:enabled">false</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/category_tip</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
     <style name="MiuiAlertDialog">
         <item name="android:fullDark">@android:color/transparent</item>
         <item name="android:topDark">@android:color/transparent</item>

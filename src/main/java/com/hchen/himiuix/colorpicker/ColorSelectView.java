@@ -29,29 +29,27 @@ import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import com.hchen.himiuix.R;
 
 public class ColorSelectView extends View {
-    private boolean mIsGrayedOut = false;
-    private int mColor = -1;
-    private Context mContext;
-    private final Paint mPaint = new Paint();
+    private Context context;
+    private int colorValue = -1;
+    private boolean isGrayedOut = false;
+    private final Paint paint = new Paint();
 
     public ColorSelectView(Context context) {
-        super(context);
-        init(context);
+        this(context, null);
     }
 
     public ColorSelectView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
+        this(context, attrs, 0);
     }
 
     public ColorSelectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ColorSelectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -60,49 +58,50 @@ public class ColorSelectView extends View {
     }
 
     private void init(Context context) {
-        mContext = context;
-        mColor = mContext.getColor(R.color.white_or_black);
+        this.context = context;
+        colorValue = this.context.getColor(R.color.white_or_black);
     }
 
-    public int getColor() {
-        return mColor;
+    @ColorInt
+    public int getColorValue() {
+        return colorValue;
     }
 
-    public void setColor(int color) {
-        mColor = color;
+    public void setColorValue(@ColorInt int colorValue) {
+        this.colorValue = colorValue;
         invalidate();
     }
 
     public void setGrayedOut(boolean isGrayedOut) {
-        mIsGrayedOut = isGrayedOut;
+        this.isGrayedOut = isGrayedOut;
         invalidate();
     }
 
     @SuppressLint("DrawAllocation")
     public void onDraw(Canvas canvas) {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, 3));
-        mPaint.reset();
+        paint.reset();
         float width = (float) getWidth();
         float radius = width / 2;
-        mPaint.setColor(mContext.getColor(android.R.color.transparent));
-        canvas.drawCircle(radius, radius, radius, mPaint);
-        mPaint.reset();
-        SweepGradient sweepGradient = new SweepGradient(radius, radius, mContext.getResources().getIntArray(R.array.gradual_color), null);
+        paint.setColor(context.getColor(android.R.color.transparent));
+        canvas.drawCircle(radius, radius, radius, paint);
+        paint.reset();
+        SweepGradient sweepGradient = new SweepGradient(radius, radius, context.getResources().getIntArray(R.array.gradual_color), null);
         Matrix matrix = new Matrix();
         matrix.preRotate(90, radius, radius);
         sweepGradient.setLocalMatrix(matrix);
-        mPaint.setShader(sweepGradient);
-        canvas.drawCircle(radius, radius, radius - 0.2F, mPaint);
-        mPaint.reset();
-        mPaint.setColor(mContext.getColor(R.color.white_or_black));
-        canvas.drawCircle(radius, radius, radius - width / 9.0F, mPaint);
-        mPaint.setColor(mColor);
-        canvas.drawCircle(radius, radius, radius - width / 5.0F, mPaint);
+        paint.setShader(sweepGradient);
+        canvas.drawCircle(radius, radius, radius - 0.2F, paint);
+        paint.reset();
+        paint.setColor(context.getColor(R.color.white_or_black));
+        canvas.drawCircle(radius, radius, radius - width / 9.0F, paint);
+        paint.setColor(colorValue);
+        canvas.drawCircle(radius, radius, radius - width / 5.0F, paint);
 
-        if (mIsGrayedOut) { // 变灰
-            mPaint.reset();
-            mPaint.setColor(Color.argb(99, 255, 255, 255));
-            canvas.drawCircle(radius, radius, radius, mPaint);
+        if (isGrayedOut) { // 变灰
+            paint.reset();
+            paint.setColor(Color.argb(99, 255, 255, 255));
+            canvas.drawCircle(radius, radius, radius, paint);
         }
         super.onDraw(canvas);
     }

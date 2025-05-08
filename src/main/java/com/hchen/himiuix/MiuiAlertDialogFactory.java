@@ -50,8 +50,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hchen.himiuix.springback.SpringBackLayout;
-import com.hchen.himiuix.widget.MiuiCheckBox;
-import com.hchen.himiuix.widget.MiuiEditText;
+import com.hchen.himiuix.widget.MiuiXCheckBox;
+import com.hchen.himiuix.widget.MiuiXEditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -461,7 +461,7 @@ class MiuiAlertDialogFactory {
         void loadEditTextView() {
             mWindow.setWindowAnimations(R.style.Animation_Dialog_ExistIme); // 存在键盘
 
-            addView(mCustomLayout, new MiuiEditText(mContext));
+            addView(mCustomLayout, new MiuiXEditText(mContext));
             mEditText = mCustomLayout.findViewById(R.id.edit_text);
             mEditText.setText(mDefEditText);
             mEditText.setSelection(mDefEditText.length());
@@ -679,8 +679,8 @@ class MiuiAlertDialogFactory {
             public MiuiAlertDialogListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
                 if (mBaseFactory.isUseCheckBoxButtonStyle) {
-                    MiuiCheckBox miuiCheckBox = view.findViewById(R.id.list_checkbox);
-                    miuiCheckBox.setButtonDrawable(MiuiXUtils.getDrawable(parent.getContext(), R.drawable.btn_checkbox));
+                    MiuiXCheckBox miuiXCheckBox = view.findViewById(R.id.list_checkbox);
+                    miuiXCheckBox.setButtonDrawable(MiuiXUtils.getDrawable(parent.getContext(), R.drawable.btn_checkbox));
                 }
                 return new MiuiAlertDialogListViewHolder(view);
             }
@@ -692,25 +692,25 @@ class MiuiAlertDialogFactory {
             public void onBindViewHolder(@NonNull MiuiAlertDialogListViewHolder holder, int position) {
                 holder.mLayout.setOnTouchListener(null);
                 holder.mTextView.setOnTouchListener(null);
-                holder.mMiuiCheckBox.setOnCheckedChangeListener(null);
+                holder.mMiuiXCheckBox.setOnCheckedChangeListener(null);
 
                 CharSequence title = mBaseFactory.mItems.get(position);
                 holder.mTextView.setText(title);
 
                 if (mBaseFactory.isEnableMultiSelect)
-                    holder.mMiuiCheckBox.setChecked(mBaseFactory.mBooleanArray.get(position));
+                    holder.mMiuiXCheckBox.setChecked(mBaseFactory.mBooleanArray.get(position));
                 else {
                     mBaseFactory.mBooleanArray.put(position, position == selectedPosition);
-                    holder.mMiuiCheckBox.setChecked(position == selectedPosition);
+                    holder.mMiuiXCheckBox.setChecked(position == selectedPosition);
                 }
                 updateSate(holder);
 
-                if (holder.mMiuiCheckBox.isEnabled()) {
-                    holder.mMiuiCheckBox.setClickable(true);
-                    holder.mLayout.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
-                    holder.mTextView.setOnTouchListener((v, event) -> holder.mMiuiCheckBox.onTouchEvent(event));
+                if (holder.mMiuiXCheckBox.isEnabled()) {
+                    holder.mMiuiXCheckBox.setClickable(true);
+                    holder.mLayout.setOnTouchListener((v, event) -> holder.mMiuiXCheckBox.onTouchEvent(event));
+                    holder.mTextView.setOnTouchListener((v, event) -> holder.mMiuiXCheckBox.onTouchEvent(event));
 
-                    holder.mMiuiCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    holder.mMiuiXCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         if (mBaseFactory.isEnableMultiSelect) {
                             mBaseFactory.mBooleanArray.put(holder.getAbsoluteAdapterPosition(), isChecked);
                         } else {
@@ -757,13 +757,13 @@ class MiuiAlertDialogFactory {
             private static class MiuiAlertDialogListViewHolder extends RecyclerView.ViewHolder {
                 ConstraintLayout mLayout;
                 TextView mTextView;
-                MiuiCheckBox mMiuiCheckBox;
+                MiuiXCheckBox mMiuiXCheckBox;
 
                 private MiuiAlertDialogListViewHolder(@NonNull View itemView) {
                     super(itemView);
                     mLayout = (ConstraintLayout) itemView;
                     mTextView = itemView.findViewById(R.id.list_item);
-                    mMiuiCheckBox = itemView.findViewById(R.id.list_checkbox);
+                    mMiuiXCheckBox = itemView.findViewById(R.id.list_checkbox);
                 }
             }
         }

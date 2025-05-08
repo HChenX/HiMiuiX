@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/miuix_item"
+    style="@style/MiuiXItemContainerStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_background_r_l">
+
+    <ImageView
+        android:id="@+id/miuix_item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:adjustViewBounds="true"
+        android:maxWidth="55dp"
+        android:maxHeight="55dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_default_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/miuix_item_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/miuix_item_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/miuix_item_tip"
+        app:layout_constraintStart_toEndOf="@id/miuix_item_icon"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/miuix_item_title"
+            style="@style/MiuiXItemTitleStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Test Text Title" />
+
+        <TextView
+            android:id="@+id/miuix_item_summary"
+            style="@style/MiuiXItemSummaryStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Test Text Summary" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/miuix_item_tip"
+        style="@style/MiuiXItemTipStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:text="Test Text Tip"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/miuix_item_indicator"
+        app:layout_constraintStart_toEndOf="@id/miuix_item_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/miuix_item_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/miuix_item_tip"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/miuix_item_custom_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_preference_arrow_right"
+            android:visibility="gone" />
+
+        <com.hchen.himiuix.colorpicker.ColorSelectView
+            android:id="@+id/miuix_item_color_indicator"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <com.hchen.himiuix.widget.MiuiXSwitch
+            android:id="@+id/miuix_item_switch"
+            android:layout_width="49dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <com.hchen.himiuix.widget.MiuiXCheckBox
+            android:id="@+id/miuix_item_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

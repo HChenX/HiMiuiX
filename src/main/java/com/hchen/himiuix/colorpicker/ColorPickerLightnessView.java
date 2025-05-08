@@ -26,17 +26,17 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorPickerHueView.OnColorHueChanged {
+public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorPickerHueView.OnColorHueChangedListener {
     public ColorPickerLightnessView(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public ColorPickerLightnessView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ColorPickerLightnessView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ColorPickerLightnessView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -45,33 +45,33 @@ public class ColorPickerLightnessView extends ColorBaseSeekBar implements ColorP
 
     @Override
     protected void init() {
-        mColorPickerTag = ColorPickerTag.TAG_LIGHTNESS;
-        mColors = new int[]{
-                Color.HSVToColor(new float[]{0, 1, 0}),
-                Color.HSVToColor(new float[]{0, 1, 1})
+        colorPickerTag = ColorPickerTag.TAG_LIGHTNESS;
+        colors = new int[]{
+            Color.HSVToColor(new float[]{0, 1, 0}),
+            Color.HSVToColor(new float[]{0, 1, 1})
         };
         setMax(10000);
         setProgress(0);
         super.init();
     }
 
-    public void updateColorPickerLightnessState(int lightness) {
+    public void updateColorPickerLightnessValue(int lightness) {
         setProgress(lightness);
-        if (mColorPickerData != null)
-            mColorPickerData.lightness = lightness;
+        if (colorPickerData != null)
+            colorPickerData.lightness = lightness;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (mColorPickerData != null)
-            mColorPickerData.lightness = seekBar.getProgress();
+        if (colorPickerData != null)
+            colorPickerData.lightness = seekBar.getProgress();
     }
 
     @Override
     public void onColorHueChanged(float changed) {
-        mColors = new int[]{
-                Color.HSVToColor(new float[]{changed, 1, 0}),
-                Color.HSVToColor(new float[]{changed, 1, 1}),
+        colors = new int[]{
+            Color.HSVToColor(new float[]{changed, 1, 0}),
+            Color.HSVToColor(new float[]{changed, 1, 1}),
         };
         updateProgressBackground();
     }

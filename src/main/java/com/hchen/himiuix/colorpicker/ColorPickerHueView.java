@@ -30,18 +30,18 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class ColorPickerHueView extends ColorBaseSeekBar {
-    private OnColorHueChanged[] onColorHueChangeds;
+    private OnColorHueChangedListener[] onColorHueChangedListeners;
 
     public ColorPickerHueView(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public ColorPickerHueView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ColorPickerHueView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public ColorPickerHueView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -50,15 +50,15 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
 
     @Override
     protected void init() {
-        mColorPickerTag = ColorPickerTag.TAG_HUE;
-        mColors = new int[]{
-                Color.HSVToColor(new float[]{0, 1, 1}),
-                Color.HSVToColor(new float[]{60, 1, 1}),
-                Color.HSVToColor(new float[]{120, 1, 1}),
-                Color.HSVToColor(new float[]{180, 1, 1}),
-                Color.HSVToColor(new float[]{240, 1, 1}),
-                Color.HSVToColor(new float[]{300, 1, 1}),
-                Color.HSVToColor(new float[]{360, 1, 1})
+        colorPickerTag = ColorPickerTag.TAG_HUE;
+        colors = new int[]{
+            Color.HSVToColor(new float[]{0, 1, 1}),
+            Color.HSVToColor(new float[]{60, 1, 1}),
+            Color.HSVToColor(new float[]{120, 1, 1}),
+            Color.HSVToColor(new float[]{180, 1, 1}),
+            Color.HSVToColor(new float[]{240, 1, 1}),
+            Color.HSVToColor(new float[]{300, 1, 1}),
+            Color.HSVToColor(new float[]{360, 1, 1})
         };
         setMax(36000);
         setMin(0);
@@ -66,15 +66,15 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
         super.init();
     }
 
-    public void registerHueChangeListener(OnColorHueChanged[] onColorHueChangeds) {
-        this.onColorHueChangeds = onColorHueChangeds;
+    public void registerHueChangeListener(OnColorHueChangedListener... onColorHueChangedListeners) {
+        this.onColorHueChangedListeners = onColorHueChangedListeners;
     }
 
-    public void updateColorPickerHueState(int hue) {
+    public void updateColorPickerHueValue(int hue) {
         setProgress(hue);
         callChanged(hue);
-        if (mColorPickerData != null)
-            mColorPickerData.hue = hue;
+        if (colorPickerData != null)
+            colorPickerData.hue = hue;
     }
 
     @Override
@@ -85,21 +85,21 @@ public class ColorPickerHueView extends ColorBaseSeekBar {
     }
 
     private void callChanged(int hue) {
-        Arrays.stream(onColorHueChangeds).forEach(new Consumer<OnColorHueChanged>() {
+        Arrays.stream(onColorHueChangedListeners).forEach(new Consumer<OnColorHueChangedListener>() {
             @Override
-            public void accept(OnColorHueChanged onColorHueChanged) {
-                onColorHueChanged.onColorHueChanged((float) hue / 100);
+            public void accept(OnColorHueChangedListener onColorHueChangedListener) {
+                onColorHueChangedListener.onColorHueChanged((float) hue / 100);
             }
         });
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (mColorPickerData != null)
-            mColorPickerData.hue = seekBar.getProgress();
+        if (colorPickerData != null)
+            colorPickerData.hue = seekBar.getProgress();
     }
 
-    public interface OnColorHueChanged {
+    public interface OnColorHueChangedListener {
         void onColorHueChanged(float changed);
     }
 }

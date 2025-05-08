@@ -10,7 +10,7 @@
     android:paddingEnd="15dp"
     android:paddingBottom="10dp">
 
-    <com.hchen.himiuix.widget.MiuiEditText
+    <com.hchen.himiuix.widget.MiuiXEditText
         android:id="@+id/edit_layout"
         android:layout_width="0dp"
         android:layout_height="match_parent"

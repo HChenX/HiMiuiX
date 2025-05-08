@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- 开关按钮部分 -->
-    <com.hchen.himiuix.widget.MiuiSwitch
+    <com.hchen.himiuix.widget.MiuiXSwitch
         android:id="@+id/checkbox_container"
         android:layout_width="49dp"
         android:layout_height="28dp"

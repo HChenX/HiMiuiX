@@ -4,6 +4,7 @@
     <attr name="disableDependentsState" format="boolean" /> <!--false: 在 false 状态下禁用家属。反之亦然。-->
     <attr name="summaryOn" format="string" />
     <attr name="summaryOff" format="string" />
+    <attr name="reverseLayout" format="boolean" />
 
     <declare-styleable name="MiuiPreference">
         <attr name="layout" format="reference" />
@@ -107,8 +108,27 @@
         <attr name="springBackMode" format="integer" />
     </declare-styleable>
 
-    <declare-styleable name="MiuiCheckBox">
+    <declare-styleable name="MiuiXCheckBox">
         <attr name="android:button" />
     </declare-styleable>
 
+    <declare-styleable name="MiuiXItem">
+        <attr name="reverseLayout" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiXCheckBoxItem">
+        <attr name="reverseLayout" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiXSwitchItem">
+        <attr name="reverseLayout" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiXColorPickerItem">
+        <attr name="reverseLayout" />
+    </declare-styleable>
+
+    <declare-styleable name="MiuiXItemGroup">
+        <attr name="dividerTitle" format="string" />
+    </declare-styleable>
 </resources>

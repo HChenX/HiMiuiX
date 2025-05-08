@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace 'com.hchen.himiuix'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         minSdk 30
-        targetSdk 34
+        targetSdk 35
     }
 
     buildTypes {

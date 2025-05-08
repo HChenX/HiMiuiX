@@ -28,27 +28,27 @@ import android.widget.CheckBox;
 import com.hchen.himiuix.R;
 
 @SuppressLint("AppCompatCustomView")
-public class MiuiCheckBox extends CheckBox {
+public class MiuiXCheckBox extends CheckBox {
     private OnCheckStateChangeListener mOnCheckStateChangeListener;
 
-    public MiuiCheckBox(Context context) {
+    public MiuiXCheckBox(Context context) {
         this(context, null);
     }
 
-    public MiuiCheckBox(Context context, AttributeSet attrs) {
+    public MiuiXCheckBox(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MiuiCheckBox(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MiuiXCheckBox(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public MiuiCheckBox(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiXCheckBox(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiCheckBox)) {
-            if (typedArray.hasValue(R.styleable.MiuiCheckBox_android_button)) {
-                Drawable drawable = typedArray.getDrawable(R.styleable.MiuiCheckBox_android_button);
+        try (TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MiuiXCheckBox)) {
+            if (typedArray.hasValue(R.styleable.MiuiXCheckBox_android_button)) {
+                Drawable drawable = typedArray.getDrawable(R.styleable.MiuiXCheckBox_android_button);
                 setButtonDrawable(drawable);
             } else {
                 setButtonDrawable(R.drawable.btn_checkbox);

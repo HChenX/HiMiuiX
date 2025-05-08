@@ -18,10 +18,9 @@
  */
 package com.hchen.himiuix.widget;
 
-import static com.hchen.himiuix.MiuiXUtils.dp2px;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -44,83 +43,24 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import com.hchen.himiuix.MiuiXUtils;
 import com.hchen.himiuix.R;
 
-public class MiuiSwitch extends ConstraintLayout {
+public class MiuiXSwitch extends ConstraintLayout {
     private static final String TAG = "MiuiPreference";
-    private View mThumbView;
-    private ViewPropertyAnimator mThumbViewAnimator;
-    private OnSwitchStateChangeListener mOnSwitchStateChangeListener;
-    private boolean isChecked = false;
-    private boolean isAnimationShowing = false;
+    private static final int ANIMATION_NEXT = 0;
+    private static final int ANIMATION_DONE = 1;
     private final int ANIMATION_DURATION = 320;
     private final float ANIMATION_TENSION = 1.2f;
-    private final float ANIMATION_START_END_OFFSET = 4.2f;
-    private final float THUMB_END_X = 20.5f;
+    private int THUMB_MARGINS;
+    private View thumbView;
+    private ViewPropertyAnimator thumbViewAnimator;
+    private OnSwitchStateChangeListener onSwitchStateChangeListener;
+    private boolean isChecked = false;
+    private boolean isAnimationShowing = false;
     private TransitionDrawable offToOnTransition;
     private TransitionDrawable onToOffTransition;
-    private static final int ANIMATION_NEXT = 3;
-    private static final int ANIMATION_DONE = 4;
-    private final Handler animationHandler = new Handler(Looper.getMainLooper()) {
-        private boolean shouldNextAnimation = false;
-        private boolean nextValue = false;
-        private boolean show = false;
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            switch (msg.what) {
-                case ANIMATION_NEXT -> {
-                    shouldNextAnimation = true;
-                    Object[] objs = (Object[]) msg.obj;
-                    nextValue = (boolean) objs[0];
-                    show = (boolean) objs[1];
-                }
-                case ANIMATION_DONE -> {
-                    if (shouldNextAnimation) {
-                        showThumbAnimationIfNeed(show, nextValue);
-                        shouldNextAnimation = false;
-                    }
-                }
-            }
-        }
-    };
-
-    private final View.OnClickListener mClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (isAnimationShowing)
-                return;
-
-            final boolean newValue = !isChecked();
-            if (mOnSwitchStateChangeListener == null)
-                setChecked(newValue);
-            else if (mOnSwitchStateChangeListener.onSwitchStateChange(newValue)) {
-                setChecked(newValue);
-            }
-
-            if (v != null) v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
-        }
-    };
-
-    /*
-     * 监听鼠标动作
-     * */
-    private final View.OnHoverListener mHoverListener = new View.OnHoverListener() {
-        @Override
-        public boolean onHover(View v, MotionEvent event) {
-            if (isAnimationShowing) return true;
-
-            if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
-                mSwitchAnimationAction.animZoom();
-            } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
-                mSwitchAnimationAction.animRevert();
-            } else return false;
-            return true;
-        }
-    };
-
     /*
      * 控制开关动画，如按钮触摸移动动画。
      * */
-    private final OnTouchAnimationListener mSwitchAnimationAction = new OnTouchAnimationListener() {
+    private final OnTouchAnimationListener switchAnimationAction = new OnTouchAnimationListener() {
         private float switchViewX;
         private boolean shouldHaptic;
         private float maxMoveX;
@@ -128,6 +68,7 @@ public class MiuiSwitch extends ConstraintLayout {
         private boolean isMoved;
 
         @Override
+        @SuppressLint("ClickableViewAccessibility")
         public boolean onTouch(View v, MotionEvent event) {
             if (isAnimationShowing) return true;
 
@@ -137,8 +78,8 @@ public class MiuiSwitch extends ConstraintLayout {
                     int[] outLocation = new int[2];
                     getLocationInWindow(outLocation);
                     switchViewX = outLocation[0];
-                    maxMoveX = getWidth() - mThumbView.getWidth() - dp2px(getContext(), ANIMATION_START_END_OFFSET);
-                    minMoveX = dp2px(getContext(), ANIMATION_START_END_OFFSET);
+                    maxMoveX = getWidth() - thumbView.getWidth() - THUMB_MARGINS;
+                    minMoveX = THUMB_MARGINS;
                     v.getParent().requestDisallowInterceptTouchEvent(true);
                     animZoom();
                     break;
@@ -168,14 +109,14 @@ public class MiuiSwitch extends ConstraintLayout {
                             finalX = maxMoveX;
                             newCheckedState = true;
                         }
-                        mThumbViewAnimator.x(finalX)
+                        thumbViewAnimator.x(finalX)
                             .setInterpolator(new AnticipateOvershootInterpolator(ANIMATION_TENSION))
                             .setDuration(ANIMATION_DURATION);
                         if (newCheckedState != isChecked()) {
-                            mClickListener.onClick(null);
-                        } else mThumbViewAnimator.start();
+                            clickListener.onClick(null);
+                        } else thumbViewAnimator.start();
                     } else
-                        mClickListener.onClick(v);
+                        clickListener.onClick(v);
 
                     v.getParent().requestDisallowInterceptTouchEvent(false);
                     break;
@@ -192,27 +133,86 @@ public class MiuiSwitch extends ConstraintLayout {
         }
 
         public void animZoom() {
-            mThumbViewAnimator.scaleX(1.1f).scaleY(1.1f);
+            thumbViewAnimator.scaleX(1.1f).scaleY(1.1f);
         }
 
         public void animRevert() {
-            mThumbViewAnimator.scaleX(1f).scaleY(1f);
+            thumbViewAnimator.scaleX(1f).scaleY(1f);
         }
     };
 
-    public MiuiSwitch(@NonNull Context context) {
+    /*
+     * 监听鼠标动作
+     * */
+    private final View.OnHoverListener hoverListener = new View.OnHoverListener() {
+        @Override
+        public boolean onHover(View v, MotionEvent event) {
+            if (isAnimationShowing) return true;
+
+            if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+                switchAnimationAction.animZoom();
+            } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+                switchAnimationAction.animRevert();
+            } else return false;
+            return true;
+        }
+    };
+
+    private final Handler animationHandler = new Handler(Looper.getMainLooper()) {
+        private boolean shouldShowNextAnimation = false;
+        private boolean nextValue = false;
+        private boolean showAnimation = false;
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case ANIMATION_NEXT -> {
+                    shouldShowNextAnimation = true;
+                    Object[] objs = (Object[]) msg.obj;
+                    nextValue = (boolean) objs[0];
+                    showAnimation = (boolean) objs[1];
+                }
+                case ANIMATION_DONE -> {
+                    if (shouldShowNextAnimation) {
+                        showThumbAnimationIfNeed(nextValue, showAnimation);
+                        shouldShowNextAnimation = false;
+                    }
+                }
+            }
+        }
+    };
+
+    private final View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (isAnimationShowing)
+                return;
+
+            final boolean newValue = !isChecked();
+            if (onSwitchStateChangeListener == null)
+                setChecked(newValue);
+            else if (onSwitchStateChangeListener.onSwitchStateChange(newValue)) {
+                setChecked(newValue);
+            }
+
+            if (v != null)
+                v.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+        }
+    };
+
+    public MiuiXSwitch(@NonNull Context context) {
         this(context, null);
     }
 
-    public MiuiSwitch(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MiuiXSwitch(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MiuiSwitch(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MiuiXSwitch(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public MiuiSwitch(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public MiuiXSwitch(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -227,15 +227,17 @@ public class MiuiSwitch extends ConstraintLayout {
 
         View view = new View(getContext());
         view.setId(R.id.switch_thumb);
+
+        THUMB_MARGINS = MiuiXUtils.dp2px(getContext(), 4.2f);
         params = new LayoutParams(
             MiuiXUtils.dp2px(getContext(), 20f),
             MiuiXUtils.dp2px(getContext(), 20f)
         );
         params.setMargins(
-            MiuiXUtils.dp2px(getContext(), 4.2f),
-            MiuiXUtils.dp2px(getContext(), 4.2f),
-            MiuiXUtils.dp2px(getContext(), 4.2f),
-            MiuiXUtils.dp2px(getContext(), 4.2f)
+            THUMB_MARGINS,
+            THUMB_MARGINS,
+            THUMB_MARGINS,
+            THUMB_MARGINS
         );
         view.setLayoutParams(params);
         view.setBackground(AppCompatResources.getDrawable(getContext(), R.drawable.thumb_background));
@@ -250,8 +252,8 @@ public class MiuiSwitch extends ConstraintLayout {
 
         constraintSet.applyTo(this);
 
-        mThumbView = view;
-        mThumbViewAnimator = mThumbView.animate();
+        thumbView = view;
+        thumbViewAnimator = thumbView.animate();
         Drawable[] switchOffToOnDrawables = MiuiXUtils.getDrawables(
             getContext(),
             R.drawable.switch_background_off,
@@ -269,29 +271,9 @@ public class MiuiSwitch extends ConstraintLayout {
     }
 
     private void initListener() {
-        setOnClickListener(mClickListener);
-        mThumbView.setOnTouchListener(mSwitchAnimationAction);
-        mThumbView.setOnHoverListener(mHoverListener);
-    }
-
-    public void setChecked(boolean checked) {
-        setChecked(checked, true);
-    }
-
-    public void setChecked(boolean checked, boolean show) {
-        final boolean changed = isChecked != checked;
-        if (changed) {
-            isChecked = checked;
-            if (isAnimationShowing)
-                animationHandler.sendMessage(
-                    animationHandler.obtainMessage(
-                        ANIMATION_NEXT,
-                        new Object[]{isChecked, show}
-                    )
-                );
-            else
-                showThumbAnimationIfNeed(show, isChecked);
-        }
+        setOnClickListener(clickListener);
+        thumbView.setOnTouchListener(switchAnimationAction);
+        thumbView.setOnHoverListener(hoverListener);
     }
 
     public boolean isAnimationShowing() {
@@ -302,34 +284,54 @@ public class MiuiSwitch extends ConstraintLayout {
         return isChecked;
     }
 
+    public void setChecked(boolean checked) {
+        setChecked(checked, true);
+    }
+
+    public void setChecked(boolean checked, boolean showAnimation) {
+        final boolean changed = isChecked != checked;
+        if (changed) {
+            isChecked = checked;
+            if (isAnimationShowing)
+                animationHandler.sendMessage(
+                    animationHandler.obtainMessage(
+                        ANIMATION_NEXT,
+                        new Object[]{isChecked, showAnimation}
+                    )
+                );
+            else
+                showThumbAnimationIfNeed(isChecked, showAnimation);
+        }
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
 
-        if (mThumbView == null) return;
-        mThumbView.setEnabled(enabled);
+        if (thumbView == null) return;
+        thumbView.setEnabled(enabled);
         updateSwitchState(false);
     }
 
     public void setOnSwitchStateChangeListener(OnSwitchStateChangeListener onSwitchStateChangeListener) {
-        mOnSwitchStateChangeListener = onSwitchStateChangeListener;
+        this.onSwitchStateChangeListener = onSwitchStateChangeListener;
     }
 
-    private void showThumbAnimationIfNeed(boolean show, boolean toRight) {
+    private void showThumbAnimationIfNeed(boolean toRight, boolean showAnimation) {
         if (isAnimationShowing) return;
         isAnimationShowing = true;
 
-        updateSwitchState(show);
-        int translationX = dp2px(getContext(), THUMB_END_X);
-        if (!show) {
-            if (toRight) mThumbView.setTranslationX(translationX);
-            else mThumbView.setTranslationX(0);
+        updateSwitchState(showAnimation);
+        int translationX = getWidth() - thumbView.getWidth() - (THUMB_MARGINS * 2);
+        if (!showAnimation) {
+            if (toRight) thumbView.setTranslationX(translationX);
+            else thumbView.setTranslationX(0);
             isAnimationShowing = false;
             return;
         }
         int thumbPosition = toRight ? translationX : 0;
 
-        mThumbViewAnimator
+        thumbViewAnimator
             .translationX(thumbPosition)
             .setDuration(ANIMATION_DURATION)
             .setInterpolator(new AnticipateOvershootInterpolator(ANIMATION_TENSION))
@@ -354,18 +356,20 @@ public class MiuiSwitch extends ConstraintLayout {
                     onToOffTransition.startTransition(ANIMATION_DURATION);
                 }
             } else {
-                setBackgroundResource(isChecked() ?
-                    R.drawable.switch_background_on :
-                    R.drawable.switch_background_off);
+                setBackgroundResource(
+                    isChecked() ?
+                        R.drawable.switch_background_on :
+                        R.drawable.switch_background_off
+                );
             }
-            mThumbView.setBackgroundResource(R.drawable.thumb_background);
+            thumbView.setBackgroundResource(R.drawable.thumb_background);
         } else {
             if (isChecked()) {
                 setBackgroundResource(R.drawable.switch_background_disable_on);
-                mThumbView.setBackgroundResource(R.drawable.thumb_disable_on_background);
+                thumbView.setBackgroundResource(R.drawable.thumb_disable_on_background);
             } else {
                 setBackgroundResource(R.drawable.switch_background_disable_off);
-                mThumbView.setBackgroundResource(R.drawable.thumb_disable_off_background);
+                thumbView.setBackgroundResource(R.drawable.thumb_disable_off_background);
             }
         }
     }

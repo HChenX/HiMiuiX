@@ -28,7 +28,7 @@
     <color name="switch_off">#E6E6E6</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="touch_down">#EBEBEB</color> <!--按下时的阴影颜色-->
+    <color name="touch_down">#E1E1E1</color> <!--按下时的阴影颜色-->
     <color name="touch_up">@color/white</color> <!--抬起后恢复的颜色-->
     <color name="white_or_black">@color/white</color>
     <color name="list_text">#000000</color>

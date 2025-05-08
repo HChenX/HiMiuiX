@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/miuix_divider_title"
+        style="@style/MiuiXItemDividerTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test Text Divider"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/miuix_divider"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone" />
+</LinearLayout>
